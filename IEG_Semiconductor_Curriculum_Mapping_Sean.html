@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IEG Semiconductor Curriculum–Equipment Mapping | FCoEE / Galaxy Global</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a1a;
+    --ink-2: #444;
+    --ink-3: #777;
+    --ink-4: #aaa;
+    --surface: #ffffff;
+    --surface-2: #f7f7f5;
+    --surface-3: #f0efec;
+    --border: #e2e0da;
+    --border-strong: #ccc8be;
+    --accent: #c0392b;
+    --accent-light: #fdf0ef;
+    --teal: #0F6E56;
+    --teal-light: #E1F5EE;
+    --amber: #854F0B;
+    --amber-light: #FAEEDA;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --purple: #3C3489;
+    --purple-light: #EEEDFE;
+    --red: #A32D2D;
+    --red-light: #FCEBEB;
+    --green-hi: #0F6E56;
+    --amber-hi: #854F0B;
+    --red-lo: #A32D2D;
+    --radius: 6px;
+    --radius-lg: 12px;
+  }
+
+  html { font-size: 14px; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--surface-2);
+    color: var(--ink);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ─────────────────────────────────────── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .header-left {}
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .header .subtitle {
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .header-meta {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .meta-row {
+    font-size: 11px;
+    color: var(--ink-3);
+    line-height: 1.8;
+  }
+  .meta-row strong { color: var(--ink-2); font-weight: 500; }
+
+  /* ── Context bar ─────────────────────────────────── */
+  .context-bar {
+    background: var(--accent-light);
+    border-bottom: 1px solid #f5c6c2;
+    padding: 12px 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--accent);
+  }
+  .context-bar .dot { width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0; }
+
+  /* ── Main layout ─────────────────────────────────── */
+  .main { max-width: 1160px; margin: 0 auto; padding: 32px 40px 60px; }
+
+  /* ── Section title ───────────────────────────────── */
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    margin-top: 36px;
+  }
+  .section-head:first-child { margin-top: 0; }
+  .section-head h2 {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .section-rule { flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Summary cards ───────────────────────────────── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .sum-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .sum-card:hover { border-color: var(--border-strong); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .sum-card.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(192,57,43,0.12); }
+  .sum-card .mod-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ink-4);
+    margin-bottom: 6px;
+  }
+  .sum-card .mod-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+  .sum-card .score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .score-hi { color: var(--green-hi); }
+  .score-mid { color: var(--amber-hi); }
+  .score-lo { color: var(--red-lo); }
+  .score-bar {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border);
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .score-bar-fill { height: 100%; border-radius: 2px; }
+
+  /* ── Module detail cards ─────────────────────────── */
+  .module-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 16px;
+    transition: all 0.2s;
+  }
+  .module-card.hidden { display: none; }
+
+  .mod-header {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .mod-header:hover { background: var(--surface-2); }
+  .mod-id-block {
+    text-align: center;
+  }
+  .mod-id-block .id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-3);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .mod-id-block .score-lg {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .mod-title h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+  .mod-title .intel-role {
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+  .mod-title .intel-role strong { color: var(--blue); font-weight: 500; }
+
+  .expand-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    font-size: 14px;
+    color: var(--ink-3);
+  }
+  .module-card.open .expand-btn { background: var(--accent); border-color: var(--accent); color: #fff; transform: rotate(45deg); }
+
+  .mod-body {
+    display: none;
+    padding: 20px;
+    gap: 20px;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .module-card.open .mod-body { display: grid; }
+
+  /* columns */
+  .col-head {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* equipment tags */
+  .eq-item {
+    margin-bottom: 10px;
+  }
+  .eq-tag {
+    display: inline-block;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+  .eq-note {
+    font-size: 11px;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+  .tag-teal { background: var(--teal-light); color: var(--teal); }
+  .tag-blue { background: var(--blue-light); color: var(--blue); }
+  .tag-amber { background: var(--amber-light); color: var(--amber); }
+  .tag-purple { background: var(--purple-light); color: var(--purple); }
+  .tag-red { background: var(--red-light); color: var(--red); }
+
+  /* skills list */
+  .skill-list { list-style: none; }
+  .skill-list li {
+    font-size: 12px;
+    color: var(--ink-2);
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    line-height: 1.5;
+  }
+  .skill-list li:last-child { border-bottom: none; }
+  .skill-list li::before {
+    content: '✓';
+    color: var(--teal);
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* gap list */
+  .gap-list { list-style: none; }
+  .gap-list li {
+    font-size: 12px;
+    color: var(--ink-2);
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    line-height: 1.5;
+  }
+  .gap-list li:last-child { border-bottom: none; }
+  .gap-icon { font-size: 13px; flex-shrink: 0; }
+  .gap-solution {
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-top: 2px;
+  }
+  .gap-solution em { font-style: normal; color: var(--blue); }
+
+  /* ── Gap summary section ─────────────────────────── */
+  .gap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .gap-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+  }
+  .gap-card.covered { border-left: 3px solid var(--teal); }
+  .gap-card.supplement { border-left: 3px solid var(--amber); }
+  .gap-card h4 {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .gap-card.covered h4 { color: var(--teal); }
+  .gap-card.supplement h4 { color: var(--amber); }
+  .gap-card ul { list-style: none; }
+  .gap-card ul li {
+    font-size: 12px;
+    color: var(--ink-2);
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.5;
+  }
+  .gap-card ul li:last-child { border-bottom: none; }
+
+  /* ── Next steps ──────────────────────────────────── */
+  .next-steps {
+    background: var(--ink);
+    border-radius: var(--radius-lg);
+    padding: 24px 28px;
+    color: #fff;
+    margin-top: 16px;
+  }
+  .next-steps h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 14px;
+    letter-spacing: 0.03em;
+  }
+  .next-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .next-item {
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+  .next-item .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 5px;
+  }
+  .next-item p { font-size: 12px; color: rgba(255,255,255,0.85); line-height: 1.6; }
+  .next-item strong { color: #fff; font-weight: 500; }
+
+  /* ── Footer ──────────────────────────────────────── */
+  .footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--ink-4);
+  }
+  .footer a { color: var(--ink-3); text-decoration: none; }
+  .footer a:hover { color: var(--ink); }
+
+  /* ── Filter bar ──────────────────────────────────── */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-3);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: var(--border-strong); color: var(--ink); }
+  .filter-btn.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+  @media (max-width: 900px) {
+    .header { flex-direction: column; padding: 20px 20px 16px; }
+    .header-meta { text-align: left; }
+    .context-bar { padding: 10px 20px; }
+    .main { padding: 20px 20px 40px; }
+    .summary-grid { grid-template-columns: repeat(3, 1fr); }
+    .mod-body { grid-template-columns: 1fr; }
+    .gap-grid { grid-template-columns: 1fr; }
+    .next-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="eyebrow">IEG Co., Ltd. — Semiconductor TVET Solutions</div>
+    <h1>Intel Penang Pre-Employment Curriculum<br>Equipment Mapping &amp; Gap Analysis</h1>
+    <div class="subtitle">Aligned to Intel Kulim / Penang Job Descriptions · HRD Corp Funding Framework</div>
+  </div>
+  <div class="header-meta">
+    <div class="meta-row"><strong>Prepared for</strong> Sean Lim, Galaxy Global / FCoEE</div>
+    <div class="meta-row"><strong>Prepared by</strong> Kelly Cho, IEG Co., Ltd.</div>
+    <div class="meta-row"><strong>Date</strong> June 2025 · Penang Visit</div>
+    <div class="meta-row"><strong>Version</strong> Catalog Ver.2 (Official)</div>
+  </div>
+</div>
+
+<!-- Context bar -->
+<div class="context-bar">
+  <div class="dot"></div>
+  All equipment references are sourced directly from IEG Semiconductor Solutions Catalog Ver.2. Product names reflect official catalog listings, not internal SKU codes.
+</div>
+
+<div class="main">
+
+  <!-- Summary scores -->
+  <div class="section-head">
+    <h2>Module Overview</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="sum-card active" onclick="filterModule('M-1')">
+      <div class="mod-id">M-1</div>
+      <div class="mod-name">Cleanroom &amp; ESD Safety</div>
+      <div class="score-badge score-hi">85%</div>
+      <div class="score-bar"><div class="score-bar-fill" style="width:85%;background:#0F6E56"></div></div>
+    </div>
+    <div class="sum-card" onclick="filterModule('M-2')">
+      <div class="mod-id">M-2</div>
+      <div class="mod-name">PLC &amp; Automation Control</div>
+      <div class="score-badge score-hi">95%</div>
+      <div class="score-bar"><div class="score-bar-fill" style="width:95%;background:#0F6E56"></div></div>
+    </div>
+    <div class="sum-card" onclick="filterModule('M-3')">
+      <div class="mod-id">M-3</div>
+      <div class="mod-name">MPS &amp; Smart Production</div>
+      <div class="score-badge score-hi">88%</div>
+      <div class="score-bar"><div class="score-bar-fill" style="width:88%;background:#0F6E56"></div></div>
+    </div>
+    <div class="sum-card" onclick="filterModule('M-4')">
+      <div class="mod-id">M-4</div>
+      <div class="mod-name">Semiconductor Process Fundamentals</div>
+      <div class="score-badge score-mid">72%</div>
+      <div class="score-bar"><div class="score-bar-fill" style="width:72%;background:#854F0B"></div></div>
+    </div>
+    <div class="sum-card" onclick="filterModule('M-5')">
+      <div class="mod-id">M-5</div>
+      <div class="mod-name">Collaborative Robots &amp; Industry 4.0</div>
+      <div class="score-badge score-hi">90%</div>
+      <div class="score-bar"><div class="score-bar-fill" style="width:90%;background:#0F6E56"></div></div>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterModule('all')">All modules</button>
+    <button class="filter-btn" onclick="filterModule('M-1')">M-1</button>
+    <button class="filter-btn" onclick="filterModule('M-2')">M-2</button>
+    <button class="filter-btn" onclick="filterModule('M-3')">M-3</button>
+    <button class="filter-btn" onclick="filterModule('M-4')">M-4</button>
+    <button class="filter-btn" onclick="filterModule('M-5')">M-5</button>
+  </div>
+
+  <!-- Module cards -->
+
+  <!-- M-1 -->
+  <div class="module-card open" id="card-M-1">
+    <div class="mod-header" onclick="toggleCard('M-1')">
+      <div class="mod-id-block">
+        <span class="id">M-1</span>
+        <span class="score-lg score-hi">85%</span>
+      </div>
+      <div class="mod-title">
+        <h3>Cleanroom &amp; ESD Safety</h3>
+        <div class="intel-role">Intel target role: <strong>Module Equipment Technician</strong> — Kulim / Penang (Diploma entry)</div>
+      </div>
+      <div class="expand-btn">+</div>
+    </div>
+    <div class="mod-body">
+      <div>
+        <div class="col-head">IEG Equipment (Catalog Name)</div>
+        <div class="eq-item">
+          <span class="eq-tag tag-teal">Semiconductor Facility Sensor Application Practice Equipment</span>
+          <div class="eq-note">Pressure, temperature &amp; ESD control lab — delivered to Samsung Electronics DS Academy. Covers PID control theory and hands-on measurement.</div>
+        </div>
+        <div class="eq-item">
+          <span class="eq-tag tag-blue">PCS (Process Control System) Training Equipment</span>
+          <div class="eq-note">SIEMENS / OMRON / LS compatible PLC control, HMI visualisation. Pressure, flow, temperature, level control practice.</div>
+        </div>
+      </div>
+      <div>
+        <div class="col-head">Skills Covered</div>
+        <ul class="skill-list">
+          <li>Bunny suit / cleanroom entry protocol</li>
+          <li>ESD grounding &amp; static measurement lab</li>
+          <li>Safety protocol simulation (OSHA 1994 / FMA)</li>
+          <li>7S, QC080000 awareness</li>
+          <li>PLC-based environmental control</li>
+          <li>HMI visualisation for process monitoring</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-head">Gaps &amp; Recommended Supplements</div>
+        <ul class="gap-list">
+          <li>
+            <span class="gap-icon">⚠</span>
+            <div>
+              <div>No live wafer handling environment</div>
+              <div class="gap-solution">→ <em>MOU with PSDC or Micron Malaysia</em> for on-site practicals</div>
+            </div>
+          </li>
+          <li>
+            <span class="gap-icon">📜</span>
+            <div>
+              <div>ISO 14001 / QC080000 certification linkage absent</div>
+              <div class="gap-solution">→ <em>Co-develop with SIRIM QAS</em> for certification pathway</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- M-2 -->
+  <div class="module-card" id="card-M-2">
+    <div class="mod-header" onclick="toggleCard('M-2')">
+      <div class="mod-id-block">
+        <span class="id">M-2</span>
+        <span class="score-lg score-hi">95%</span>
+      </div>
+      <div class="mod-title">
+        <h3>PLC &amp; Automation Control</h3>
+        <div class="intel-role">Intel target role: <strong>Process &amp; Equipment Engineer</strong> — Kulim ("own and optimise high-volume manufacturing equipment")</div>
+      </div>
+      <div class="expand-btn">+</div>
+    </div>
+    <div class="mod-body">
+      <div>
+        <div class="col-head">IEG Equipment (Catalog Name)</div>
+        <div class="eq-item">
+          <span class="eq-tag tag-blue">PCS Hands-on Equipment (MITSUBISHI)</span>
+          <div class="eq-note">Mitsubishi PLC-based PID control, pressure / flow / temperature / level practice. HMI visualisation.</div>
+        </div>
+        <div class="eq-item">
+          <span class="eq-tag tag-blue">PCS Hands-on Equipment (SIEMENS / OMRON / LS)</span>
+          <div class="eq-note">Siemens S7 ladder &amp; FBD programming, multi-controller support. Directly aligned with Siemens SMSCP standard.</div>
+        </div>
+        <div class="eq-item">
+          <span class="eq-tag tag-teal">SECS / GEM Interface Equipment</span>
+          <div class="eq-note">SEMI-standard equipment-to-host communication, FAB automation integration, HSMS protocol.</div>
+        </div>
+      </div>
+      <div>
+        <div class="col-head">Skills Covered</div>
+        <ul class="skill-list">
+          <li>Siemens SMSCP-standard PLC ladder / FBD programming</li>
+          <li>HMI / SCADA operation &amp; visualisation</li>
+          <li>Pneumatic &amp; hydraulic control systems</li>
+          <li>Fault diagnosis &amp; root-cause simulation</li>
+          <li>Process data analysis &amp; yield optimisation logic</li>
+          <li>FAB automation communication (SECS / GEM)</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-head">Gaps &amp; Recommended Supplements</div>
+        <ul class="gap-list">
+          <li>
+            <span class="gap-icon">📊</span>
+            <div>
+              <div>No live production data / SPC-APC integration</div>
+              <div class="gap-solution">→ <em>Embed SPC software module</em> (e.g. Minitab or equivalent)</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- M-3 -->
+  <div class="module-card" id="card-M-3">
+    <div class="mod-header" onclick="toggleCard('M-3')">
+      <div class="mod-id-block">
+        <span class="id">M-3</span>
+        <span class="score-lg score-hi">88%</span>
+      </div>
+      <div class="mod-title">
+        <h3>MPS &amp; Smart Production</h3>
+        <div class="intel-role">Intel target role: <strong>Manufacturing Operations Manager</strong> — "Lead team, oversee operational processes, KPI-based performance management"</div>
+      </div>
+      <div class="expand-btn">+</div>
+    </div>
+    <div class="mod-body">
+      <div>
+        <div class="col-head">IEG Equipment (Catalog Name)</div>
+        <div class="eq-item">
+          <span class="eq-tag tag-purple">Semiconductor Wafer Transfer Module (TM) Training Equipment</span>
+          <div class="eq-note">Automated wafer transfer between process stations, 5-axis AC servo, optical fibre edge detection. OEE measurement practicals included.</div>
+        </div>
+        <div class="eq-item">
+          <span class="eq-tag tag-purple">Wafer Transfer Module (TM) + Process Module (PM) Training Equipment</span>
+          <div class="eq-note">Multi-process module integration. Spin Coater, Developer, Bake, Aligner, Transfer Robot — configurable production line simulation.</div>
+        </div>
+        <div class="eq-item">
+          <span class="eq-tag tag-blue">EasyCluster Control Solution Software</span>
+          <div class="eq-note">FAB automation SW — Scheduler, TMC, PMC, EDA integration. 6,000+ installations globally over 25 years.</div>
+        </div>
+      </div>
+      <div>
+        <div class="col-head">Skills Covered</div>
+        <ul class="skill-list">
+          <li>Production line setup &amp; changeover simulation</li>
+          <li>Module install / tool conversion procedures</li>
+          <li>OEE &amp; cycle time measurement and analysis</li>
+          <li>Work instruction (WI) creation</li>
+          <li>FAB automation software operation</li>
+          <li>Lean manufacturing — waste elimination practice</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-head">Gaps &amp; Recommended Supplements</div>
+        <ul class="gap-list">
+          <li>
+            <span class="gap-icon">🏅</span>
+            <div>
+              <div>Lean / Six Sigma certification not included</div>
+              <div class="gap-solution">→ <em>Partner with local Lean certification body</em> (e.g. Malaysia Productivity Corporation)</div>
+            </div>
+          </li>
+          <li>
+            <span class="gap-icon">👥</span>
+            <div>
+              <div>HR staffing / team leadership content needed</div>
+              <div class="gap-solution">→ <em>Add soft-skills module</em> via FCoEE curriculum team</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- M-4 -->
+  <div class="module-card" id="card-M-4">
+    <div class="mod-header" onclick="toggleCard('M-4')">
+      <div class="mod-id-block">
+        <span class="id">M-4</span>
+        <span class="score-lg score-mid">72%</span>
+      </div>
+      <div class="mod-title">
+        <h3>Semiconductor Process Fundamentals</h3>
+        <div class="intel-role">Intel target role: <strong>Module Engineering Intern / Graduate</strong> — "Diploma fresh graduate, kick-start career in semiconductor"</div>
+      </div>
+      <div class="expand-btn">+</div>
+    </div>
+    <div class="mod-body">
+      <div>
+        <div class="col-head">IEG Equipment (Catalog Name)</div>
+        <div class="eq-item">
+          <span class="eq-tag tag-teal">Testbed of 8 Major Semiconductor Processes</span>
+          <div class="eq-note">Full 8-process testbed: Wafer Mfg → Oxidation → Photo → Etching → Wet Cleaning → Ion Implantation → EDS Test → Packaging.</div>
+        </div>
+        <div class="eq-item">
+          <span class="eq-tag tag-teal">Semiconductor Photo Process Testbed</span>
+          <div class="eq-note">LPM + Transfer Robot, Aligner, Spin Coater, Developer, Bake (CP/HP), Plasma, Photo — full photolithography line.</div>
+        </div>
+        <div class="eq-item">
+          <span class="eq-tag tag-amber">Semiconductor Post-Process Inspection Training Equipment</span>
+          <div class="eq-note">EDS inspection, Picker Unit, 2M CMOS vision, OK/NG classification, packaging process simulation.</div>
+        </div>
+        <div class="eq-item">
+          <span class="eq-tag tag-amber">AR / XR-based Semiconductor Process VR Learning Content</span>
+          <div class="eq-note">12-inch wafer equipment VR, real-FAB-equivalent environment. Covers ATM processes, CS troubleshooting, gas piping.</div>
+        </div>
+      </div>
+      <div>
+        <div class="col-head">Skills Covered</div>
+        <ul class="skill-list">
+          <li>ATM process flow simulation (Die Sort → Test)</li>
+          <li>Packaging materials &amp; substrate knowledge</li>
+          <li>Quality inspection lab (vision-based)</li>
+          <li>Measurement &amp; documentation practice</li>
+          <li>VR-based FAB environment immersion</li>
+          <li>Gas piping &amp; equipment assembly</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-head">Gaps &amp; Recommended Supplements</div>
+        <ul class="gap-list">
+          <li>
+            <span class="gap-icon">🔬</span>
+            <div>
+              <div>No real wafer / IC handling</div>
+              <div class="gap-solution">→ <em>MOU with PSDC or Micron Malaysia</em> for live wafer practicals</div>
+            </div>
+          </li>
+          <li>
+            <span class="gap-icon">🖥</span>
+            <div>
+              <div>ATE equipment not in IEG lineup</div>
+              <div class="gap-solution">→ <em>Embed Agilent / Keysight training content</em> or virtual ATE simulator license</div>
+            </div>
+          </li>
+          <li>
+            <span class="gap-icon">🔭</span>
+            <div>
+              <div>SEM inspection equipment cost-prohibitive</div>
+              <div class="gap-solution">→ <em>Virtual SEM simulator</em> as add-on module</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- M-5 -->
+  <div class="module-card" id="card-M-5">
+    <div class="mod-header" onclick="toggleCard('M-5')">
+      <div class="mod-id-block">
+        <span class="id">M-5</span>
+        <span class="score-lg score-hi">90%</span>
+      </div>
+      <div class="mod-title">
+        <h3>Collaborative Robots &amp; Industry 4.0</h3>
+        <div class="intel-role">Intel target roles: <strong>TEG Equipment Supervisor</strong> + <strong>Advanced Packaging Engineer</strong> — Pelican 3D chiplet, cobot pick &amp; place</div>
+      </div>
+      <div class="expand-btn">+</div>
+    </div>
+    <div class="mod-body">
+      <div>
+        <div class="col-head">IEG Equipment (Catalog Name)</div>
+        <div class="eq-item">
+          <span class="eq-tag tag-red">Semiconductor Wafer Cassette Transfer Robot (IMOBA)</span>
+          <div class="eq-note">AMR-based autonomous wafer cassette transport. 60 kg payload, 10-hr continuous operation, 1,000 mm/s speed. Cleanroom-ready.</div>
+        </div>
+        <div class="eq-item">
+          <span class="eq-tag tag-purple">Wafer Transfer Module (TM) + Process Module (PM) Training Equipment</span>
+          <div class="eq-note">Cobot-integrated pick &amp; place, vision system, IoT sensor data collection, MPS-integrated automation.</div>
+        </div>
+        <div class="eq-item">
+          <span class="eq-tag tag-blue">Digital Twin Solution (EasyCluster + PLM Software)</span>
+          <div class="eq-note">3D digital factory simulation — logistics, layout, production planning Digital Twin. RAIL + ROBOT Digital Twin demonstrated.</div>
+        </div>
+        <div class="eq-item">
+          <span class="eq-tag tag-teal">SECS / GEM Interface (EasyFASGEM)</span>
+          <div class="eq-note">Industry 4.0 FAB automation standard. SECS-I/II, HSMS, GEM compliance. IoT dashboard integration ready.</div>
+        </div>
+      </div>
+      <div>
+        <div class="col-head">Skills Covered</div>
+        <ul class="skill-list">
+          <li>AMR / cobot operation &amp; path programming</li>
+          <li>Safety zone configuration &amp; SOP</li>
+          <li>MPS-integrated automation workflows</li>
+          <li>IoT data collection &amp; visualisation</li>
+          <li>Digital Twin fundamentals &amp; simulation</li>
+          <li>FAB-level SECS / GEM communication</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-head">Gaps &amp; Recommended Supplements</div>
+        <ul class="gap-list">
+          <li>
+            <span class="gap-icon">🤖</span>
+            <div>
+              <div>AI vision module not included in base package</div>
+              <div class="gap-solution">→ <em>Emotii AI partnership</em> — multilingual IoT dashboard + AI vision add-on module</div>
+            </div>
+          </li>
+          <li>
+            <span class="gap-icon">🌐</span>
+            <div>
+              <div>Digital Twin SW requires separate licensing</div>
+              <div class="gap-solution">→ <em>Bundle as Phase 2 delivery</em> post HRD Corp funding confirmation</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gap Analysis Summary -->
+  <div class="section-head" style="margin-top:40px">
+    <h2>Gap Analysis Summary</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="gap-grid">
+    <div class="gap-card covered">
+      <h4>✅ Directly Covered by IEG Equipment (≥85% fit)</h4>
+      <ul>
+        <li><strong>PLC / HMI Automation Control (M-2 · 95%)</strong> — Siemens SMSCP-standard. Directly matches Intel Process Engineer JDs.</li>
+        <li><strong>Collaborative Robot Operation (M-5 · 90%)</strong> — IMOBA AMR + TM+PM cobot integration maps to Intel Pelican pick &amp; place roles.</li>
+        <li><strong>Production Process Sequencing (M-3 · 88%)</strong> — TM+PM trainers simulate Intel factory ramp procedures with OEE measurement.</li>
+        <li><strong>Cleanroom &amp; ESD Safety (M-1 · 85%)</strong> — Facility Sensor Practice Equipment covers ESD grounding, PID control, safety simulation.</li>
+        <li><strong>Digital Twin &amp; Industry 4.0 (M-5)</strong> — EasyCluster + PLM Digital Twin. RAIL and ROBOT Digital Twin modules demonstrated.</li>
+      </ul>
+    </div>
+    <div class="gap-card supplement">
+      <h4>⚠️ Supplementation Required — Partnerships or Add-ons</h4>
+      <ul>
+        <li><strong>Live Semiconductor Wafer / IC Handling</strong> — MOU with PSDC or Micron Malaysia for on-site wafer practicals.</li>
+        <li><strong>ATE &amp; SEM Inspection Equipment (M-4)</strong> — Embed Agilent / Keysight training content, or bundle virtual semiconductor inspection simulator license.</li>
+        <li><strong>AI Vision &amp; Advanced Digital Twin (M-5)</strong> — Leverage Emotii AI partnership for multilingual IoT dashboard; develop AI vision add-on module.</li>
+        <li><strong>ISO 14001 / QC080000 Certification Links</strong> — Co-develop with SIRIM QAS; offer certification pathway upon course completion.</li>
+        <li><strong>Lean / Six Sigma Certification (M-3)</strong> — Partner with Malaysia Productivity Corporation or equivalent body.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Next Steps -->
+  <div class="next-steps">
+    <h3>Proposed Next Steps — Penang June 2025</h3>
+    <div class="next-grid">
+      <div class="next-item">
+        <div class="step-num">01 — Immediate</div>
+        <p><strong>HRD Corp funding structure confirmation.</strong> Align curriculum scope to approved training hours and grant categories with FCoEE / Galaxy Global team.</p>
+      </div>
+      <div class="next-item">
+        <div class="step-num">02 — Short term</div>
+        <p><strong>PSDC / Micron MOU scoping.</strong> Secure a wafer-handling practicals partner to close the M-4 live-wafer gap — critical for Intel alignment.</p>
+      </div>
+      <div class="next-item">
+        <div class="step-num">03 — Parallel</div>
+        <p><strong>SIRIM QAS co-development.</strong> Initiate ISO 14001 / QC080000 certification pathway integration for M-1 and M-4 graduate credentialing.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div>IEG Co., Ltd. · <a href="https://www.ieg.kr" target="_blank">www.ieg.kr</a> · +82-31-698-2200 · 13204 Seongnam-si, Gyeonggi-do, Korea</div>
+    <div>Semiconductor Solutions Catalog Ver.2 · Confidential — For FCoEE / Galaxy Global use only</div>
+  </div>
+
+</div>
+
+<script>
+  function toggleCard(id) {
+    const card = document.getElementById('card-' + id);
+    card.classList.toggle('open');
+  }
+
+  function filterModule(id) {
+    const cards = ['M-1','M-2','M-3','M-4','M-5'];
+    const sumCards = document.querySelectorAll('.sum-card');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    filterBtns.forEach(b => b.classList.remove('active'));
+    sumCards.forEach(c => c.classList.remove('active'));
+
+    if (id === 'all') {
+      filterBtns[0].classList.add('active');
+      cards.forEach(m => {
+        const card = document.getElementById('card-' + m);
+        card.classList.remove('hidden');
+      });
+    } else {
+      filterBtns[cards.indexOf(id) + 1].classList.add('active');
+      sumCards[cards.indexOf(id)].classList.add('active');
+      cards.forEach(m => {
+        const card = document.getElementById('card-' + m);
+        if (m === id) {
+          card.classList.remove('hidden');
+          card.classList.add('open');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+  }
+</script>
+</body>
+</html>
