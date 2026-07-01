@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IEG × Tesca Technologies — Collaboration Discovery Questionnaire</title>
+<style>
+  :root {
+    --navy: #12233f;
+    --navy-soft: #1c3660;
+    --steel: #3d6b96;
+    --accent: #c47a3d;
+    --paper: #faf8f4;
+    --ink: #1a1a1a;
+    --ink-soft: #5a5f6b;
+    --line: #dcdfe4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 0 0 80px; }
+
+  header.masthead {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-soft) 100%);
+    color: #fff;
+    padding: 56px 48px 44px;
+  }
+  .eyebrow {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #a9c2dd;
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-size: 30px;
+    margin: 0 0 10px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .sub {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #cdd9e6;
+    font-size: 14.5px;
+    max-width: 560px;
+  }
+  .meta-row {
+    margin-top: 28px;
+    display: flex;
+    gap: 32px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12.5px;
+    color: #a9c2dd;
+    flex-wrap: wrap;
+    border-top: 1px solid rgba(255,255,255,0.18);
+    padding-top: 18px;
+  }
+  .meta-row div span { display: block; color: #fff; font-size: 13.5px; margin-top: 2px; }
+
+  .intro {
+    padding: 36px 48px 8px;
+    font-size: 15px;
+    color: var(--ink-soft);
+  }
+  .intro p { margin: 0 0 14px; }
+
+  .fill-note {
+    margin: 0 48px 8px;
+    background: #fff4e6;
+    border: 1px solid #ecd3ae;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12.5px;
+    color: #6b4a1f;
+  }
+
+  section.block { padding: 30px 48px; border-top: 1px solid var(--line); }
+  .block-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+  .block-num {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: #fff;
+    background: var(--steel);
+    padding: 3px 9px;
+    border-radius: 3px;
+  }
+  .block-title { font-size: 20px; color: var(--navy); margin: 0; font-weight: 500; }
+  .block-note {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 6px 0 22px;
+    padding-left: 12px;
+    border-left: 2px solid var(--accent);
+  }
+
+  .q { margin-bottom: 22px; }
+  .q-text { font-size: 15.5px; margin: 0 0 10px; }
+  .q-text b { color: var(--navy); }
+
+  textarea.answer-box {
+    display: block;
+    width: 100%;
+    border: 1px solid #b7bcc4;
+    border-radius: 4px;
+    background: #fff;
+    min-height: 54px;
+    padding: 10px 12px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13.5px;
+    color: var(--ink);
+    resize: vertical;
+  }
+  textarea.answer-box::placeholder { color: #9aa0aa; }
+  textarea.answer-box:focus { outline: 2px solid var(--steel); outline-offset: 1px; }
+
+  .respondent-block {
+    padding: 26px 48px;
+    border-top: 1px solid var(--line);
+    background: #f2f0ea;
+  }
+  .respondent-block h3 {
+    font-size: 15px;
+    color: var(--navy);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin: 0 0 14px;
+  }
+  .respondent-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .respondent-grid label {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    color: var(--ink-soft);
+    display: block;
+    margin-bottom: 5px;
+  }
+  .respondent-grid input {
+    width: 100%;
+    border: 1px solid #b7bcc4;
+    border-radius: 4px;
+    padding: 9px 10px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13.5px;
+  }
+
+  .submit-block {
+    padding: 30px 48px 10px;
+    text-align: center;
+  }
+  #submitBtn {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: var(--navy);
+    border: none;
+    border-radius: 5px;
+    padding: 14px 34px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  #submitBtn:hover { background: var(--navy-soft); }
+  #submitBtn:disabled { background: #9aa0aa; cursor: not-allowed; }
+  .submit-hint {
+    margin-top: 12px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+  }
+  .submit-status {
+    margin-top: 14px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    display: none;
+  }
+  .submit-status.success { color: #2f6b3f; display: block; }
+  .submit-status.error { color: #a33; display: block; }
+  .config-warning {
+    margin: 0 48px 8px;
+    background: #fdecea;
+    border: 1px solid #f3b4ac;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    color: #8a2e22;
+  }
+
+  footer {
+    padding: 34px 48px 10px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--line);
+  }
+  footer .sign { color: var(--navy); font-weight: 700; }
+
+  @media (max-width: 600px) {
+    header.masthead, .intro, section.block, footer, .respondent-block, .submit-block { padding-left: 24px; padding-right: 24px; }
+    .respondent-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">IEG Global Business Division · Partnership Discovery</div>
+    <h1>Collaboration Discovery Questionnaire</h1>
+    <div class="sub">IEG (Innovative Enterprise Group) &amp; Tesca Technologies Pvt. Ltd. — a structured set of pre-engagement questions to help both teams scope a concrete, mutually beneficial collaboration in automotive/EV training and semiconductor curriculum extension.</div>
+    <div class="meta-row">
+      <div>Prepared by <span>IEG Co., Ltd. — Global Business Division</span></div>
+      <div>For the attention of <span>Mr. Ashutosh Agarwal, Director</span></div>
+      <div>Requested response by <span>within 2 weeks of receipt</span></div>
+    </div>
+  </header>
+
+  <div class="intro">
+    <p>Dear Ashutosh,</p>
+    <p>Following our discussion, we would like to move from a general exploration of synergy toward a concrete collaboration framework. The questions below are grouped into five areas: (1) automotive/EV training collaboration, (2) semiconductor curriculum extension, (3) channel &amp; commercial structure, (4) organizational capacity for joint ODA/multilateral bids, and (5) a follow-up on recent regional expansion. There is no need to answer everything at once — even a partial response ahead of our next call would help us prepare a focused proposal.</p>
+  </div>
+
+  <div class="fill-note">Please type your answers directly into the boxes below, then click "Submit &amp; Send to IEG" at the bottom of the page. Your responses will be sent automatically — no need to open your own email client.</div>
+  <div class="config-warning" id="configWarning" style="display:none;">⚠️ This form is not yet connected to a live endpoint. Please contact IEG directly, or ask them to finish configuring the form.</div>
+
+  <form id="tescaForm">
+
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">01</span>
+      <h2 class="block-title">Automotive &amp; EV Training Collaboration</h2>
+    </div>
+    <p class="block-note">IEG is strong in smart-factory and semiconductor training but has limited in-house automotive/EV hardware. Tesca's EV Technology Lab and automotive trainer lines appear to be a natural complement.</p>
+
+    <div class="q">
+      <p class="q-text"><b>1.1</b> Beyond the BLDC-motor two-wheeler EV Training System, does Tesca offer EV kits for four-wheeler platforms, battery-pack/BMS training, or charging-infrastructure simulation?</p>
+      <textarea class="answer-box" id="q1_1" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>1.2</b> Would Tesca be open to a "simulator-first" go-to-market model — where an IEG-developed EV curriculum/simulator is used with a prospective client to validate demand and budget before physical Tesca EV hardware is procured?</p>
+      <textarea class="answer-box" id="q1_2" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>1.3</b> In which countries/institutions are Tesca's EV kits currently installed or under active proposal? (To check overlap with IEG's active markets: Central Asia, Southeast Asia, Middle East, Africa.)</p>
+      <textarea class="answer-box" id="q1_3" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>1.4</b> Is white-label / co-branded packaging of EV kits possible for joint proposals?</p>
+      <textarea class="answer-box" id="q1_4" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>1.5</b> What are typical MOQ, lead time, and indicative pricing bands for an EV lab setup (per-institution basis)?</p>
+      <textarea class="answer-box" id="q1_5" placeholder="Your answer..."></textarea>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">02</span>
+      <h2 class="block-title">Semiconductor Curriculum Extension</h2>
+    </div>
+    <p class="block-note">IEG's strength is back-end semiconductor process training (die bonding, wire bonding, molding, sawing, package testing) — a step ahead of Tesca's device-characteristics and SMD/PCB assembly trainers. We see this as sequential, not competitive.</p>
+
+    <div class="q">
+      <p class="q-text"><b>2.1</b> Can you confirm whether Tesca currently offers any equipment covering wafer-level or package-level back-end semiconductor processes, beyond device-characteristics and SMD/PCB assembly trainers?</p>
+      <textarea class="answer-box" id="q2_1" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>2.2</b> Would Tesca be interested in positioning a combined curriculum — semiconductor device fundamentals → IEG back-end packaging process training → Tesca SMD/PCB assembly — as a single proposal to shared institutional clients?</p>
+      <textarea class="answer-box" id="q2_2" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>2.3</b> Are there existing Tesca clients (universities, polytechnics, TVET centers) currently using your electronics/embedded trainers who may be candidates for this kind of curriculum upgrade?</p>
+      <textarea class="answer-box" id="q2_3" placeholder="Your answer..."></textarea>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">03</span>
+      <h2 class="block-title">Channel &amp; Commercial Structure</h2>
+    </div>
+    <p class="block-note">To scope a workable brokerage / referral arrangement for both the EV and semiconductor tracks.</p>
+
+    <div class="q">
+      <p class="q-text"><b>3.1</b> Would Tesca be open to a referral or brokerage arrangement in which IEG introduces qualified opportunities and Tesca (for EV/automotive) or IEG (for semiconductor back-end) fulfills the equipment supply, with a commission on closed deals?</p>
+      <textarea class="answer-box" id="q3_1" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>3.2</b> What commercial structure has worked well for Tesca in past channel-partner arrangements — a referral fee, a distributor margin built into pricing, or a formal consortium/JV split?</p>
+      <textarea class="answer-box" id="q3_2" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>3.3</b> Are there territories where Tesca would prefer exclusivity, and territories where open/non-exclusive collaboration would be acceptable?</p>
+      <textarea class="answer-box" id="q3_3" placeholder="Your answer..."></textarea>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">04</span>
+      <h2 class="block-title">Organizational Capacity &amp; ODA Track Record</h2>
+    </div>
+    <p class="block-note">To help us jointly scope realistic project sizes for multilateral or government-funded bids.</p>
+
+    <div class="q">
+      <p class="q-text"><b>4.1</b> Could you share 1–2 recent examples of Tesca-delivered TVET/education projects funded by the World Bank, ADB, AfDB, or GOI Line of Credit — including approximate project value and country?</p>
+      <textarea class="answer-box" id="q4_1" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>4.2</b> For a multi-country or multi-year consortium bid (e.g., KOICA IBS, EDCF, or similar tri-lateral development cooperation), what is Tesca's typical internal project-execution team size and structure?</p>
+      <textarea class="answer-box" id="q4_2" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>4.3</b> Would Tesca be interested in exploring a joint bid on an upcoming KOICA- or EDCF-funded TVET modernization project, with IEG as technical/equipment lead and Tesca contributing regional channel and turnkey project-delivery experience?</p>
+      <textarea class="answer-box" id="q4_3" placeholder="Your answer..."></textarea>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">05</span>
+      <h2 class="block-title">Geographic Footprint — North America, Europe &amp; Brazil</h2>
+    </div>
+    <p class="block-note">Public records show only isolated, single-item shipments to the US, France, and Iceland (with no named institutional partner), a larger 171-unit Power Electronics Trainer project in Peru, and an ESC India trade-delegation visit to São Paulo (Brazil) with no confirmed sale on record. We'd like to understand the real picture before assuming these are established channels.</p>
+
+    <div class="q">
+      <p class="q-text"><b>5.1</b> In North America and Europe, are there any active institutional relationships (universities, TVET centers, or distributors) beyond one-off equipment shipments? If so, which countries/institutions would you highlight?</p>
+      <textarea class="answer-box" id="q5_1" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>5.2</b> Does Tesca have a local distributor, agent, or representative office in the US or in any EU/EEA country? If not, how are inquiries and after-sales support currently handled in these regions?</p>
+      <textarea class="answer-box" id="q5_2" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>5.3</b> Following the São Paulo Buyer-Seller Meet, has Tesca converted any Brazilian opportunities into an actual order or installation? What is the current status of Brazil market entry, and would there be interest in exploring it jointly?</p>
+      <textarea class="answer-box" id="q5_3" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>5.4</b> The Peru project (171 Power Electronics Trainers) appears to be your largest documented single deployment outside Asia/Africa/Middle East. Could you share: (a) roughly when this was delivered, (b) how the opportunity was sourced (direct tender, distributor, ODA-funded), and (c) whether Tesca still has an active relationship with this institution today?</p>
+      <textarea class="answer-box" id="q5_4" placeholder="Your answer..."></textarea>
+    </div>
+    <div class="q">
+      <p class="q-text"><b>5.5</b> If the relationship with the Peru institution is still active, would Tesca be open to introducing IEG as a follow-on partner for a curriculum upgrade path — moving the institution from foundational power electronics training toward smart-factory and PLC-based automation training?</p>
+      <textarea class="answer-box" id="q5_5" placeholder="Your answer..."></textarea>
+    </div>
+  </section>
+
+  <div class="respondent-block">
+    <h3>Respondent details (optional, but helpful)</h3>
+    <div class="respondent-grid">
+      <div>
+        <label for="respName">Name</label>
+        <input type="text" id="respName" placeholder="e.g., Ashutosh Agarwal">
+      </div>
+      <div>
+        <label for="respTitle">Title</label>
+        <input type="text" id="respTitle" placeholder="e.g., Director">
+      </div>
+    </div>
+  </div>
+
+  <div class="submit-block">
+    <button id="submitBtn" onclick="sendResponses()">Submit &amp; Send to IEG</button>
+    <p class="submit-hint">Sends your answers directly to IEG's Global Business Division — no need to open your own email client.</p>
+    <p class="submit-status" id="submitStatus"></p>
+  </div>
+
+  </form>
+
+  <footer>
+    <p>We appreciate your time in working through these questions — even directional answers will help us shape a concrete next-step proposal rather than a general partnership discussion. Happy to walk through any of this on a follow-up call.</p>
+    <p class="sign">Kelly Cho</p>
+    <p>Team Manager, Global Business Division · IEG Co., Ltd.<br>
+    kellycho824@ieg.kr</p>
+  </footer>
+
+</div>
+
+<script>
+  // ── Formspree configuration ─────────────────────────────────────────────
+  // Replace FORM_ID below with the ID from your Formspree endpoint URL,
+  // e.g. if your endpoint is https://formspree.io/f/abcd1234, set:
+  // var FORM_ID = "abcd1234";
+  var FORM_ID = "xnjkjnyy";
+  var FORM_ENDPOINT = "https://formspree.io/f/" + FORM_ID;
+  // ─────────────────────────────────────────────────────────────────────────
+
+  if (FORM_ID === "REPLACE_WITH_YOUR_FORM_ID") {
+    document.getElementById('configWarning').style.display = 'block';
+  }
+
+  var questions = [
+    ["1.1", "Beyond the BLDC-motor two-wheeler EV Training System, does Tesca offer EV kits for four-wheeler platforms, battery-pack/BMS training, or charging-infrastructure simulation?", "q1_1"],
+    ["1.2", "Would Tesca be open to a \"simulator-first\" go-to-market model?", "q1_2"],
+    ["1.3", "In which countries/institutions are Tesca's EV kits currently installed or under active proposal?", "q1_3"],
+    ["1.4", "Is white-label / co-branded packaging of EV kits possible for joint proposals?", "q1_4"],
+    ["1.5", "What are typical MOQ, lead time, and indicative pricing bands for an EV lab setup?", "q1_5"],
+    ["2.1", "Does Tesca offer any wafer-level or package-level back-end semiconductor process equipment?", "q2_1"],
+    ["2.2", "Interested in a combined sequential curriculum (device fundamentals -> IEG back-end -> Tesca SMD/PCB)?", "q2_2"],
+    ["2.3", "Existing Tesca clients who may be candidates for this curriculum upgrade?", "q2_3"],
+    ["3.1", "Open to a referral/brokerage arrangement with commission on closed deals?", "q3_1"],
+    ["3.2", "What commercial structure has worked well for Tesca in past channel-partner arrangements?", "q3_2"],
+    ["3.3", "Territories for exclusivity vs. open/non-exclusive collaboration?", "q3_3"],
+    ["4.1", "1-2 recent examples of Tesca-delivered TVET/education projects funded by World Bank/ADB/AfDB/GOI LOC?", "q4_1"],
+    ["4.2", "Typical internal project-execution team size/structure for multi-country consortium bids?", "q4_2"],
+    ["4.3", "Interested in exploring a joint bid on a KOICA- or EDCF-funded TVET project?", "q4_3"],
+    ["5.1", "Active institutional relationships in North America/Europe beyond one-off shipments?", "q5_1"],
+    ["5.2", "Local distributor/agent/rep office in the US or EU/EEA?", "q5_2"],
+    ["5.3", "Status of Brazil market entry after the São Paulo Buyer-Seller Meet?", "q5_3"],
+    ["5.4", "Peru project (171 units): when delivered, how sourced, still an active relationship?", "q5_4"],
+    ["5.5", "Open to introducing IEG as a follow-on curriculum-upgrade partner at the Peru institution?", "q5_5"]
+  ];
+
+  function sendResponses() {
+    var statusEl = document.getElementById('submitStatus');
+    var btn = document.getElementById('submitBtn');
+
+    if (FORM_ID === "REPLACE_WITH_YOUR_FORM_ID") {
+      statusEl.className = "submit-status error";
+      statusEl.textContent = "This form isn't connected yet. Please contact IEG directly at kellycho824@ieg.kr.";
+      return;
+    }
+
+    var name = document.getElementById('respName').value.trim();
+    var title = document.getElementById('respTitle').value.trim();
+
+    var answeredCount = 0;
+    var payload = {
+      _subject: "Tesca Response — IEG Collaboration Discovery Questionnaire",
+      respondent_name: name || "(not provided)",
+      respondent_title: title || "(not provided)"
+    };
+    var summaryLines = [];
+    questions.forEach(function (item) {
+      var num = item[0], text = item[1], id = item[2];
+      var val = document.getElementById(id).value.trim();
+      if (val) answeredCount++;
+      payload["Q" + num] = val || "(no answer provided)";
+      summaryLines.push("[" + num + "] " + text + "\nAnswer: " + (val || "(no answer provided)"));
+    });
+    payload["full_summary"] = summaryLines.join("\n\n");
+
+    if (answeredCount === 0) {
+      var proceed = confirm("No answers have been entered yet. Submit anyway?");
+      if (!proceed) return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+    statusEl.className = "";
+    statusEl.textContent = "";
+
+    fetch(FORM_ENDPOINT, {
+      method: "POST",
+      headers: { "Accept": "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(function (response) {
+        if (response.ok) {
+          statusEl.className = "submit-status success";
+          statusEl.textContent = "✓ Your responses have been sent to IEG. Thank you!";
+          btn.textContent = "Sent";
+        } else {
+          return response.json().then(function (data) {
+            throw new Error((data && data.error) || "Submission failed");
+          });
+        }
+      })
+      .catch(function (err) {
+        statusEl.className = "submit-status error";
+        statusEl.textContent = "Something went wrong (" + err.message + "). Please email kellycho824@ieg.kr directly with your answers.";
+        btn.disabled = false;
+        btn.textContent = "Submit & Send to IEG";
+      });
+  }
+</script>
+</body>
+</html>
