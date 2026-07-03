@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IEG × Tesca Technologies — Collaboration Discovery</title>
+<style>
+  :root {
+    --navy: #12233f;
+    --navy-soft: #1c3660;
+    --steel: #3d6b96;
+    --accent: #c47a3d;
+    --paper: #faf8f4;
+    --ink: #1a1a1a;
+    --ink-soft: #5a5f6b;
+    --line: #dcdfe4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 0 0 80px; }
+
+  header.masthead {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-soft) 100%);
+    color: #fff;
+    padding: 56px 48px 44px;
+  }
+  .eyebrow {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #a9c2dd;
+    margin-bottom: 14px;
+  }
+  h1 { font-size: 28px; margin: 0 0 10px; font-weight: 500; letter-spacing: 0.01em; }
+  .sub { font-family: 'Helvetica Neue', Arial, sans-serif; color: #cdd9e6; font-size: 14.5px; max-width: 560px; }
+  .meta-row {
+    margin-top: 26px; display: flex; gap: 32px;
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12.5px; color: #a9c2dd;
+    flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.18); padding-top: 16px;
+  }
+  .meta-row div span { display: block; color: #fff; font-size: 13.5px; margin-top: 2px; }
+
+  .intro { padding: 32px 48px 6px; font-size: 15px; color: var(--ink-soft); }
+  .intro p { margin: 0 0 14px; }
+
+  .fill-note {
+    margin: 0 48px 8px; background: #fff4e6; border: 1px solid #ecd3ae; border-radius: 6px;
+    padding: 12px 16px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12.5px; color: #6b4a1f;
+  }
+  .oem-confirm {
+    margin: 0 48px 8px; background: #eaf4ec; border: 1px solid #b9d9bf; border-radius: 6px;
+    padding: 12px 16px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12.5px; color: #235c31;
+  }
+  .config-warning {
+    margin: 0 48px 8px; background: #fdecea; border: 1px solid #f3b4ac; border-radius: 6px;
+    padding: 10px 16px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #8a2e22;
+  }
+
+  section.block { padding: 26px 48px; border-top: 1px solid var(--line); }
+  .block-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 10px; }
+  .block-num {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; letter-spacing: 0.1em;
+    color: #fff; background: var(--steel); padding: 3px 9px; border-radius: 3px;
+  }
+  .block-title { font-size: 18.5px; color: var(--navy); margin: 0; font-weight: 500; }
+
+  .q-text { font-size: 15.5px; margin: 0 0 10px; }
+  .q-text b { color: var(--navy); }
+
+  textarea.answer-box {
+    display: block; width: 100%; border: 1px solid #b7bcc4; border-radius: 4px; background: #fff;
+    min-height: 62px; padding: 10px 12px; font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13.5px; color: var(--ink); resize: vertical;
+  }
+  textarea.answer-box::placeholder { color: #9aa0aa; }
+  textarea.answer-box:focus { outline: 2px solid var(--steel); outline-offset: 1px; }
+
+  .respondent-block { padding: 24px 48px; border-top: 1px solid var(--line); background: #f2f0ea; }
+  .respondent-block h3 { font-size: 15px; color: var(--navy); font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0 0 14px; }
+  .respondent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .respondent-grid label { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: var(--ink-soft); display: block; margin-bottom: 5px; }
+  .respondent-grid input {
+    width: 100%; border: 1px solid #b7bcc4; border-radius: 4px; padding: 9px 10px;
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13.5px;
+  }
+
+  .submit-block { padding: 30px 48px 10px; text-align: center; }
+  #submitBtn {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 14.5px; font-weight: 600; letter-spacing: 0.02em;
+    color: #fff; background: var(--navy); border: none; border-radius: 5px; padding: 14px 34px;
+    cursor: pointer; transition: background 0.15s ease;
+  }
+  #submitBtn:hover { background: var(--navy-soft); }
+  #submitBtn:disabled { background: #9aa0aa; cursor: not-allowed; }
+  .submit-hint { margin-top: 12px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11.5px; color: var(--ink-soft); }
+  .submit-status { margin-top: 14px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; display: none; }
+  .submit-status.success { color: #2f6b3f; display: block; }
+  .submit-status.error { color: #a33; display: block; }
+
+  footer { padding: 30px 48px 10px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12.5px; color: var(--ink-soft); border-top: 1px solid var(--line); }
+  footer .sign { color: var(--navy); font-weight: 700; }
+
+  @media (max-width: 600px) {
+    header.masthead, .intro, section.block, footer, .respondent-block, .submit-block { padding-left: 24px; padding-right: 24px; }
+    .respondent-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">IEG Global Business Division · Partnership Discovery</div>
+    <h1>Collaboration Discovery — 6 Quick Questions</h1>
+    <div class="sub">IEG (Innovative Enterprise Group) &amp; Tesca Technologies Pvt. Ltd. — a short set of questions to help us scope a concrete next step together.</div>
+    <div class="meta-row">
+      <div>Prepared by <span>IEG Co., Ltd.</span></div>
+      <div>For the attention of <span>Mr. Ashutosh Agarwal</span></div>
+      <div>Est. time <span>8–10 minutes</span></div>
+    </div>
+  </header>
+
+  <div class="intro">
+    <p>Dear Ashutosh,</p>
+    <p>To keep this light, we've narrowed our questions down to the six that matter most for shaping a concrete proposal. Even brief, directional answers are enough — full detail can come later on a call.</p>
+  </div>
+
+  <div class="fill-note">Type your answers below, then click "Submit &amp; Send to IEG" at the bottom.</div>
+  <div class="oem-confirm">✓ Confirmed in today's meeting: IEG will supply the relevant automotive/EV and semiconductor back-end equipment under an OEM arrangement through Tesca's channel. The questions below are to help us move quickly toward the first concrete opportunity.</div>
+  <div class="config-warning" id="configWarning" style="display:none;">⚠️ This form is not yet connected to a live endpoint. Please contact IEG directly, or ask them to finish configuring the form.</div>
+
+  <form id="tescaForm">
+
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">01</span>
+      <h2 class="block-title">Automotive &amp; EV</h2>
+    </div>
+    <p class="q-text"><b>Q1.</b> Beyond the two-wheeler EV Training System, do you have four-wheeler/EV kits, and where are they currently deployed?</p>
+    <textarea class="answer-box" id="q1" placeholder="Your answer..."></textarea>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">02</span>
+      <h2 class="block-title">Semiconductor</h2>
+    </div>
+    <p class="q-text"><b>Q2.</b> IEG's core strengths are in packaging, wafer handling/transfer, equipment maintenance, and plasma process element technologies, along with an online content platform covering the semiconductor 8 major processes. Does Tesca currently offer equipment or content in any of these specific areas, and would a combined offering (Tesca SMD/PCB assembly + IEG's areas above) be of interest?</p>
+    <textarea class="answer-box" id="q2" placeholder="Your answer..."></textarea>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">03</span>
+      <h2 class="block-title">Content Delivery Track Record</h2>
+    </div>
+    <p class="q-text"><b>Q3.</b> Beyond hardware, IEG also produces smart-factory, Physical AI, VR, and AR training content. In your tender/bid experience, has Tesca ever delivered digital content or curriculum materials — not just physical equipment — as part of a winning proposal? If so, could you share a brief example?</p>
+    <textarea class="answer-box" id="q3_content" placeholder="Your answer..."></textarea>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">04</span>
+      <h2 class="block-title">OEM Delivery Terms</h2>
+    </div>
+    <p class="q-text"><b>Q4.</b> For the OEM-supplied equipment, could you share your typical lead time from order confirmation to delivery, preferred Incoterms (e.g., FOB, CIF, DAP), and preferred payment terms (e.g., deposit/balance split, LC, T/T)?</p>
+    <textarea class="answer-box" id="q4_oem" placeholder="Your answer..."></textarea>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">05</span>
+      <h2 class="block-title">Nearest Bid Opportunity</h2>
+    </div>
+    <p class="q-text"><b>Q5.</b> Is there a specific upcoming tender, bid, or institutional opportunity — in any market — where this OEM-supplied equipment could realistically be included in a near-term proposal? If possible, please share the country, institution, and expected timeline.</p>
+    <textarea class="answer-box" id="q5_bid" placeholder="Your answer..."></textarea>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">06</span>
+      <h2 class="block-title">Peru Follow-up</h2>
+    </div>
+    <p class="q-text"><b>Q6.</b> Is your relationship with the Peru institution (171 Power Electronics Trainers) still active? Would you be open to introducing IEG there for a smart-factory/PLC curriculum upgrade?</p>
+    <textarea class="answer-box" id="q6_peru" placeholder="Your answer..."></textarea>
+  </section>
+
+  <div class="respondent-block">
+    <h3>Respondent details (optional)</h3>
+    <div class="respondent-grid">
+      <div>
+        <label for="respName">Name</label>
+        <input type="text" id="respName" placeholder="e.g., Ashutosh Agarwal">
+      </div>
+      <div>
+        <label for="respTitle">Title</label>
+        <input type="text" id="respTitle" placeholder="e.g., Director">
+      </div>
+    </div>
+  </div>
+
+  <div class="submit-block">
+    <button id="submitBtn" onclick="sendResponses()">Submit &amp; Send to IEG</button>
+    <p class="submit-hint">Sends your answers directly to IEG's Global Business Division.</p>
+    <p class="submit-status" id="submitStatus"></p>
+  </div>
+
+  </form>
+
+  <footer>
+    <p>Thanks for taking the time — this will help us come back with a focused, concrete proposal rather than a general discussion.</p>
+    <p class="sign">Kelly Cho</p>
+    <p>Team Manager, Global Business Division · IEG Co., Ltd.<br>kellycho824@ieg.kr</p>
+  </footer>
+
+</div>
+
+<script>
+  var FORM_ID = "xnjkjnyy";
+  var FORM_ENDPOINT = "https://formspree.io/f/" + FORM_ID;
+
+  if (FORM_ID === "REPLACE_WITH_YOUR_FORM_ID") {
+    document.getElementById('configWarning').style.display = 'block';
+  }
+
+  var questions = [
+    ["Q1", "Four-wheeler/EV kits and current deployment locations?", "q1"],
+    ["Q2", "Equipment/content overlap with IEG's packaging, wafer handling, maintenance, plasma process, and 8-process content platform?", "q2"],
+    ["Q3", "Has Tesca ever delivered digital content/curriculum materials (not just hardware) as part of a winning bid?", "q3_content"],
+    ["Q4", "OEM lead time, preferred Incoterms, and preferred payment terms?", "q4_oem"],
+    ["Q5", "Nearest upcoming tender/bid where OEM-supplied equipment could be included, with country/institution/timeline?", "q5_bid"],
+    ["Q6", "Is the Peru relationship still active, and open to an IEG introduction there?", "q6_peru"]
+  ];
+
+  function sendResponses() {
+    var statusEl = document.getElementById('submitStatus');
+    var btn = document.getElementById('submitBtn');
+
+    if (FORM_ID === "REPLACE_WITH_YOUR_FORM_ID") {
+      statusEl.className = "submit-status error";
+      statusEl.textContent = "This form isn't connected yet. Please contact IEG directly at kellycho824@ieg.kr.";
+      return;
+    }
+
+    var name = document.getElementById('respName').value.trim();
+    var title = document.getElementById('respTitle').value.trim();
+
+    var answeredCount = 0;
+    var payload = {
+      _subject: "Tesca Response — IEG Collaboration Discovery (6 Questions)",
+      respondent_name: name || "(not provided)",
+      respondent_title: title || "(not provided)"
+    };
+    var summaryLines = [];
+    questions.forEach(function (item) {
+      var num = item[0], text = item[1], id = item[2];
+      var val = document.getElementById(id).value.trim();
+      if (val) answeredCount++;
+      payload[num] = val || "(no answer provided)";
+      summaryLines.push("[" + num + "] " + text + "\nAnswer: " + (val || "(no answer provided)"));
+    });
+    payload["full_summary"] = summaryLines.join("\n\n");
+
+    if (answeredCount === 0) {
+      var proceed = confirm("No answers have been entered yet. Submit anyway?");
+      if (!proceed) return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+    statusEl.className = "";
+    statusEl.textContent = "";
+
+    fetch(FORM_ENDPOINT, {
+      method: "POST",
+      headers: { "Accept": "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(function (response) {
+        if (response.ok) {
+          statusEl.className = "submit-status success";
+          statusEl.textContent = "✓ Your responses have been sent to IEG. Thank you!";
+          btn.textContent = "Sent";
+        } else {
+          return response.json().then(function (data) {
+            throw new Error((data && data.error) || "Submission failed");
+          });
+        }
+      })
+      .catch(function (err) {
+        statusEl.className = "submit-status error";
+        statusEl.textContent = "Something went wrong (" + err.message + "). Please email kellycho824@ieg.kr directly with your answers.";
+        btn.disabled = false;
+        btn.textContent = "Submit & Send to IEG";
+      });
+  }
+</script>
+</body>
+</html>
