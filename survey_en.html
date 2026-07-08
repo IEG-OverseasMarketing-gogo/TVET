@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>H2 Sales &amp; Bid Information Survey | IEG Global Business</title>
+<style>
+  :root{
+    --ink:#16232b;
+    --steel:#3d5a68;
+    --line:#d8dfe1;
+    --paper:#f6f4ef;
+    --card:#ffffff;
+    --brass:#b8863c;
+    --brass-dark:#96692a;
+    --ok:#2e6b4f;
+    --err:#a4362c;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+    line-height:1.5;
+    padding:32px 16px 64px;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+  .wrap{max-width:640px;margin:0 auto;}
+
+  .masthead{
+    border-bottom:2px solid var(--ink);
+    padding-bottom:16px;
+    margin-bottom:28px;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--brass-dark);
+    margin:0 0 8px;
+  }
+  h1{
+    font-size:25px;
+    font-weight:700;
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  .sub{
+    font-size:14px;
+    color:var(--steel);
+    margin:0;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:24px 20px;
+    margin-bottom:16px;
+  }
+  .card h2{
+    font-size:13px;
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--brass-dark);
+    margin:0 0 18px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--line);
+  }
+
+  .field{margin-bottom:18px;}
+  .field:last-child{margin-bottom:0;}
+  label{
+    display:block;
+    font-size:13.5px;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  label .req{color:var(--err); margin-left:2px;}
+  label .hint{
+    display:block;
+    font-weight:400;
+    color:var(--steel);
+    font-size:12.5px;
+    margin-top:2px;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  select,
+  textarea{
+    width:100%;
+    padding:10px 12px;
+    font-size:14.5px;
+    font-family:inherit;
+    color:var(--ink);
+    background:#fff;
+    border:1px solid #b9c2c5;
+    border-radius:3px;
+  }
+  textarea{resize:vertical; min-height:84px;}
+  input:focus, select:focus, textarea:focus{
+    outline:none;
+    border-color:var(--brass);
+    box-shadow:0 0 0 3px rgba(184,134,60,0.18);
+  }
+  .row2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  @media (max-width:520px){
+    .row2{grid-template-columns:1fr;}
+  }
+
+  .radio-group{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 16px;
+  }
+  .radio-opt{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:13.5px;
+    font-weight:400;
+  }
+  .radio-opt input{width:auto;}
+
+  .submit-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-top:8px;
+    flex-wrap:wrap;
+  }
+  button[type="submit"]{
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    padding:13px 28px;
+    font-size:14.5px;
+    font-weight:600;
+    border-radius:3px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  button[type="submit"]:hover{background:#243740;}
+  .note{
+    font-size:12px;
+    color:var(--steel);
+  }
+
+  .status{
+    display:none;
+    margin-top:14px;
+    padding:12px 14px;
+    border-radius:3px;
+    font-size:13.5px;
+  }
+  .status.ok{ background:#eaf3ee; color:var(--ok); border:1px solid #bfdccb; display:block;}
+  .status.err{ background:#f7e9e7; color:var(--err); border:1px solid #eac3bd; display:block;}
+
+  .info-note{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    color:var(--steel);
+    background:#eee9dc;
+    border:1px dashed #c9bc9c;
+    padding:10px 12px;
+    border-radius:3px;
+    margin-bottom:20px;
+  }
+  .info-note b{color:var(--brass-dark);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <p class="eyebrow">IEG Global Business Division — 2026 H2</p>
+    <h1>H2 Sales &amp; Bid Information Survey</h1>
+    <p class="sub">A short survey to capture partner status. Takes about 2 minutes.</p>
+  </div>
+
+  <div class="info-note">
+    ℹ Responses are sent automatically by email to <b>kellycho824@ieg.kr</b> — no action needed from the respondent's side beyond clicking "Send Response."
+  </div>
+
+  <form id="surveyForm" action="https://formsubmit.co/kellycho824@ieg.kr" method="POST">
+    <input type="hidden" name="_subject" value="New H2 Survey Response">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_next" value="https://formsubmit.co/thanks">
+
+    <div class="card">
+      <h2>Basic Information</h2>
+
+      <div class="field">
+        <label for="company">Company Name <span class="req">*</span></label>
+        <input type="text" id="company" name="company" required placeholder="e.g. Galaxy Global Sdn Bhd">
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="country">Country <span class="req">*</span></label>
+          <input type="text" id="country" name="country" required placeholder="e.g. Malaysia">
+        </div>
+        <div class="field">
+          <label for="region">Region / City <span class="req">*</span></label>
+          <input type="text" id="region" name="region" required placeholder="e.g. Penang">
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="contact_name">Contact Name <span class="req">*</span></label>
+          <input type="text" id="contact_name" name="contact_name" required>
+        </div>
+        <div class="field">
+          <label for="position">Position / Title</label>
+          <input type="text" id="position" name="position">
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="email">Email <span class="req">*</span></label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <div class="field">
+          <label for="phone">Phone / WhatsApp</label>
+          <input type="tel" id="phone" name="phone">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Sales Information</h2>
+
+      <div class="field">
+        <label for="revenue_range">Expected 2026 H2 Revenue <span class="req">*</span>
+          <span class="hint">Based on your company or your region/product line</span>
+        </label>
+        <select id="revenue_range" name="revenue_range" required>
+          <option value="" disabled selected>Select a range</option>
+          <option value="Under USD 50,000">Under USD 50,000</option>
+          <option value="USD 50,000 – 200,000">USD 50,000 – 200,000</option>
+          <option value="USD 200,000 – 500,000">USD 200,000 – 500,000</option>
+          <option value="USD 500,000 – 1,000,000">USD 500,000 – 1,000,000</option>
+          <option value="Over USD 1,000,000">Over USD 1,000,000</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Trend vs. same period last year</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="revenue_trend" value="Increasing"> Increasing</label>
+          <label class="radio-opt"><input type="radio" name="revenue_trend" value="Flat"> Flat</label>
+          <label class="radio-opt"><input type="radio" name="revenue_trend" value="Decreasing"> Decreasing</label>
+          <label class="radio-opt"><input type="radio" name="revenue_trend" value="Not yet known"> Not yet known</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Bid / Tender Information</h2>
+
+      <div class="field">
+        <label>Do you have any bids currently in progress or planned?</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="bid_status" value="Yes"> Yes</label>
+          <label class="radio-opt"><input type="radio" name="bid_status" value="No"> No</label>
+          <label class="radio-opt"><input type="radio" name="bid_status" value="In preparation"> In preparation</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="bid_details">Bid Details
+          <span class="hint">Feel free to note project name / issuing agency / expected timing / estimated value (USD)</span>
+        </label>
+        <textarea id="bid_details" name="bid_details" placeholder="e.g. TVET equipment supply tender / Ministry of Education agency / expected Sept 2026 / est. USD 300,000"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Other</h2>
+      <div class="field">
+        <label for="comments">Additional comments or items to discuss</label>
+        <textarea id="comments" name="comments" placeholder="Feel free to add anything else here"></textarea>
+      </div>
+    </div>
+
+    <div class="submit-bar">
+      <button type="submit">Send Response</button>
+      <span class="note">* Required fields</span>
+    </div>
+
+    <div id="statusBox" class="status"></div>
+  </form>
+
+</div>
+
+<script>
+  const form = document.getElementById('surveyForm');
+  const statusBox = document.getElementById('statusBox');
+  const RECIPIENT = 'kellycho824@ieg.kr';
+
+  form.addEventListener('submit', function(e){
+    const company = document.getElementById('company').value.trim();
+    const country = document.getElementById('country').value.trim();
+    const region = document.getElementById('region').value.trim();
+    const contactName = document.getElementById('contact_name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const revenueRange = document.getElementById('revenue_range').value;
+
+    if(!company || !country || !region || !contactName || !email || !revenueRange){
+      e.preventDefault();
+      statusBox.className = 'status err';
+      statusBox.textContent = '⚠ Please fill in all required fields marked with *.';
+      return;
+    }
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+    statusBox.className = 'status ok';
+    statusBox.textContent = `Sending your response to ${RECIPIENT} — you'll be redirected in a moment…`;
+    // No preventDefault here — the browser submits the form normally to FormSubmit.
+  });
+</script>
+
+</body>
+</html>
