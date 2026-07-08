@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>e-Mobility Digital Twin</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --bg:#EEF2F3;
+    --panel:#FFFFFF;
+    --panel-soft:#F6F8F9;
+    --line:#DFE5E8;
+    --navy:#16324F;
+    --teal:#0E7C7B;
+    --teal-deep:#0B5E5D;
+    --ink:#1D2B33;
+    --sub:#5C6B73;
+    --amber:#C8790A;
+    --amber-bg:#FCEED8;
+    --red:#B23A2E;
+    --red-bg:#FBE3DF;
+    --green:#227A52;
+    --green-bg:#DFF1E7;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+    --disp: "Trebuchet MS", "Segoe UI Semibold", system-ui, sans-serif;
+    --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--body);}
+  .app{max-width:1400px;margin:0 auto;padding:22px 22px 40px;}
+  header{display:flex;flex-direction:column;gap:4px;margin-bottom:18px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-deep);}
+  h1{font-family:var(--disp);font-size:26px;font-weight:700;margin:2px 0 0;color:var(--navy);}
+  .sub{color:var(--sub);font-size:14px;margin-top:2px;}
+
+  .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;align-items:start;}
+  @media (max-width:980px){.grid{grid-template-columns:1fr;}}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 2px rgba(20,40,50,.04);}
+  .viewport-panel{padding:16px;display:flex;flex-direction:column;gap:12px;}
+  #canvas-wrap{position:relative;width:100%;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#F5F8F9 0%, #E7EDEF 100%);border:1px solid var(--line);}
+  #canvas-wrap canvas{display:block;width:100%!important;height:100%!important;cursor:grab;}
+  #canvas-wrap.dragging canvas{cursor:grabbing;}
+  #engineError{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;background:#F6F8F9;color:var(--sub);font-size:13px;line-height:1.6;}
+  #engineError.show{display:flex;}
+
+  .status-banner{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-family:var(--mono);font-size:13px;border:1px solid var(--line);background:var(--panel-soft);color:var(--sub);transition:.25s;}
+  .status-banner .dot{width:10px;height:10px;border-radius:50%;background:#9AA7AD;flex:none;}
+  .status-banner.ok{background:var(--green-bg);color:var(--green);border-color:#BEE3CE;}
+  .status-banner.ok .dot{background:var(--green);box-shadow:0 0 0 4px rgba(34,122,82,.15);}
+  .status-banner.warn{background:var(--amber-bg);color:var(--amber);border-color:#F1CE95;}
+  .status-banner.warn .dot{background:var(--amber);box-shadow:0 0 0 4px rgba(200,121,10,.15);}
+  .status-banner.danger{background:var(--red-bg);color:var(--red);border-color:#F0BDB5;}
+  .status-banner.danger .dot{background:var(--red);box-shadow:0 0 0 4px rgba(178,58,46,.18);animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(178,58,46,.18);}50%{box-shadow:0 0 0 8px rgba(178,58,46,.06);}}
+
+  .gauges{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .gauge{background:var(--panel-soft);border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+  .gauge .g-label{font-size:10.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;}
+  .gauge .g-val{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--ink);margin-top:2px;}
+  .gauge .g-val.ok{color:var(--green);} .gauge .g-val.warn{color:var(--amber);} .gauge .g-val.danger{color:var(--red);}
+  .gauge .g-bar{height:4px;border-radius:3px;background:#E1E7E9;margin-top:6px;overflow:hidden;}
+  .gauge .g-bar > i{display:block;height:100%;background:var(--teal);border-radius:3px;transition:width .35s;}
+  .gauge .g-spark{width:100%;height:30px;margin-top:6px;display:block;}
+  .gauge .g-trendlabel{font-size:9.5px;color:var(--sub);font-family:var(--mono);margin-top:2px;}
+
+  .control-panel{padding:16px;display:flex;flex-direction:column;gap:14px;}
+  .section-title{font-family:var(--disp);font-weight:700;font-size:13.5px;color:var(--navy);display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .section-title .num{font-family:var(--mono);font-size:11px;color:#fff;background:var(--teal);border-radius:5px;padding:1px 6px;}
+
+  .scenario-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .scenario-btn{text-align:left;border:1px solid var(--line);background:var(--panel-soft);border-radius:9px;padding:8px 10px;cursor:pointer;font-family:var(--body);font-size:12.5px;color:var(--ink);transition:.15s;line-height:1.35;}
+  .scenario-btn:hover{border-color:var(--teal);}
+  .scenario-btn.active{background:#E4F3F2;border-color:var(--teal);color:var(--teal-deep);font-weight:600;}
+  .scenario-btn .tag{display:block;font-family:var(--mono);font-size:10px;color:var(--sub);margin-top:2px;}
+  .scenario-btn.active .tag{color:var(--teal-deep);}
+
+  .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .field{display:flex;flex-direction:column;gap:4px;}
+  .field label{font-size:11.5px;color:var(--sub);}
+  .field .unit-input{position:relative;}
+  .field input[type=number], .field select{width:100%;padding:8px 34px 8px 10px;border-radius:8px;border:1px solid var(--line);background:#fff;font-family:var(--mono);font-size:14px;color:var(--ink);}
+  .field select{padding:8px 10px;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--sub) 50%),linear-gradient(135deg,var(--sub) 50%,transparent 50%);background-position:calc(100% - 16px) 14px, calc(100% - 11px) 14px;background-size:5px 5px;background-repeat:no-repeat;}
+  .field .unit{position:absolute;right:10px;top:8px;font-size:11px;color:var(--sub);font-family:var(--mono);}
+  .field input:focus, .field select:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal);}
+  .range-hint{font-size:10.5px;color:var(--sub);font-family:var(--mono);}
+
+  .btn{width:100%;padding:10px 14px;border-radius:9px;border:none;background:var(--navy);color:#fff;font-family:var(--disp);font-weight:700;font-size:13.5px;cursor:pointer;transition:.15s;}
+  .btn:hover{background:#0F2540;}
+  .btn.teal{background:var(--teal);} .btn.teal:hover{background:var(--teal-deep);}
+  .btn:disabled{background:#C7CFD3;cursor:not-allowed;}
+  .btn.pressed{transform:scale(0.98);}
+
+  .analysis{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--panel-soft);display:none;}
+  .analysis.show{display:block;}
+  .a-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line);font-size:12.5px;}
+  .a-row:last-child{border-bottom:none;}
+  .a-row .a-name{color:var(--sub);}
+  .a-row .a-val{font-family:var(--mono);font-weight:600;}
+  .chip{font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:20px;}
+  .chip.ok{background:var(--green-bg);color:var(--green);}
+  .chip.warn{background:var(--amber-bg);color:var(--amber);}
+  .chip.danger{background:var(--red-bg);color:var(--red);}
+
+  .action-panel{display:none;flex-direction:column;gap:8px;}
+  .action-panel.show{display:flex;}
+  .action-btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 11px;text-align:left;font-size:12.5px;cursor:pointer;font-family:var(--body);color:var(--ink);}
+  .action-btn:hover{border-color:var(--navy);}
+  .feedback{border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.5;display:none;}
+  .feedback.show{display:block;}
+  .feedback.correct{background:var(--green-bg);color:var(--green);}
+  .feedback.wrong{background:var(--red-bg);color:var(--red);}
+
+  .log{max-height:150px;overflow-y:auto;display:flex;flex-direction:column-reverse;gap:6px;}
+  .log-item{font-family:var(--mono);font-size:11px;color:var(--sub);padding:6px 8px;border-radius:7px;background:var(--panel-soft);border:1px solid var(--line);}
+  .log-item.correct{border-left:3px solid var(--green);}
+  .log-item.wrong{border-left:3px solid var(--red);}
+  .empty-log{font-size:11.5px;color:var(--sub);font-style:italic;}
+
+  .hint{font-size:11px;color:var(--sub);}
+
+  .dashboard-panel{border:1px solid var(--line);border-radius:10px;background:#0E1B22;padding:12px 14px 8px;}
+  .dashboard-header{display:flex;flex-direction:column;gap:1px;margin-bottom:8px;}
+  .dashboard-title{font-family:var(--disp);font-weight:700;font-size:13px;color:#E7F0F2;}
+  .dashboard-sub{font-family:var(--mono);font-size:10px;color:#7C93A0;}
+  .dashboard-canvas{width:100%;height:190px;display:block;border-radius:6px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="eyebrow">e-Mobility Digital Twin · In-Vehicle Battery Pack</div>
+    <h1>Battery Pack Digital Twin — Mounted in the Vehicle Underbody</h1>
+    <div class="sub">The pack, wheels, and e-motors sit inside a translucent chassis view. Enter values and click Apply — the twin updates immediately. Pick a scenario to diagnose a situation and choose the correct response.</div>
+  </header>
+
+  <div class="grid">
+    <!-- LEFT: 3D VIEWPORT -->
+    <div class="panel viewport-panel">
+      <div id="canvas-wrap">
+        <div id="canvas-target" style="width:100%;height:100%;"></div>
+        <div id="engineError">3D engine failed to load in this preview.<br>The controls, gauges and analysis below still work normally.</div>
+      </div>
+      <div class="status-banner ok" id="statusBanner">
+        <span class="dot"></span>
+        <span id="statusText">Idle — enter values and click "Apply to Twin" to start.</span>
+      </div>
+      <div class="gauges" id="gauges"></div>
+      <div class="hint">Drag inside the viewport to rotate the view.</div>
+
+      <div class="dashboard-panel">
+        <div class="dashboard-header">
+          <span class="dashboard-title">Process Trend Dashboard</span>
+          <span class="dashboard-sub">Pack Voltage · Insulation Resistance · Tightening Torque · Temperature</span>
+        </div>
+        <canvas id="dashboardCanvas" class="dashboard-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- RIGHT: CONTROLS -->
+    <div class="panel control-panel">
+      <div>
+        <div class="section-title"><span class="num">1</span>Select Scenario</div>
+        <div class="scenario-grid" id="scenarioGrid"></div>
+      </div>
+
+      <div>
+        <div class="section-title"><span class="num">2</span>Input Values</div>
+        <div class="field-grid" id="fieldGrid"></div>
+      </div>
+
+      <button class="btn teal" id="applyBtn">Apply to Twin</button>
+
+      <div>
+        <div class="section-title"><span class="num">3</span>Analysis</div>
+        <div class="analysis" id="analysisBox"></div>
+      </div>
+
+      <div>
+        <div class="section-title"><span class="num">4</span>Choose a Response</div>
+        <div class="action-panel" id="actionPanel"></div>
+        <div class="feedback" id="feedbackBox"></div>
+      </div>
+
+      <div>
+        <div class="section-title">Log</div>
+        <div class="log" id="logPanel"><div class="empty-log">No entries yet</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- Domain model ---------------- */
+const PARAMS = {
+  voltage:     { label:"Pack Voltage", unit:"V",  min:300, max:450, step:1,
+                 range:[350,400], warnPad:12, defaultV:380 },
+  insulation:  { label:"Insulation Resistance", unit:"MΩ", min:0,   max:3,   step:0.1,
+                 range:[1.0,3.0], warnPad:0.5, defaultV:1.8 },
+  torque:      { label:"Tightening Torque",     unit:"N·m",min:0,   max:14,  step:0.1,
+                 range:[8.0,10.0], warnPad:1.0, defaultV:9.0 },
+  temperature: { label:"Temperature",     unit:"°C", min:0,   max:90,  step:1,
+                 range:[15,45], warnPad:15, defaultV:28 }
+};
+const INTERLOCK_OPTS = [
+  { v:"normal", t:"Normal (mutual exclusion active)" },
+  { v:"fault",  t:"Released (simultaneous motion detected)" }
+];
+const ACTIONS = [
+  { id:"continue", t:"Continue normal operation" },
+  { id:"estop",    t:"E-stop and report immediately" },
+  { id:"rework",   t:"Send the unit for rework" },
+  { id:"monitor",  t:"Flag it and keep monitoring" }
+];
+
+const SCENARIOS = [
+  { id:"normal", name:"Normal Operation", tag:"Baseline",
+    values:{voltage:380, insulation:1.8, torque:9.0, temperature:28, interlock:"normal"},
+    correct:"continue",
+    why:"Every value is within its normal range and the interlock is intact. Continuing normal operation is the right call." },
+  { id:"insulation", name:"Insulation Breakdown", tag:"Danger · Battery",
+    values:{voltage:379, insulation:0.3, torque:9.1, temperature:29, interlock:"normal"},
+    correct:"estop",
+    why:"Insulation resistance is below the safety threshold (≥1.0MΩ). Insulation breakdown in a battery process carries fire and shock risk, so an immediate stop and report is required (Instructor Guide, Sections 4 &amp; 10)." },
+  { id:"torque", name:"Torque Out of Spec", tag:"Fail · QC",
+    values:{voltage:378, insulation:1.6, torque:4.5, temperature:27, interlock:"normal"},
+    correct:"rework",
+    why:"Torque is far outside the normal range (8.0-10.0N·m). A full line stop isn't necessary, but this unit must be rejected and routed to rework." },
+  { id:"thermal", name:"Thermal Anomaly", tag:"Danger · Thermal",
+    values:{voltage:381, insulation:1.5, torque:8.8, temperature:68, interlock:"normal"},
+    correct:"estop",
+    why:"Temperature has reached a dangerous range (above 45°C, and especially above 60°C). This is a thermal-runaway risk for the battery, so stop and report immediately." },
+  { id:"sensor", name:"Unstable Sensor Signal", tag:"Warning · Sensor",
+    values:{voltage:380, insulation:1.7, torque:8.9, temperature:30, interlock:"normal"},
+    correct:"monitor",
+    why:"The measured values are themselves normal, but the sensor signal is flickering. Per the troubleshooting procedure (observe-hypothesize-verify-act), flag and keep monitoring while you verify, rather than stopping the line outright." },
+  { id:"interlock", name:"Interlock Released — Collision Risk", tag:"Danger · Mechanical",
+    values:{voltage:379, insulation:1.6, torque:8.7, temperature:31, interlock:"fault"},
+    correct:"estop",
+    why:"The forward/reverse interlock has been released, and simultaneous motion (collision) risk is detected. This is a mechanical collision hazard, so an immediate stop and report is the standard response." }
+];
+
+let current = { voltage:380, insulation:1.8, torque:9.0, temperature:28, interlock:"normal" };
+let activeScenario = "normal";
+let lastAnalysis = null;
+let twin = null; // holds live 3D refs; stays null until the engine finishes starting (declared early so early UI calls can safely check it)
+
+/* ---------------- Build UI: scenario buttons ---------------- */
+const scenarioGrid = document.getElementById("scenarioGrid");
+SCENARIOS.forEach(s=>{
+  const b = document.createElement("button");
+  b.className = "scenario-btn" + (s.id==="normal" ? " active" : "");
+  b.dataset.id = s.id;
+  b.innerHTML = s.name + '<span class="tag">'+s.tag+'</span>';
+  b.addEventListener("click", ()=>selectScenario(s.id));
+  scenarioGrid.appendChild(b);
+});
+
+function selectScenario(id){
+  activeScenario = id;
+  document.querySelectorAll(".scenario-btn").forEach(b=>b.classList.toggle("active", b.dataset.id===id));
+  const sc = SCENARIOS.find(s=>s.id===id);
+  Object.assign(current, sc.values);
+  syncFieldsFromCurrent();
+  resetAnalysisUI();
+}
+
+/* ---------------- Build UI: input fields ---------------- */
+const fieldGrid = document.getElementById("fieldGrid");
+Object.entries(PARAMS).forEach(([key,p])=>{
+  const wrap = document.createElement("div");
+  wrap.className = "field";
+  wrap.innerHTML =
+    '<label>'+p.label+'</label>'+
+    '<div class="unit-input">'+
+      '<input type="number" id="in_'+key+'" min="'+p.min+'" max="'+p.max+'" step="'+p.step+'" value="'+current[key]+'">'+
+      '<span class="unit">'+p.unit+'</span>'+
+    '</div>'+
+    '<span class="range-hint">Normal '+p.range[0]+'-'+p.range[1]+p.unit+'</span>';
+  fieldGrid.appendChild(wrap);
+});
+const ilWrap = document.createElement("div");
+ilWrap.className = "field";
+ilWrap.innerHTML =
+  '<label>Interlock Status</label>'+
+  '<select id="in_interlock">'+
+    INTERLOCK_OPTS.map(o=>'<option value="'+o.v+'">'+o.t+'</option>').join("")+
+  '</select>'+
+  '<span class="range-hint">Normal = forward/reverse motion mutually blocked</span>';
+fieldGrid.appendChild(ilWrap);
+
+function syncFieldsFromCurrent(){
+  Object.keys(PARAMS).forEach(key=>{
+    document.getElementById("in_"+key).value = current[key];
+  });
+  document.getElementById("in_interlock").value = current.interlock;
+}
+
+/* ---------------- Gauges + trend sparklines ---------------- */
+const gaugesEl = document.getElementById("gauges");
+const trendHistory = { voltage:[], insulation:[], torque:[], temperature:[] };
+const HISTORY_MAX = 15;
+
+function pushHistory(){
+  Object.keys(PARAMS).forEach(key=>{
+    const arr = trendHistory[key];
+    arr.push(current[key]);
+    if (arr.length > HISTORY_MAX) arr.shift();
+  });
+}
+
+/* Shared trend-chart renderer — used by both the on-screen dashboard canvas
+   and the 3D HMI monitor texture, so both always show identical data. */
+function renderTrendChart(ctx, w, h){
+  const padL = 46, padR = 14, padT = 20, padB = 30;
+  const plotW = w - padL - padR, plotH = h - padT - padB;
+
+  ctx.fillStyle = "#0E1B22";
+  ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle = "#1E3038";
+  ctx.lineWidth = 1;
+  for (let i=0;i<=4;i++){
+    const y = padT + (plotH/4)*i;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(w-padR,y); ctx.stroke();
+  }
+  ctx.fillStyle = "#8FA3AB";
+  ctx.font = "13px monospace";
+  ctx.fillText("PROCESS TREND", padL, 14);
+
+  const seriesDefs = [
+    { key:"voltage",     color:"#59C7C2", label:"V" },
+    { key:"insulation",  color:"#7FA6E6", label:"MΩ" },
+    { key:"torque",      color:"#D6A6E8", label:"N·m" },
+    { key:"temperature", color:"#F0A24B", label:"°C" }
+  ];
+
+  seriesDefs.forEach((s, si) => {
+    const p = PARAMS[s.key];
+    const arr = trendHistory[s.key];
+    const lx = padL + si*((w-padL-padR)/4), ly = h - 10;
+    ctx.fillStyle = s.color;
+    ctx.fillRect(lx, ly-8, 10, 10);
+    ctx.fillStyle = "#C9D6DA";
+    ctx.font = "11px monospace";
+    ctx.fillText(p.label.split(" ")[0] + " (" + s.label + ")", lx+14, ly);
+
+    if (!arr || arr.length < 2) return;
+    const toX = i => padL + (plotW/(HISTORY_MAX-1)) * (HISTORY_MAX - arr.length + i);
+    const toY = v => padT + plotH - ((v - p.min)/(p.max - p.min))*plotH;
+
+    ctx.beginPath();
+    arr.forEach((v,i)=>{ const x=toX(i), y=toY(v); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    const lastX = toX(arr.length-1), lastY = toY(arr[arr.length-1]);
+    ctx.beginPath(); ctx.arc(lastX,lastY,3,0,Math.PI*2);
+    ctx.fillStyle = s.color; ctx.fill();
+  });
+}
+
+const dashboardCanvas = document.getElementById("dashboardCanvas");
+function drawDashboard(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = dashboardCanvas.clientWidth || 600, h = dashboardCanvas.clientHeight || 190;
+  dashboardCanvas.width = w*dpr; dashboardCanvas.height = h*dpr;
+  const ctx = dashboardCanvas.getContext("2d");
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  renderTrendChart(ctx, w, h);
+}
+drawDashboard();
+window.addEventListener("resize", drawDashboard);
+
+function drawSparkline(canvas, key, level){
+  const p = PARAMS[key];
+  const arr = trendHistory[key];
+  const ctx = canvas.getContext("2d");
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+
+  // shaded normal-range band
+  const [lo,hi] = p.range;
+  const toY = v => h - ((v - p.min)/(p.max - p.min))*h;
+  const yLo = toY(lo), yHi = toY(hi);
+  ctx.fillStyle = "rgba(34,122,82,0.10)";
+  ctx.fillRect(0, Math.min(yLo,yHi), w, Math.abs(yLo-yHi));
+
+  if (arr.length < 2) { return; }
+
+  const stepX = w / (HISTORY_MAX - 1);
+  const offset = HISTORY_MAX - arr.length;
+  const lineColor = level==="danger" ? "#B23A2E" : level==="warn" ? "#C8790A" : "#0E7C7B";
+
+  ctx.beginPath();
+  arr.forEach((v,i)=>{
+    const x = (offset+i)*stepX;
+    const y = toY(v);
+    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 1.6;
+  ctx.stroke();
+
+  // last point marker
+  const lastX = (offset+arr.length-1)*stepX;
+  const lastY = toY(arr[arr.length-1]);
+  ctx.beginPath();
+  ctx.arc(lastX,lastY,2.4,0,Math.PI*2);
+  ctx.fillStyle = lineColor;
+  ctx.fill();
+}
+
+function renderGauges(statusMap){
+  gaugesEl.innerHTML = "";
+  Object.entries(PARAMS).forEach(([key,p])=>{
+    const val = current[key];
+    const pct = Math.max(0, Math.min(100, ((val - p.min) / (p.max - p.min)) * 100));
+    const st = statusMap ? statusMap[key] : null;
+    const cls = st ? st.level : "";
+    const barColor = cls==="danger" ? "var(--red)" : cls==="warn" ? "var(--amber)" : "var(--teal)";
+    const div = document.createElement("div");
+    div.className = "gauge";
+    div.innerHTML =
+      '<div class="g-label">'+p.label+'</div>'+
+      '<div class="g-val '+cls+'">'+val+p.unit+'</div>'+
+      '<div class="g-bar"><i style="width:'+pct+'%;background:'+barColor+'"></i></div>'+
+      '<canvas class="g-spark"></canvas>'+
+      '<div class="g-trendlabel">trend · last '+HISTORY_MAX+' applies</div>';
+    gaugesEl.appendChild(div);
+    const canvas = div.querySelector(".g-spark");
+    requestAnimationFrame(()=>drawSparkline(canvas, key, cls || "ok"));
+  });
+}
+renderGauges(null);
+
+/* ---------------- Analysis logic ---------------- */
+function evaluateParam(key, val){
+  const p = PARAMS[key];
+  const [lo, hi] = p.range;
+  if (val >= lo && val <= hi) return { level:"ok", label:"Normal" };
+  const pad = p.warnPad;
+  if (val >= lo - pad && val <= hi + pad) return { level:"warn", label:"Warning" };
+  return { level:"danger", label:"Danger" };
+}
+
+function runAnalysis(){
+  const statusMap = {};
+  let worst = "ok";
+  Object.keys(PARAMS).forEach(key=>{
+    const r = evaluateParam(key, current[key]);
+    statusMap[key] = r;
+    if (r.level==="danger") worst = "danger";
+    else if (r.level==="warn" && worst!=="danger") worst = "warn";
+  });
+  if (current.interlock === "fault") worst = "danger";
+  lastAnalysis = { statusMap, worst, interlock: current.interlock };
+  return lastAnalysis;
+}
+
+function resetAnalysisUI(){
+  document.getElementById("analysisBox").classList.remove("show");
+  document.getElementById("actionPanel").classList.remove("show");
+  document.getElementById("feedbackBox").classList.remove("show");
+  document.getElementById("statusBanner").className = "status-banner ok";
+  document.getElementById("statusText").textContent = 'Idle — review the values, then click "Apply to Twin".';
+  renderGauges(null);
+  lastAnalysis = null;
+  applyToTwin({ worst:"idle", statusMap:null, interlock:current.interlock }, false);
+}
+
+/* ---------------- Apply + Analyze flow ---------------- */
+const applyBtn = document.getElementById("applyBtn");
+applyBtn.addEventListener("click", ()=>{
+  Object.keys(PARAMS).forEach(key=>{
+    const raw = parseFloat(document.getElementById("in_"+key).value);
+    current[key] = Number.isFinite(raw) ? raw : current[key];
+  });
+  current.interlock = document.getElementById("in_interlock").value;
+
+  applyBtn.classList.add("pressed");
+  setTimeout(()=>applyBtn.classList.remove("pressed"), 150);
+
+  const analysis = runAnalysis();
+  pushHistory();
+  renderGauges(analysis.statusMap);
+  drawDashboard();
+  applyToTwin(analysis, true); // true = play a visible "applied" pulse every time
+
+  const banner = document.getElementById("statusBanner");
+  const bannerText = document.getElementById("statusText");
+  banner.className = "status-banner " + (analysis.worst==="danger"?"danger":analysis.worst==="warn"?"warn":"ok");
+  bannerText.textContent = analysis.worst==="danger" ? "Danger detected — a decision is needed now."
+                          : analysis.worst==="warn"  ? "Warning — double-check these values."
+                          : "Normal — every value is within its target range.";
+
+  const box = document.getElementById("analysisBox");
+  box.classList.add("show");
+  let rows = "";
+  Object.entries(PARAMS).forEach(([key,p])=>{
+    const st = analysis.statusMap[key];
+    rows += '<div class="a-row"><span class="a-name">'+p.label+'</span><span class="a-val">'+current[key]+p.unit+' <span class="chip '+st.level+'">'+st.label+'</span></span></div>';
+  });
+  const ilBad = current.interlock === "fault";
+  rows += '<div class="a-row"><span class="a-name">Interlock</span><span class="a-val">'+(ilBad?"Released":"Normal")+' <span class="chip '+(ilBad?"danger":"ok")+'">'+(ilBad?"Danger":"Normal")+'</span></span></div>';
+  box.innerHTML = rows;
+
+  const actionPanel = document.getElementById("actionPanel");
+  actionPanel.innerHTML = "";
+  actionPanel.classList.add("show");
+  ACTIONS.forEach(a=>{
+    const btn = document.createElement("button");
+    btn.className = "action-btn";
+    btn.textContent = a.t;
+    btn.addEventListener("click", ()=>chooseAction(a.id));
+    actionPanel.appendChild(btn);
+  });
+  document.getElementById("feedbackBox").classList.remove("show");
+});
+
+function chooseAction(actionId){
+  const sc = SCENARIOS.find(s=>s.id===activeScenario);
+  const isCorrect = actionId === sc.correct;
+  const fb = document.getElementById("feedbackBox");
+  fb.className = "feedback show " + (isCorrect ? "correct" : "wrong");
+  fb.innerHTML = (isCorrect ? "&#10003; Correct response.<br>" : "&#10007; That's not the recommended response.<br>") + sc.why;
+
+  const log = document.getElementById("logPanel");
+  const empty = log.querySelector(".empty-log");
+  if (empty) empty.remove();
+  const item = document.createElement("div");
+  item.className = "log-item " + (isCorrect ? "correct" : "wrong");
+  const time = new Date().toLocaleTimeString("en-US", {hour:"2-digit", minute:"2-digit", second:"2-digit"});
+  const actionLabel = ACTIONS.find(a=>a.id===actionId).t;
+  item.textContent = "["+time+"] "+sc.name+" -> "+actionLabel+" - "+(isCorrect ? "Correct" : "Incorrect");
+  log.prepend(item);
+}
+
+/* init defaults */
+selectScenario("normal");
+
+/* ================= THREE.JS DIGITAL TWIN ================= */
+function initTwin(){
+  if (typeof THREE === "undefined") {
+    throw new Error("THREE failed to load from CDN");
+  }
+
+  const target = document.getElementById("canvas-target");
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xEFF3F4);
+  scene.fog = new THREE.Fog(0xEFF3F4, 14, 26);
+
+  const camera = new THREE.PerspectiveCamera(38, 4/3, 0.1, 100);
+  const camState = { angle:0.68, elev:0.5, dist:9.5 };
+  function updateCamera(){
+    camera.position.set(
+      Math.sin(camState.angle)*camState.dist*Math.cos(camState.elev),
+      camState.dist*Math.sin(camState.elev)+1.2,
+      Math.cos(camState.angle)*camState.dist*Math.cos(camState.elev)
+    );
+    camera.lookAt(0, 0.7, 0);
+  }
+  updateCamera();
+
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const w0 = target.clientWidth || 800, h0 = target.clientHeight || 600;
+  renderer.setSize(w0, h0);
+  renderer.shadowMap.enabled = true;
+  target.appendChild(renderer.domElement);
+
+  // lights
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xC9D2D6, 0.9));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.85);
+  sun.position.set(6, 10, 4);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024,1024);
+  sun.shadow.camera.left=-8; sun.shadow.camera.right=8; sun.shadow.camera.top=8; sun.shadow.camera.bottom=-8;
+  scene.add(sun);
+  const fillLight = new THREE.DirectionalLight(0xffffff, 0.25);
+  fillLight.position.set(-6, 5, -4);
+  scene.add(fillLight);
+
+  // floor + grid
+  const floorMat = new THREE.MeshStandardMaterial({ color:0xE3E9EA, roughness:1 });
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(30,30), floorMat);
+  floor.rotation.x = -Math.PI/2;
+  floor.receiveShadow = true;
+  scene.add(floor);
+  const grid = new THREE.GridHelper(30, 30, 0xC7D0D3, 0xDCE3E5);
+  grid.position.y = 0.001;
+  scene.add(grid);
+
+  // vehicle chassis "X-ray" scene: the battery pack is shown mounted in the underbody,
+  // seen through a translucent car body shell, with wheels and e-motors for context.
+  const chassisMat = new THREE.MeshStandardMaterial({ color:0xAEB7BC, roughness:.6, metalness:.5 });
+  const chassisFrame = new THREE.Mesh(new THREE.BoxGeometry(4.3, 0.08, 1.9), chassisMat);
+  chassisFrame.position.set(0, 0.42, 0);
+  chassisFrame.castShadow = true; chassisFrame.receiveShadow = true;
+  scene.add(chassisFrame);
+
+  // wheels at the four corners
+  const tireMat = new THREE.MeshStandardMaterial({ color:0x1C1F22, roughness:.9, metalness:.05 });
+  const rimMat = new THREE.MeshStandardMaterial({ color:0xCBD2D6, roughness:.35, metalness:.75 });
+  [-1.55, 1.55].forEach(x=>{
+    [-0.85, 0.85].forEach(z=>{
+      const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.36,0.36,0.24,24), tireMat);
+      tire.rotation.x = Math.PI/2;
+      tire.position.set(x, 0.36, z);
+      tire.castShadow = true;
+      scene.add(tire);
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.19,0.26,20), rimMat);
+      rim.rotation.x = Math.PI/2;
+      rim.position.set(x, 0.36, z);
+      scene.add(rim);
+    });
+  });
+
+  // front/rear e-motor housings, for drivetrain context
+  const motorMat = new THREE.MeshStandardMaterial({ color:0x2B3035, roughness:.5, metalness:.6 });
+  [-1.55, 1.55].forEach(x=>{
+    const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.5,16), motorMat);
+    motor.rotation.x = Math.PI/2;
+    motor.position.set(x, 0.36, 0);
+    motor.castShadow = true;
+    scene.add(motor);
+  });
+
+  // battery pack — mounted in the underbody between the axles.
+  // dark graphite casing + raised module grid + HV orange warning stripe +
+  // a small dedicated status LED plate (color changes with analysis, not the whole casing)
+  const casingMat = new THREE.MeshStandardMaterial({ color:0x33383D, roughness:.45, metalness:.55, emissive:0x000000 });
+  const moduleCapMat = new THREE.MeshStandardMaterial({ color:0x484F56, roughness:.5, metalness:.4 });
+  const hvStripeMat = new THREE.MeshStandardMaterial({ color:0xFF8A00, roughness:.55, metalness:.1 });
+  const statusPlateMat = new THREE.MeshStandardMaterial({ color:0x227A52, emissive:0x227A52, emissiveIntensity:0.7, roughness:.35, metalness:.2 });
+  const connectorMat = new THREE.MeshStandardMaterial({ color:0xFF8A00, roughness:.5, metalness:.3 });
+  const boltMat = new THREE.MeshStandardMaterial({ color:0x6B7278, roughness:.4, metalness:.6, emissive:0x000000 });
+
+  const packGroup = new THREE.Group();
+  const packInner = new THREE.Group(); // jitters as one rigid body during the interlock-collision scenario
+  packGroup.add(packInner);
+
+  // main casing (flat, wide tray spanning most of the underbody, like a real EV "skateboard" pack)
+  const packBody = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.28, 1.4), casingMat);
+  packBody.position.set(0, 0.34, 0);
+  packBody.castShadow = true;
+  packBody.receiveShadow = true;
+  packInner.add(packBody);
+
+  // raised module caps — a 4x2 grid on top, suggesting individual cell modules underneath
+  const capTopY = 0.34 + 0.14 + 0.025;
+  [-0.9,-0.3,0.3,0.9].forEach(cx=>{
+    [-0.32,0.32].forEach(cz=>{
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.05, 0.58), moduleCapMat);
+      cap.position.set(cx, capTopY, cz);
+      cap.castShadow = true;
+      packInner.add(cap);
+    });
+  });
+
+  // high-voltage warning stripe across the front face
+  const hvStripe = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.075, 0.02), hvStripeMat);
+  hvStripe.position.set(0, 0.30, 0.711);
+  packInner.add(hvStripe);
+
+  // status LED plate — this is what actually changes color with analysis results
+  const statusPlate = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.13, 0.02), statusPlateMat);
+  statusPlate.position.set(0, 0.46, 0.711);
+  packInner.add(statusPlate);
+
+  // HV interconnect (to the rear motor/inverter)
+  const connector = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.14, 0.26), connectorMat);
+  connector.position.set(1.33, 0.34, 0);
+  packInner.add(connector);
+
+  // hex mounting bolts along the underside flange — highlight color reflects torque status
+  const boltPositions = [];
+  [-1.1, 0, 1.1].forEach(bx => [-0.65, 0.65].forEach(bz => boltPositions.push([bx,bz])));
+  boltPositions.forEach(([bx,bz])=>{
+    const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,0.04,6), boltMat);
+    bolt.position.set(bx, 0.205, bz);
+    packInner.add(bolt);
+  });
+
+  scene.add(packGroup);
+
+  // dashboard warning light — visible through the windshield, like a BMS telltale on the instrument cluster
+  const indicatorMat = new THREE.MeshStandardMaterial({ color:0x227A52, emissive:0x227A52, emissiveIntensity:0.6 });
+  const indicator = new THREE.Mesh(new THREE.SphereGeometry(0.09, 20, 20), indicatorMat);
+  indicator.position.set(0.65, 1.02, 0);
+  scene.add(indicator);
+
+  // translucent car body shell — the "x-ray" view over the chassis/pack
+  const bodyMat = new THREE.MeshStandardMaterial({ color:0xBFD7E0, transparent:true, opacity:0.14, roughness:.25, metalness:.1, depthWrite:false });
+  const lowerBody = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.75, 1.85), bodyMat);
+  lowerBody.position.set(0, 0.78, 0);
+  scene.add(lowerBody);
+  const glassMat = new THREE.MeshStandardMaterial({ color:0x9FD0E0, transparent:true, opacity:0.16, roughness:.15, metalness:.1, depthWrite:false });
+  const greenhouse = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.55, 1.75), glassMat);
+  greenhouse.position.set(0.05, 1.35, 0);
+  scene.add(greenhouse);
+
+  // mouse drag orbit (r128 build ships without OrbitControls)
+  const wrap = document.getElementById("canvas-wrap");
+  const drag = { active:false, lastX:0, lastY:0 };
+  wrap.addEventListener("pointerdown", e=>{ drag.active=true; drag.lastX=e.clientX; drag.lastY=e.clientY; wrap.classList.add("dragging"); });
+  window.addEventListener("pointerup", ()=>{ drag.active=false; wrap.classList.remove("dragging"); });
+  window.addEventListener("pointermove", e=>{
+    if(!drag.active) return;
+    const dx = e.clientX-drag.lastX, dy = e.clientY-drag.lastY;
+    camState.angle -= dx*0.006;
+    camState.elev = Math.max(0.18, Math.min(1.1, camState.elev + dy*0.004));
+    drag.lastX=e.clientX; drag.lastY=e.clientY;
+    updateCamera();
+  });
+
+  window.addEventListener("resize", ()=>{
+    const w = target.clientWidth, h = target.clientHeight;
+    if (!w || !h) return;
+    camera.aspect = w/h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w,h);
+  });
+
+  twin = {
+    scene, camera, renderer, updateCamera, camState, drag,
+    packGroup, packInner, casingMat, statusPlateMat, boltMat, indicatorMat,
+    state:{ worst:"idle", torqueBad:false, interlockAlarm:false, pulse:0 },
+    t:0
+  };
+
+  function animate(){
+    requestAnimationFrame(animate);
+    twin.t += 0.016;
+    const s = twin.state;
+
+    if (s.worst === "danger") {
+      indicatorMat.emissiveIntensity = 0.6 + Math.sin(twin.t*6)*0.5;
+    } else {
+      indicatorMat.emissiveIntensity = s.worst==="warn" ? 0.7 : (s.worst==="idle" ? 0.35 : 0.45);
+    }
+
+    if (s.interlockAlarm) {
+      packInner.position.x = Math.sin(twin.t*40)*0.035;
+      packInner.rotation.z = Math.sin(twin.t*40)*0.02;
+    } else {
+      packInner.position.x += (0 - packInner.position.x) * 0.12;
+      packInner.rotation.z *= 0.8;
+    }
+
+    // guaranteed visible reaction whenever "Apply" is pressed: a brief scale pulse
+    if (s.pulse > 0) {
+      s.pulse -= 0.016;
+      const k = Math.max(0, s.pulse) / 0.4;
+      const scale = 1 + Math.sin(k*Math.PI) * 0.12;
+      packGroup.scale.set(scale, scale, scale);
+    } else {
+      packGroup.scale.set(1,1,1);
+    }
+
+    if (!drag.active) camState.angle += 0.0009;
+    updateCamera();
+    renderer.render(scene, camera);
+  }
+  animate();
+}
+
+function applyToTwin(analysis, pulse){
+  if (!twin) return;
+  const statusColor = { ok:0x227A52, warn:0xC8790A, danger:0xB23A2E, idle:0x9AA7AD };
+  const col = statusColor[analysis.worst] ?? statusColor.idle;
+
+  twin.indicatorMat.color.setHex(col);
+  twin.indicatorMat.emissive.setHex(col);
+
+  // the pack's own casing keeps its real "battery" color; only its small status
+  // LED plate changes with the verdict, plus a faint glow on the casing itself
+  twin.statusPlateMat.color.setHex(col);
+  twin.statusPlateMat.emissive.setHex(col);
+  const casingGlow = analysis.worst==="danger" ? 0x3a0f0a : analysis.worst==="warn" ? 0x2a1a05 : 0x000000;
+  twin.casingMat.emissive.setHex(casingGlow);
+
+  const torqueBad = analysis.statusMap && analysis.statusMap.torque && analysis.statusMap.torque.level !== "ok";
+  twin.boltMat.color.setHex(torqueBad ? col : 0x6B7278);
+  twin.boltMat.emissive.setHex(torqueBad && analysis.statusMap.torque.level==="danger" ? 0x4a0f0a : 0x000000);
+
+  twin.state.worst = analysis.worst;
+  twin.state.torqueBad = torqueBad;
+  twin.state.interlockAlarm = analysis.interlock === "fault";
+  if (pulse) twin.state.pulse = 0.4;
+}
+
+try {
+  initTwin();
+  applyToTwin({ worst:"idle", statusMap:null, interlock:"normal" }, false);
+} catch (err) {
+  console.error("[Digital Twin] 3D engine could not start:", err);
+  const errBox = document.getElementById("engineError");
+  if (errBox) errBox.classList.add("show");
+}
+</script>
+</body>
+</html>
