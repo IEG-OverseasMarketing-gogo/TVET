@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Korea–Mongolia Collaboration Roadmap | IEG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2333;
+    --ink-soft:#4A5468;
+    --steppe:#1F4287;
+    --steppe-deep:#152C5C;
+    --gold:#B8862E;
+    --gold-soft:#E7C77A;
+    --paper:#F5F2E8;
+    --paper-deep:#EDE7D6;
+    --line:#D6CEB5;
+    --white:#FFFDF8;
+    --track-a:#1F4287;
+    --track-a-soft:#E5EBF5;
+    --track-b:#A6702A;
+    --track-b-soft:#F3E7D2;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Pretendard', -apple-system, sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  ::selection{ background:var(--gold-soft); }
+
+  .serif{ font-family:'Noto Serif KR', serif; }
+
+  /* ---------- texture backdrop ---------- */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.035;
+    background-image:radial-gradient(circle at 1px 1px, #000 1px, transparent 0);
+    background-size:3px 3px;
+  }
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    position:relative;
+    min-height:78vh;
+    display:flex; flex-direction:column; justify-content:center;
+    padding:8vh 8vw 6vh;
+    background:
+      radial-gradient(ellipse 900px 500px at 85% -10%, rgba(184,134,46,.16), transparent 60%),
+      radial-gradient(ellipse 700px 400px at -5% 100%, rgba(31,66,135,.12), transparent 60%),
+      var(--paper);
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  .hero-eyebrow{
+    display:flex; align-items:center; gap:14px;
+    font-size:.8rem; letter-spacing:.16em; font-weight:600; color:var(--gold);
+    text-transform:uppercase; margin-bottom:28px;
+    opacity:0; animation:fadeUp .8s ease .1s forwards;
+  }
+  .hero-eyebrow::before{
+    content:''; width:36px; height:1px; background:var(--gold);
+  }
+  h1.hero-title{
+    font-size:clamp(2.4rem, 6vw, 4.6rem);
+    font-weight:900; line-height:1.16; color:var(--ink);
+    max-width:16ch;
+    opacity:0; animation:fadeUp .9s ease .25s forwards;
+  }
+  h1.hero-title em{
+    font-style:normal; color:var(--steppe);
+    background:linear-gradient(180deg, transparent 62%, var(--gold-soft) 62%);
+  }
+  .hero-sub{
+    margin-top:26px; max-width:54ch; font-size:1.08rem; color:var(--ink-soft);
+    opacity:0; animation:fadeUp .9s ease .4s forwards;
+  }
+  .hero-meta{
+    display:flex; gap:36px; margin-top:52px; flex-wrap:wrap;
+    opacity:0; animation:fadeUp .9s ease .55s forwards;
+  }
+  .hero-meta .stat b{
+    display:block; font-family:'Noto Serif KR',serif; font-size:1.7rem; color:var(--steppe-deep);
+  }
+  .hero-meta .stat span{ font-size:.78rem; color:var(--ink-soft); letter-spacing:.02em; }
+
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- ORIGIN NODE ---------- */
+  .origin{
+    position:relative; z-index:1;
+    max-width:1180px; margin:0 auto; padding:70px 8vw 20px;
+    text-align:center;
+  }
+  .origin-card{
+    display:inline-flex; flex-direction:column; align-items:center; gap:6px;
+    background:var(--white); border:1px solid var(--line);
+    border-radius:4px; padding:22px 42px;
+    box-shadow:0 10px 30px -12px rgba(27,35,51,.18);
+  }
+  .origin-card .date{ font-family:'Noto Serif KR',serif; font-weight:700; font-size:1.3rem; color:var(--steppe-deep); }
+  .origin-card .desc{ font-size:.88rem; color:var(--ink-soft); }
+
+  /* ---------- FORK SVG SPINE ---------- */
+  .spine-wrap{ max-width:1180px; margin:0 auto; padding:0 8vw; position:relative; }
+  svg.spine{ width:100%; height:90px; display:block; overflow:visible; }
+  svg.spine path{
+    fill:none; stroke-width:2.5; stroke-linecap:round;
+    stroke-dasharray:400; stroke-dashoffset:400;
+    animation:draw 1.2s ease forwards;
+    animation-play-state:paused;
+  }
+  svg.spine.in-view path{ animation-play-state:running; }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+
+  /* ---------- TRACKS SECTION ---------- */
+  .tracks{
+    max-width:1180px; margin:0 auto; padding:0 8vw 40px;
+    display:grid; grid-template-columns:1fr 1fr; gap:34px;
+  }
+  @media(max-width:860px){ .tracks{ grid-template-columns:1fr; gap:60px; } }
+
+  .track-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:22px; padding-bottom:16px; border-bottom:2px solid currentColor;
+  }
+  .track-a .track-head{ color:var(--track-a); }
+  .track-b .track-head{ color:var(--track-b); }
+  .track-head .name{ font-family:'Noto Serif KR',serif; font-weight:700; font-size:1.32rem; }
+  .track-head .tag{
+    font-size:.72rem; font-weight:700; letter-spacing:.06em; padding:5px 11px;
+    border-radius:100px; color:var(--white);
+  }
+  .track-a .tag{ background:var(--track-a); }
+  .track-b .tag{ background:var(--track-b); }
+
+  .phase{
+    position:relative; padding:0 0 32px 30px; border-left:2px solid var(--line);
+    opacity:0; transform:translateY(14px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .phase.visible{ opacity:1; transform:translateY(0); }
+  .phase:last-child{ padding-bottom:4px; }
+  .phase::before{
+    content:''; position:absolute; left:-7px; top:2px; width:12px; height:12px;
+    border-radius:50%; background:var(--white); border:2.5px solid currentColor;
+  }
+  .track-a .phase::before{ color:var(--track-a); }
+  .track-b .phase::before{ color:var(--track-b); }
+
+  .phase .period{ font-size:.74rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+  .track-a .phase .period{ color:var(--track-a); }
+  .track-b .phase .period{ color:var(--track-b); }
+  .phase h3{ font-family:'Noto Serif KR',serif; font-size:1.08rem; margin:6px 0 10px; color:var(--ink); }
+  .phase ul{ list-style:none; }
+  .phase li{
+    position:relative; padding-left:16px; margin-bottom:7px; font-size:.9rem; color:var(--ink-soft);
+  }
+  .phase li::before{ content:'—'; position:absolute; left:0; color:var(--line); }
+  .phase .purpose{
+    margin-top:10px; font-size:.82rem; padding:9px 12px; border-radius:3px; color:var(--ink);
+  }
+  .track-a .phase .purpose{ background:var(--track-a-soft); }
+  .track-b .phase .purpose{ background:var(--track-b-soft); }
+
+  /* ---------- CONVERGENCE ---------- */
+  .converge{
+    max-width:1180px; margin:20px auto 0; padding:60px 8vw;
+    background:var(--steppe-deep); color:var(--white); border-radius:6px;
+    position:relative; overflow:hidden;
+  }
+  .converge::after{
+    content:''; position:absolute; right:-60px; top:-60px; width:260px; height:260px;
+    border-radius:50%; background:radial-gradient(circle, rgba(184,134,46,.35), transparent 70%);
+  }
+  .converge .eyebrow{ font-size:.76rem; letter-spacing:.14em; color:var(--gold-soft); text-transform:uppercase; font-weight:700; margin-bottom:14px; }
+  .converge h2{ font-family:'Noto Serif KR',serif; font-size:1.7rem; margin-bottom:16px; max-width:26ch; }
+  .converge p{ max-width:64ch; color:#D9E1F0; font-size:.96rem; margin-bottom:26px; }
+  .converge-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; position:relative; z-index:1; }
+  @media(max-width:760px){ .converge-grid{ grid-template-columns:1fr; } }
+  .converge-item{ border-left:2px solid var(--gold-soft); padding-left:14px; }
+  .converge-item b{ display:block; font-size:.92rem; margin-bottom:4px; }
+  .converge-item span{ font-size:.82rem; color:#C3CEE3; }
+
+  /* ---------- MOU RELEVANCE TABLE ---------- */
+  section.mou{ max-width:1180px; margin:0 auto; padding:80px 8vw; }
+  .section-head{ margin-bottom:36px; }
+  .section-head .eyebrow{ font-size:.78rem; letter-spacing:.14em; color:var(--gold); text-transform:uppercase; font-weight:700; margin-bottom:10px; }
+  .section-head h2{ font-family:'Noto Serif KR',serif; font-size:1.9rem; color:var(--ink); }
+
+  .mou-table{ width:100%; border-collapse:collapse; font-size:.9rem; }
+  .mou-table thead th{
+    text-align:left; padding:12px 16px; background:var(--steppe-deep); color:var(--white);
+    font-weight:600; font-size:.8rem; letter-spacing:.02em;
+  }
+  .mou-table thead th:first-child{ border-radius:4px 0 0 0; }
+  .mou-table thead th:last-child{ border-radius:0 4px 0 0; }
+  .mou-table tbody td{ padding:14px 16px; border-bottom:1px solid var(--line); color:var(--ink-soft); vertical-align:top; }
+  .mou-table tbody tr:hover{ background:var(--paper-deep); }
+  .mou-table td.name{ color:var(--ink); font-weight:600; }
+  .strength{ display:inline-block; padding:3px 10px; border-radius:100px; font-size:.72rem; font-weight:700; }
+  .strength.strong{ background:var(--track-a-soft); color:var(--track-a); }
+  .strength.weak{ background:#EFEFEF; color:#8A8A8A; }
+
+  /* ---------- NEXT STEPS ---------- */
+  section.next{ max-width:1180px; margin:0 auto; padding:0 8vw 100px; }
+  .steps{ display:flex; flex-direction:column; border-top:1px solid var(--line); }
+  .step{
+    display:grid; grid-template-columns:70px 1fr auto; gap:22px; align-items:center;
+    padding:22px 4px; border-bottom:1px solid var(--line);
+    opacity:0; transform:translateX(-10px); transition:opacity .5s ease, transform .5s ease;
+  }
+  .step.visible{ opacity:1; transform:translateX(0); }
+  .step .num{ font-family:'Noto Serif KR',serif; font-size:1.6rem; color:var(--line); font-weight:700; }
+  .step .txt b{ display:block; font-size:.98rem; color:var(--ink); margin-bottom:3px; }
+  .step .txt span{ font-size:.84rem; color:var(--ink-soft); }
+  .step .when{ font-size:.76rem; font-weight:700; letter-spacing:.04em; color:var(--gold); text-transform:uppercase; white-space:nowrap; }
+
+  footer{
+    text-align:center; padding:44px 8vw 60px; color:var(--ink-soft); font-size:.82rem;
+    border-top:1px solid var(--line);
+  }
+  footer b{ color:var(--ink); }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<header class="hero">
+  <div class="hero-eyebrow">2026 · Golden Era of Korea–Mongolia Relations</div>
+  <h1 class="hero-title serif">Korea–Mongolia<br>Collaboration <em>Roadmap</em></h1>
+  <p class="hero-sub">Two parallel tracks translate the momentum from the July 9, 2026 Korea–Mongolia summit into action: TVET infrastructure through the Korea Polytechnics channel (Priority 1), and service-sector DX training through Dr. Gana's network (Priority 2).</p>
+  <div class="hero-meta">
+    <div class="stat"><b>USD 1B</b><span>2030 trade target (≈ KRW 1.5T)</span></div>
+    <div class="stat"><b>21 MOUs</b><span>signed at the summit</span></div>
+    <div class="stat"><b>2 Tracks</b><span>Polytechnics · Dr. Gana, in parallel</span></div>
+  </div>
+</header>
+
+<div class="origin">
+  <div class="origin-card">
+    <span class="date serif">Jul 9, 2026</span>
+    <span class="desc">Korea–Mongolia Summit — CEPA agreed in principle · Education Ministry TVET cooperation MOU signed</span>
+  </div>
+</div>
+
+<div class="spine-wrap">
+  <svg class="spine" viewBox="0 0 1000 90" preserveAspectRatio="none">
+    <path d="M500,0 C500,30 260,20 260,90" stroke="#1F4287"/>
+    <path d="M500,0 C500,30 740,20 740,90" stroke="#A6702A"/>
+  </svg>
+</div>
+
+<main class="tracks">
+  <div class="track-a">
+    <div class="track-head">
+      <span class="name serif">Track A — Korea Polytechnics</span>
+      <span class="tag">Priority 1</span>
+    </div>
+
+    <div class="phase">
+      <div class="period">Phase 1 · Immediate – 1 month</div>
+      <h3>Connect &amp; assess status</h3>
+      <ul>
+        <li>Reach out via IEG's existing contact at Polytechnics' overseas partnerships team</li>
+        <li>Confirm progress on the Mongolia International TVET Center</li>
+        <li>Check whether departments and equipment specs are already under discussion</li>
+      </ul>
+      <div class="purpose">Goal — Get to the table before specifications are finalized</div>
+    </div>
+
+    <div class="phase">
+      <div class="period">Phase 2 · 1 – 6 months</div>
+      <h3>Co-design equipment &amp; curriculum</h3>
+      <ul>
+        <li>Propose training equipment configurations (electrical, PLC, smart manufacturing, EV) by department</li>
+        <li>Localize Korean-style TVET curriculum and develop Mongolian-language materials</li>
+        <li>Explore ties with local partner institutions such as Universal Polytechnic College</li>
+      </ul>
+      <div class="purpose">Goal — Build IEG's 6030-line standard into the center's specifications</div>
+    </div>
+
+    <div class="phase">
+      <div class="period">Phase 3 · 6 months – 2 years</div>
+      <h3>Formal supply &amp; pilot operation</h3>
+      <ul>
+        <li>Sign equipment supply agreement; run a pilot tied to the "1+2 program"</li>
+        <li>Connect to budget and administrative support under the Education Ministry TVET MOU</li>
+        <li>Use the Mongolia center as a springboard into Central Asia</li>
+      </ul>
+      <div class="purpose">Goal — Secure standing as an ongoing education partner, not a one-off vendor</div>
+    </div>
+  </div>
+
+  <div class="track-b">
+    <div class="track-head">
+      <span class="name serif">Track B — Dr. Gana's Network</span>
+      <span class="tag">Priority 2</span>
+    </div>
+
+    <div class="phase">
+      <div class="period">Phase 1 · Short-term (1–3 months)</div>
+      <h3>Connect &amp; identify needs</h3>
+      <ul>
+        <li>Formally approach Dr. Gana under the "USD 1B trade target" framing</li>
+        <li>Learn the current state of Mongolia's tourism &amp; hospitality workforce training</li>
+        <li>Confirm demand for smart training equipment</li>
+      </ul>
+      <div class="purpose">Goal — Reduce entry risk through a trusted local relationship</div>
+    </div>
+
+    <div class="phase">
+      <div class="period">Phase 2 · Mid-term (4–12 months)</div>
+      <h3>Build DX training infrastructure</h3>
+      <ul>
+        <li>Co-develop vocational training programs for service &amp; hospitality</li>
+        <li>Propose a university pilot via the AEN / CHRIE Asia-Pacific network</li>
+        <li>Join seminars and demos with Mongolian government tourism bodies</li>
+      </ul>
+      <div class="purpose">Goal — Provide AI/digital training to raise service quality</div>
+    </div>
+
+    <div class="phase">
+      <div class="period">Phase 3 · Long-term (1–3 years)</div>
+      <h3>Expand into supply-chain &amp; industrial solutions</h3>
+      <ul>
+        <li>Propose critical-minerals-linked infrastructure &amp; logistics systems (DX Labeler)</li>
+        <li>Pursue feasibility studies tied to KOICA IBS / EDCF funding</li>
+        <li>Formalize MOUs with Mongolian partner institutions</li>
+      </ul>
+      <div class="purpose">Goal — Large-scale system exports linked to government projects</div>
+    </div>
+  </div>
+</main>
+
+<section class="mou">
+  <div class="section-head">
+    <div class="eyebrow">Policy Ground</div>
+    <h2 class="serif">IEG-relevant items among the 21 summit MOUs</h2>
+  </div>
+  <table class="mou-table">
+    <thead>
+      <tr><th>MOU</th><th>Content</th><th>Relevance to IEG</th><th>Strength</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="name">Education Ministry TVET MOU</td>
+        <td>Exchange of TVET information &amp; curriculum experience; AI/digital education</td>
+        <td>Government-level basis for the Polytechnics Mongolia center</td>
+        <td><span class="strength strong">Strong</span></td>
+      </tr>
+      <tr>
+        <td class="name">Digital Cooperation MOU</td>
+        <td>AI, next-gen telecom, cybersecurity, conformity assessment personnel exchange</td>
+        <td>Policy channel for AI/DX training solutions</td>
+        <td><span class="strength strong">Strong</span></td>
+      </tr>
+      <tr>
+        <td class="name">Science &amp; Technology Cooperation MOU</td>
+        <td>Joint research and exchange on resources, climate, environment, energy</td>
+        <td>Rationale for critical-minerals infrastructure/logistics training (DX Labeler)</td>
+        <td><span class="strength strong">Strong</span></td>
+      </tr>
+      <tr>
+        <td class="name">EPS Worker Dispatch MOU (renewal)</td>
+        <td>Dispatch costs, candidate selection, entry-procedure transparency</td>
+        <td>Touchpoint for pre-departure job/language training content</td>
+        <td><span class="strength weak">Weak</span></td>
+      </tr>
+      <tr>
+        <td class="name">2nd National Cancer Center MOU</td>
+        <td>Feasibility study and EDCF support financial-authority cooperation</td>
+        <td>Reference precedent for an EDCF-linked F/S track (unrelated to the Gana track)</td>
+        <td><span class="strength weak">Weak</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div style="max-width:1180px; margin:0 auto; padding:0 8vw;">
+  <div class="converge">
+    <div class="eyebrow">Convergence · 2027 and beyond</div>
+    <h2 class="serif">Both tracks eventually feed one Mongolia TVET ecosystem</h2>
+    <p>Track A lays the infrastructure backbone for technical education; Track B opens a new application axis in the service sector. Together they give IEG a multi-channel pipeline with Mongolian government and educational institutions, not a single one-off contract.</p>
+    <div class="converge-grid">
+      <div class="converge-item"><b>Infrastructure axis</b><span>Polytechnics center = equipment &amp; curriculum standard</span></div>
+      <div class="converge-item"><b>Application axis</b><span>Gana network = service-sector application</span></div>
+      <div class="converge-item"><b>Funding axis</b><span>Education MOU + EDCF/KOICA = path to scale</span></div>
+    </div>
+  </div>
+</div>
+
+<section class="next">
+  <div class="section-head">
+    <div class="eyebrow">Action</div>
+    <h2 class="serif">Next steps</h2>
+  </div>
+  <div class="steps">
+    <div class="step"><span class="num serif">01</span><div class="txt"><b>Reach out to Polytechnics' overseas team</b><span>Use the existing contact to check on center progress and whether specs are under discussion</span></div><span class="when">Immediate</span></div>
+    <div class="step"><span class="num serif">02</span><div class="txt"><b>Formally approach Dr. Gana</b><span>Send an introduction email and propose a call, framed around the summit outcomes</span></div><span class="when">Within 2 weeks</span></div>
+    <div class="step"><span class="num serif">03</span><div class="txt"><b>Register Mongolia pipeline in Zoho CRM</b><span>Log both tracks as separate deals and set up progress tracking</span></div><span class="when">Within 1 month</span></div>
+    <div class="step"><span class="num serif">04</span><div class="txt"><b>Draft equipment specs &amp; curriculum outline</b><span>Turn confirmed needs into track-specific proposal materials</span></div><span class="when">Within the quarter</span></div>
+  </div>
+</section>
+
+<footer>
+  <b>IEG Co., Ltd.</b> · Global Business Division · Kelly Cho (조경형)<br>
+  Prepared July 2026 — subject to updates as the policy landscape evolves
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ e.target.classList.add('visible'); }
+    });
+  }, {threshold:.2});
+  document.querySelectorAll('.phase, .step').forEach(el=>io.observe(el));
+
+  const spineIo = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ e.target.classList.add('in-view'); }
+    });
+  }, {threshold:.4});
+  document.querySelectorAll('svg.spine').forEach(el=>spineIo.observe(el));
+</script>
+
+</body>
+</html>
