@@ -1,0 +1,241 @@
+
+<h2 class="sr-only">IEG MAKER TVET Open Forum — forsythia yellow text on pistachio, 5 slides</h2>
+<style>
+  .cw{position:relative;width:100%;overflow:hidden}
+  .slides{display:flex;transition:transform .45s cubic-bezier(.4,0,.2,1)}
+  .slide{min-width:100%;aspect-ratio:1/1;display:flex;flex-direction:column;position:relative;overflow:hidden;border-radius:12px;font-family:var(--font-sans)}
+
+  .s1{background:#0b0b0b}
+  .s2{background:#D6E8D0}
+  .s3{background:#0b0b0b}
+  .s4{background:#C8DFC0}
+  .s5{background:#0b0b0b}
+
+  /* forsythia yellow — vivid enough on pistachio */
+  --fy: #D4A017;
+
+  .go{position:absolute;inset:0;background-image:linear-gradient(rgba(0,0,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.03) 1px,transparent 1px);background-size:44px 44px}
+  .go.dk{background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px)}
+
+  .sc{position:absolute;top:1.4rem;right:1.5rem;font-family:var(--font-mono);font-size:11px;z-index:10}
+  .sc.lt{color:rgba(255,255,255,.2)} .sc.dk{color:rgba(30,60,20,.22)}
+
+  .top-strip{position:absolute;top:0;left:0;right:0;padding:1.4rem 1.75rem;z-index:5}
+  .brand-tag{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+  .brand-tag.lt{color:rgba(255,255,255,.32)}
+  .brand-tag.dk{color:rgba(30,65,20,.38)}
+
+  .slide-inner{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;flex:1;padding:3.5rem 1.75rem 1.75rem}
+
+  /* black slide headline */
+  .dh{font-size:clamp(34px,8.5vw,62px);font-weight:500;line-height:1.0;letter-spacing:-.022em;color:#fff;margin-bottom:1.2rem}
+  .dh .g{color:#9FE1CB}
+
+  /* pistachio/matcha slide headline — forsythia yellow for accent */
+  .dh-grn{font-size:clamp(28px,6.5vw,48px);font-weight:500;line-height:1.0;letter-spacing:-.022em;color:#1a3d10;margin-bottom:1.1rem}
+  .dh-grn .fy{color:#B8860B}          /* forsythia — dark goldenrod reads rich on pistachio */
+  .dh-grn .fy-bright{color:#C8980E}
+
+  /* subhead & body */
+  .bp{font-size:clamp(13px,2.4vw,14px);line-height:1.75;max-width:440px}
+  .bp.lt{color:rgba(255,255,255,.6)} .bp.dk{color:rgba(26,61,16,.55)}
+
+  /* question list */
+  .q-list{display:flex;flex-direction:column;gap:9px;margin-bottom:1rem}
+  .q-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:rgba(255,255,255,.07);border:.5px solid rgba(255,255,255,.1)}
+  .q-dash{color:#9FE1CB;font-family:var(--font-mono);font-size:14px;flex-shrink:0;margin-top:1px}
+  .q-text{font-size:clamp(13px,2.4vw,14px);color:#fff;line-height:1.55}
+
+  /* pain cards — forsythia area label + title */
+  .pain-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:.9rem}
+  .pain-card{background:rgba(255,255,255,.5);border:.5px solid rgba(30,65,20,.14);border-radius:10px;padding:12px 14px}
+  .pain-area{font-size:10px;font-family:var(--font-mono);letter-spacing:.08em;color:#9A7200;margin-bottom:5px;font-weight:500}
+  .pain-title{font-size:clamp(13px,2.4vw,14px);color:#B8860B;font-weight:500;line-height:1.3;margin-bottom:4px}
+  .pain-quote{font-size:11px;color:rgba(26,61,16,.58);line-height:1.5;font-style:italic}
+
+  /* voice cards */
+  .voice-list{display:flex;flex-direction:column;gap:9px;margin-bottom:.9rem}
+  .voice{border-left:3px solid #9FE1CB;padding:10px 14px;border-radius:0 8px 8px 0;background:rgba(255,255,255,.06)}
+  .voice-q{font-size:clamp(12px,2.3vw,13px);color:rgba(255,255,255,.82);line-height:1.65;font-style:italic;margin-bottom:5px}
+  .voice-src{font-size:10px;color:#9FE1CB;font-family:var(--font-mono);letter-spacing:.05em}
+
+  /* pillar list — forsythia dot + title */
+  .pillar-list{display:flex;flex-direction:column;gap:13px;margin-bottom:1rem}
+  .pillar{display:flex;align-items:flex-start;gap:13px}
+  .pillar-dot{width:9px;height:9px;border-radius:50%;background:#B8860B;flex-shrink:0;margin-top:5px}
+  .pillar-title{font-size:clamp(13px,2.5vw,15px);color:#B8860B;font-weight:500;line-height:1.35;margin-bottom:3px}
+  .pillar-sub{font-size:clamp(11px,2vw,12px);color:rgba(26,61,16,.52);line-height:1.5}
+
+  /* open question box */
+  .open-q{padding:16px 18px;border-radius:10px;background:rgba(255,255,255,.07);border:.5px solid rgba(255,255,255,.12);margin-bottom:.9rem}
+  .open-q-label{font-size:10px;font-family:var(--font-mono);letter-spacing:.1em;color:rgba(255,255,255,.28);margin-bottom:8px}
+  .open-q-text{font-size:clamp(14px,2.8vw,16px);color:#fff;line-height:1.65;font-style:italic}
+
+  /* nav */
+  .cnav{display:flex;align-items:center;justify-content:space-between;margin-top:1rem;padding:0 .25rem}
+  .nb{background:var(--surface-1);border:.5px solid var(--border-strong);border-radius:6px;padding:6px 14px;font-size:13px;cursor:pointer;color:var(--text-secondary);font-family:var(--font-sans);transition:color .15s}
+  .nb:hover{color:var(--text-primary)} .nb:disabled{opacity:.3;cursor:default}
+  .dots{display:flex;gap:6px;align-items:center}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--border-stronger);transition:background .2s,width .2s}
+  .dot.active{background:#B8860B;width:18px;border-radius:3px}
+</style>
+
+<div class="cw">
+<div class="slides" id="slides">
+
+  <!-- ── 01 · black ── -->
+  <div class="slide s1">
+    <div class="go dk"></div>
+    <span class="sc lt">01 / 05</span>
+    <div class="top-strip"><span class="brand-tag lt">IEG MAKER · TVET Open Forum</span></div>
+    <div class="slide-inner">
+      <div class="dh">
+        What does<br>your lab<br><span class="g">actually<br>lack?</span>
+      </div>
+      <div class="q-list">
+        <div class="q-item"><span class="q-dash">—</span><span class="q-text">What equipment forces you to improvise every single class?</span></div>
+        <div class="q-item"><span class="q-dash">—</span><span class="q-text">Where do trainees hit a wall the kit can't explain?</span></div>
+        <div class="q-item"><span class="q-dash">—</span><span class="q-text">What would you request if someone was actually listening?</span></div>
+      </div>
+      <div class="bp lt">This isn't a product launch. It's a conversation we should have had sooner. Drop your answer below.</div>
+    </div>
+  </div>
+
+  <!-- ── 02 · pistachio + forsythia ── -->
+  <div class="slide s2">
+    <div class="go"></div>
+    <span class="sc dk">02 / 05</span>
+    <div class="top-strip"><span class="brand-tag dk">// Where TVET equipment falls short</span></div>
+    <div class="slide-inner">
+      <div class="dh-grn">
+        The gap between<br><span class="fy">classroom</span><br>and<br><span class="fy">shop floor</span><br>is real.
+      </div>
+      <div class="pain-grid">
+        <div class="pain-card">
+          <div class="pain-area">FAULT DIAGNOSIS</div>
+          <div class="pain-title">No real fault simulation</div>
+          <div class="pain-quote">"Trainees never see real failures before the shop floor"</div>
+        </div>
+        <div class="pain-card">
+          <div class="pain-area">CONNECTIVITY</div>
+          <div class="pain-title">Kits stuck offline</div>
+          <div class="pain-quote">"No IoT, no SCADA, no cloud PLC in the lab"</div>
+        </div>
+        <div class="pain-card">
+          <div class="pain-area">LANGUAGE</div>
+          <div class="pain-title">English-only interfaces</div>
+          <div class="pain-quote">"Half the class can't read the labels"</div>
+        </div>
+        <div class="pain-card">
+          <div class="pain-area">MODULARITY</div>
+          <div class="pain-title">Fixed, rigid kits</div>
+          <div class="pain-quote">"Can't add sensors when the curriculum evolves"</div>
+        </div>
+      </div>
+      <div class="bp dk">Which of these hits closest to home? Tell us in the comments.</div>
+    </div>
+  </div>
+
+  <!-- ── 03 · black ── -->
+  <div class="slide s3">
+    <div class="go dk"></div>
+    <span class="sc lt">03 / 05</span>
+    <div class="top-strip"><span class="brand-tag lt">// Voices from the field</span></div>
+    <div class="slide-inner">
+      <div class="dh" style="font-size:clamp(26px,6vw,44px);margin-bottom:1rem;">
+        TVET instructors<br>have been<br>saying this<br><span class="g">for years.</span>
+      </div>
+      <div class="voice-list">
+        <div class="voice">
+          <div class="voice-q">"My students pass the assessment — then freeze on day one at the plant. The equipment never prepares them for real conditions."</div>
+          <div class="voice-src">TVET instructor · Philippines</div>
+        </div>
+        <div class="voice">
+          <div class="voice-q">"We wire the same faults by hand every class because the trainer can't simulate them. Half the lesson is wasted."</div>
+          <div class="voice-src">Automation trainer · Malaysia</div>
+        </div>
+        <div class="voice">
+          <div class="voice-q">"The lab looks modern but trains for a factory that no longer exists. Industry moved. The curriculum didn't."</div>
+          <div class="voice-src">TVET coordinator · Kazakhstan</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 04 · matcha latte + forsythia ── -->
+  <div class="slide s4">
+    <div class="go"></div>
+    <span class="sc dk">04 / 05</span>
+    <div class="top-strip"><span class="brand-tag dk">// Three things to explore together</span></div>
+    <div class="slide-inner">
+      <div class="dh-grn" style="font-size:clamp(26px,6.5vw,46px);">
+        So let's build<br>the<br><span class="fy">discussion</span><br>first.
+      </div>
+      <div class="pillar-list">
+        <div class="pillar">
+          <div class="pillar-dot"></div>
+          <div>
+            <div class="pillar-title">What's missing — and why it stays missing</div>
+            <div class="pillar-sub">Structural gaps the equipment market keeps ignoring</div>
+          </div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-dot"></div>
+          <div>
+            <div class="pillar-title">What effective training actually looks like</div>
+            <div class="pillar-sub">Real needs from instructors who run these sessions every week</div>
+          </div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-dot"></div>
+          <div>
+            <div class="pillar-title">What the next lab kit should do</div>
+            <div class="pillar-sub">A brief built from collective field experience — not a wish list</div>
+          </div>
+        </div>
+      </div>
+      <div class="bp dk">No agenda beyond the conversation itself.</div>
+    </div>
+  </div>
+
+  <!-- ── 05 · black ── -->
+  <div class="slide s5">
+    <div class="go dk"></div>
+    <span class="sc lt">05 / 05</span>
+    <div class="top-strip"><span class="brand-tag lt">// This week's open question</span></div>
+    <div class="slide-inner">
+      <div class="dh" style="font-size:clamp(30px,7.5vw,54px);margin-bottom:1rem;">
+        What would<br>you<br><span class="g">change<br>first?</span>
+      </div>
+      <div class="open-q">
+        <div class="open-q-label">// To TVET professionals everywhere</div>
+        <div class="open-q-text">"If you could fix one thing about the training equipment in your lab right now — not the budget, not the policy — just the equipment itself — what would it be?"</div>
+      </div>
+      <div class="bp lt">Comment below. Every response shapes what gets built next.<br>Tag a colleague who should weigh in.</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="cnav">
+  <button class="nb" id="pb" onclick="move(-1)" disabled>← Prev</button>
+  <div class="dots" id="dots">
+    <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div>
+  </div>
+  <button class="nb" id="nb2" onclick="move(1)">Next →</button>
+</div>
+
+<script>
+  let c=0;const t=5;
+  const sl=document.getElementById('slides');
+  const dots=document.querySelectorAll('.dot');
+  function move(d){
+    c=Math.max(0,Math.min(t-1,c+d));
+    sl.style.transform=`translateX(-${c*100}%)`;
+    dots.forEach((dot,i)=>dot.classList.toggle('active',i===c));
+    document.getElementById('pb').disabled=c===0;
+    document.getElementById('nb2').disabled=c===t-1;
+  }
+</script>
