@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training Pathway Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #eef6fb; --panel: #ffffff; --panel2: #eaf5fb; --border: #bfe0f0; --border2: #94c9e3;
+  --text: #0f2436; --muted: #2f4a63; --muted2: #43617d;
+  --gray-fill: #f1efe8; --gray-stroke: #5f5e5a; --gray-text: #2c2c2a;
+  --purple-fill: #eeedfe; --purple-stroke: #534ab7; --purple-text: #26215c;
+  --blue-fill: #e6f1fb; --blue-stroke: #185fa5; --blue-text: #042c53;
+  --teal-fill: #e1f5ee; --teal-stroke: #0f6e56; --teal-text: #04342c;
+  --red-fill: #fcebeb; --red-stroke: #a32d2d; --red-text: #501313;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-weight: 500; background: #87CEEB; color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 14px; line-height: 1.55; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 60px; }
+.hero { text-align: center; margin-bottom: 20px; }
+.hero-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .1em; color: #0f2436; font-weight: 700; }
+.hero-title { font-size: 22px; font-weight: 800; margin-top: 6px; }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 24px 20px; }
+.node { cursor: pointer; transition: opacity .15s; }
+.node:hover { opacity: 0.82; }
+.t { font-family: 'Noto Sans KR', sans-serif; font-size: 14px; }
+.ts { font-family: 'Noto Sans KR', sans-serif; font-size: 12px; }
+.th { font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; }
+.hint { text-align: center; font-size: 11.5px; color: var(--muted2); margin-top: 4px; font-family: 'IBM Plex Mono', monospace; }
+#detailPanel {
+  background: var(--panel2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px 18px; min-height: 50px; display: flex; align-items: center; margin-top: 16px;
+}
+#detailText { font-size: 13.5px; color: var(--muted); margin: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-eyebrow">TRAINING PATHWAY OVERVIEW</div>
+    <div class="hero-title">Placement Test → Preliminary / Main Program → Red Pathway</div>
+  </div>
+
+  <div class="panel">
+    <svg width="100%" viewBox="0 0 680 630">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#5f5e5a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <g class="node" onclick="showDetail('placement')">
+        <rect x="230" y="20" width="220" height="64" rx="8" fill="var(--gray-fill)" stroke="var(--gray-stroke)" stroke-width="0.75"/>
+        <text class="th" x="340" y="42" text-anchor="middle" dominant-baseline="central" fill="var(--gray-text)">Placement test</text>
+        <text class="ts" x="340" y="62" text-anchor="middle" dominant-baseline="central" fill="var(--gray-text)" opacity="0.8">20-question placement quiz</text>
+      </g>
+
+      <path d="M280 84 L280 120 L190 120 L190 148" fill="none" stroke="#5f5e5a" stroke-width="0.75" marker-end="url(#arrow)"/>
+      <text class="ts" x="235" y="132" text-anchor="middle" fill="var(--muted2)">Needs foundation</text>
+
+      <path d="M400 84 L610 84 L610 280 L392 280 L392 308" fill="none" stroke="#5f5e5a" stroke-width="0.75" marker-end="url(#arrow)"/>
+      <text class="ts" x="614" y="180" text-anchor="start" fill="var(--muted2)">Ready now</text>
+
+      <g class="node" onclick="showDetail('preliminary')">
+        <rect x="40" y="148" width="300" height="64" rx="8" fill="var(--purple-fill)" stroke="var(--purple-stroke)" stroke-width="0.75"/>
+        <text class="th" x="190" y="170" text-anchor="middle" dominant-baseline="central" fill="var(--purple-text)">Preliminary track</text>
+        <text class="ts" x="190" y="190" text-anchor="middle" dominant-baseline="central" fill="var(--purple-text)" opacity="0.8">4 weeks, then a readiness gate</text>
+      </g>
+
+      <path d="M190 212 L190 280 L288 280 L288 308" fill="none" stroke="#5f5e5a" stroke-width="0.75" marker-end="url(#arrow)"/>
+
+      <g class="node" onclick="showDetail('main')">
+        <rect x="230" y="308" width="220" height="64" rx="8" fill="var(--blue-fill)" stroke="var(--blue-stroke)" stroke-width="0.75"/>
+        <text class="th" x="340" y="330" text-anchor="middle" dominant-baseline="central" fill="var(--blue-text)">Main 12-week program</text>
+        <text class="ts" x="340" y="350" text-anchor="middle" dominant-baseline="central" fill="var(--blue-text)" opacity="0.8">Reaches Orange level</text>
+      </g>
+
+      <line x1="340" y1="372" x2="340" y2="400" stroke="#5f5e5a" stroke-width="0.75" marker-end="url(#arrow)"/>
+
+      <g class="node" onclick="showDetail('survey')">
+        <rect x="230" y="400" width="220" height="64" rx="8" fill="var(--teal-fill)" stroke="var(--teal-stroke)" stroke-width="0.75"/>
+        <text class="th" x="340" y="422" text-anchor="middle" dominant-baseline="central" fill="var(--teal-text)">Completion survey</text>
+        <text class="ts" x="340" y="442" text-anchor="middle" dominant-baseline="central" fill="var(--teal-text)" opacity="0.8">Feedback after graduation</text>
+      </g>
+
+      <line x1="340" y1="464" x2="340" y2="492" stroke="#5f5e5a" stroke-width="0.75" marker-end="url(#arrow)"/>
+
+      <g class="node" onclick="showDetail('logbook')">
+        <rect x="230" y="492" width="220" height="64" rx="8" fill="var(--red-fill)" stroke="var(--red-stroke)" stroke-width="0.75"/>
+        <text class="th" x="340" y="514" text-anchor="middle" dominant-baseline="central" fill="var(--red-text)">Red pathway logbook</text>
+        <text class="ts" x="340" y="534" text-anchor="middle" dominant-baseline="central" fill="var(--red-text)" opacity="0.8">Tracks hours toward Red</text>
+      </g>
+    </svg>
+    <div class="hint">Click any box for a short explanation</div>
+
+    <div id="detailPanel">
+      <p id="detailText">Click any box above to see a short explanation here.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const DETAILS = {
+  placement: "A 20-question quiz that decides whether a student starts at the Preliminary track or skips straight to Week 1, based on their existing ICE knowledge.",
+  preliminary: "4 weeks, 20 sessions covering ICE fundamentals: systems thinking, safety, Ohm's law, diagnostic reasoning, and sensor-ECU concepts. Ends with an honest readiness gate.",
+  main: "12 weeks, 60 sessions taking a student from zero EV knowledge to solid Blue-level judgment, then supervised Orange-level competence during real-vehicle OJT.",
+  survey: "A short feedback form graduates fill out right after finishing the 12-week program, covering confidence by area, program experience, and readiness for Red.",
+  logbook: "A simple tool graduates use after finishing the program to log supervised live-HV hours, working toward the hour count their employer requires for Red certification."
+};
+function showDetail(key) {
+  document.getElementById('detailText').textContent = DETAILS[key];
+}
+</script>
+</body>
+</html>
