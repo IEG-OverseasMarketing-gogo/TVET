@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12-Week Program Completion Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #eef6fb; --panel: #ffffff; --panel2: #eaf5fb; --border: #bfe0f0; --border2: #94c9e3;
+  --accent: #22c55e; --amber: #f59e0b; --red: #ef4444; --text: #0f2436; --muted: #2f4a63; --muted2: #43617d;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-weight: 500; background: #87CEEB; color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 14px; line-height: 1.55; }
+.wrap { max-width: 780px; margin: 0 auto; padding: 32px 20px 80px; }
+.hero { background: linear-gradient(135deg, #14532d, #166534); border-radius: 14px; padding: 30px 26px; color: #fff; margin-bottom: 20px; }
+.hero-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .1em; color: #86efac; font-weight: 700; margin-bottom: 8px; }
+.hero-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+.hero-sub { font-size: 13px; color: #d1fae5; line-height: 1.7; }
+.hero-sub b { color: #fff; }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--accent); font-weight: 700; letter-spacing: .05em; margin-bottom: 4px; }
+.section-title { font-size: 16px; font-weight: 800; margin-bottom: 14px; }
+.field { margin-bottom: 18px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 12.5px; font-weight: 700; color: var(--muted); margin-bottom: 8px; }
+.field input[type=text], .field textarea {
+  width: 100%; padding: 9px 11px; border-radius: 7px; border: 1px solid var(--border2);
+  font-family: 'Noto Sans KR', sans-serif; font-size: 13px; color: var(--text); background: var(--panel2);
+}
+.field textarea { min-height: 60px; resize: vertical; }
+.rating-row { display: flex; gap: 6px; }
+.rating-btn {
+  flex: 1; padding: 10px 4px; text-align: center; border-radius: 7px; border: 1.5px solid var(--border);
+  background: var(--panel2); cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 13px;
+}
+.rating-btn.selected { background: var(--accent); border-color: var(--accent); color: white; }
+.rating-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted2); margin-top: 5px; }
+.radio-row { display: flex; flex-direction: column; gap: 7px; }
+.radio-opt { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-radius: 7px; background: var(--panel2); cursor: pointer; font-size: 12.5px; border: 1.5px solid transparent; }
+.radio-opt.selected { border-color: var(--accent); background: #dcfce7; font-weight: 700; }
+.submit-btn { width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--accent); color: white; font-weight: 800; font-size: 14px; cursor: pointer; }
+.submit-btn:hover { background: #16a34a; }
+.hidden { display: none !important; }
+.thanks-box { text-align: center; padding: 30px 20px; }
+.thanks-icon { font-size: 44px; margin-bottom: 12px; }
+.export-box { background: var(--panel2); border-radius: 8px; padding: 14px; margin-top: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; white-space: pre-wrap; text-align: left; max-height: 300px; overflow-y: auto; }
+.no-print .submit-btn.secondary { background: var(--panel); color: var(--muted); border: 1px solid var(--border2); margin-top: 10px; }
+@media print { .no-print { display: none !important; } body { background: white; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-eyebrow">🎓 PROGRAM COMPLETION SURVEY</div>
+    <div class="hero-title">You've finished the 12-week program — tell us how it actually went</div>
+    <div class="hero-sub">
+      <b>Why this survey exists:</b> this program has already been revised multiple times based on direct field feedback (that's how the real-vehicle OJT phase and this Blue/Orange/Red framing came to exist at all). Your honest answers are what shapes the next version for the next cohort.<br><br>
+      <b>Where you stand right now:</b> completing this program means you've reached solid <b>Blue-level</b> judgment (Weeks 1-8) and supervised <b>Orange-level</b> competence (Weeks 9-12 OJT). Independent <b>Red-level</b> authorization is a separate step through your employer's own certification process — this survey also asks how ready you feel for that next stage.
+    </div>
+  </div>
+
+  <form id="surveyForm">
+    <div class="panel">
+      <div class="section-label">ABOUT YOU</div>
+      <div class="section-title">Basic Info</div>
+      <div class="field">
+        <label>Name (optional)</label>
+        <input type="text" id="fName" placeholder="You can leave this blank for anonymous feedback">
+      </div>
+      <div class="field">
+        <label>Which track did you complete?</label>
+        <div class="radio-row" id="trackRow"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-label">SECTION 1 — CONFIDENCE BY AREA</div>
+      <div class="section-title">Rate your confidence in each area (1 = not confident, 5 = very confident)</div>
+      <div id="confidenceArea"></div>
+    </div>
+
+    <div class="panel">
+      <div class="section-label">SECTION 2 — THE PROGRAM ITSELF</div>
+      <div class="section-title">Your experience</div>
+      <div class="field">
+        <label>Overall, how would you rate the 12 weeks? (1 = poor, 5 = excellent)</label>
+        <div class="rating-row" id="ratingOverall"></div>
+        <div class="rating-labels"><span>Poor</span><span>Excellent</span></div>
+      </div>
+      <div class="field">
+        <label>Which part was hardest to follow?</label>
+        <div class="radio-row" id="hardestPart"></div>
+      </div>
+      <div class="field">
+        <label>What was the single most useful part of the program?</label>
+        <textarea id="fMostUseful" placeholder="Be specific if you can — a session, a simulator type, the OJT weeks, etc."></textarea>
+      </div>
+      <div class="field">
+        <label>What would you change or improve?</label>
+        <textarea id="fImprove" placeholder="Honest feedback helps the next cohort more than praise does"></textarea>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-label">SECTION 3 — LOOKING AHEAD TO RED</div>
+      <div class="section-title">Your readiness for what comes next</div>
+      <div class="field">
+        <label>How ready do you feel to begin logging supervised hours toward Red-level authorization?</label>
+        <div class="rating-row" id="ratingRedReady"></div>
+        <div class="rating-labels"><span>Not ready</span><span>Very ready</span></div>
+      </div>
+      <div class="field">
+        <label>Do you know how to use the Red Pathway Logbook tool?</label>
+        <div class="radio-row" id="logbookKnown"></div>
+      </div>
+    </div>
+
+    <button type="button" class="submit-btn no-print" onclick="submitSurvey()">Submit Survey</button>
+  </form>
+
+  <div id="thanksArea" class="hidden"></div>
+
+</div>
+
+<script>
+const CONFIDENCE_AREAS = [
+  "Battery & charging diagnosis (Weeks 1-4)",
+  "Drivetrain, brake & thermal diagnosis (Weeks 5-8)",
+  "Real-vehicle mentored diagnosis (Weeks 9-11 OJT)",
+  "Independent diagnosis & repair (Week 12)",
+];
+const TRACKS = ["Full 12 weeks (Preliminary + Main)", "Main 12 weeks only (already had ICE background)", "Not sure / other"];
+const HARDEST_PARTS = ["Weeks 1-4 (Battery/charging fundamentals)", "Weeks 5-8 (Drivetrain/brakes/thermal)", "Weeks 9-11 (Mentored OJT)", "Week 12 (Independent assessment)", "None — it all made sense"];
+const YES_NO = ["Yes, I could use it right now", "I've seen it but need a refresher", "No, I haven't used it yet"];
+
+let ratings = {}; // ratingOverall, ratingRedReady, confidence-0..3
+let radioSelections = {}; // track, hardestPart, logbookKnown
+
+function buildRatingRow(containerId, key, max=5) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = Array.from({length:max}, (_,i) => i+1).map(n => `
+    <div class="rating-btn" id="${key}-${n}" onclick="selectRating('${key}', ${n}, '${containerId}')">${n}</div>
+  `).join('');
+}
+function selectRating(key, val, containerId) {
+  ratings[key] = val;
+  document.querySelectorAll(`#${containerId} .rating-btn`).forEach(el => el.classList.remove('selected'));
+  document.getElementById(`${key}-${val}`).classList.add('selected');
+}
+
+function buildRadioRow(containerId, key, options) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = options.map((opt, i) => `
+    <div class="radio-opt" id="${key}-opt-${i}" onclick="selectRadio('${key}', ${i}, '${containerId}', '${opt.replace(/'/g,"\\'")}')">${opt}</div>
+  `).join('');
+}
+function selectRadio(key, idx, containerId, label) {
+  radioSelections[key] = label;
+  document.querySelectorAll(`#${containerId} .radio-opt`).forEach(el => el.classList.remove('selected'));
+  document.getElementById(`${key}-opt-${idx}`).classList.add('selected');
+}
+
+function init() {
+  buildRadioRow('trackRow', 'track', TRACKS);
+  document.getElementById('confidenceArea').innerHTML = CONFIDENCE_AREAS.map((label, i) => `
+    <div class="field">
+      <label>${label}</label>
+      <div class="rating-row" id="conf-${i}"></div>
+      <div class="rating-labels"><span>Not confident</span><span>Very confident</span></div>
+    </div>
+  `).join('');
+  CONFIDENCE_AREAS.forEach((_, i) => buildRatingRow('conf-' + i, 'confidence-' + i));
+  buildRatingRow('ratingOverall', 'ratingOverall');
+  buildRadioRow('hardestPart', 'hardestPart', HARDEST_PARTS);
+  buildRatingRow('ratingRedReady', 'ratingRedReady');
+  buildRadioRow('logbookKnown', 'logbookKnown', YES_NO);
+}
+
+function submitSurvey() {
+  const name = document.getElementById('fName').value.trim() || '(anonymous)';
+  const mostUseful = document.getElementById('fMostUseful').value.trim();
+  const improve = document.getElementById('fImprove').value.trim();
+
+  const lines = [];
+  lines.push('12-WEEK PROGRAM COMPLETION SURVEY');
+  lines.push('Name: ' + name);
+  lines.push('Track completed: ' + (radioSelections.track || '(not answered)'));
+  lines.push('');
+  lines.push('-- Confidence by area (1-5) --');
+  CONFIDENCE_AREAS.forEach((label, i) => {
+    lines.push(label + ': ' + (ratings['confidence-' + i] || '(not answered)'));
+  });
+  lines.push('');
+  lines.push('-- Program experience --');
+  lines.push('Overall rating (1-5): ' + (ratings.ratingOverall || '(not answered)'));
+  lines.push('Hardest part: ' + (radioSelections.hardestPart || '(not answered)'));
+  lines.push('Most useful part: ' + (mostUseful || '(not answered)'));
+  lines.push('Suggested improvement: ' + (improve || '(not answered)'));
+  lines.push('');
+  lines.push('-- Looking ahead to Red --');
+  lines.push('Red-readiness feeling (1-5): ' + (ratings.ratingRedReady || '(not answered)'));
+  lines.push('Knows how to use Red Pathway Logbook: ' + (radioSelections.logbookKnown || '(not answered)'));
+
+  const exportText = lines.join('\\n');
+
+  document.getElementById('surveyForm').classList.add('hidden');
+  const thanksArea = document.getElementById('thanksArea');
+  thanksArea.classList.remove('hidden');
+  thanksArea.innerHTML = `
+    <div class="panel thanks-box">
+      <div class="thanks-icon">🙏</div>
+      <div class="section-title">Thank you — this genuinely gets used</div>
+      <p style="font-size:13px;color:var(--muted2)">Copy the summary below and send it to your instructor, or print it. There's no server behind this form, so nothing is submitted automatically.</p>
+      <div class="export-box">${exportText}</div>
+      <button class="submit-btn no-print" style="margin-top:16px" onclick="copyResult()">📋 Copy to Clipboard</button>
+      <button class="submit-btn secondary no-print" onclick="window.print()">🖨 Print</button>
+    </div>
+  `;
+  window.__exportText = exportText;
+}
+
+function copyResult() {
+  navigator.clipboard.writeText(window.__exportText).then(() => alert('Copied! Paste it into a message to your instructor.'));
+}
+
+init();
+</script>
+</body>
+</html>

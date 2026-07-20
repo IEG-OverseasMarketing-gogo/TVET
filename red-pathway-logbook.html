@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Red Pathway Logbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #eef6fb;
+  --surface: #eaf6fc;
+  --panel: #ffffff;
+  --panel2: #eaf5fb;
+  --border: #bfe0f0;
+  --border2: #94c9e3;
+  --accent: #ef4444;
+  --accent2: #f87171;
+  --orange: #f97316;
+  --blue: #3b82f6;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --purple: #a78bfa;
+  --text: #0f2436;
+  --muted: #2f4a63;
+  --muted2: #43617d;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-weight: 500;
+  background: #87CEEB;
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.wrap { max-width: 980px; margin: 0 auto; padding: 32px 20px 80px; }
+
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(135deg, #1a2f42, #0f2436);
+  border-radius: 14px;
+  padding: 32px 28px;
+  color: #fff;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute; top: -60px; right: -60px;
+  width: 220px; height: 220px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(239,68,68,.25), transparent 70%);
+}
+.hero-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .12em; color: #fca5a5; font-weight: 700; margin-bottom: 8px; }
+.hero-title { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+.hero-sub { font-size: 13px; color: #b9c9d8; max-width: 640px; }
+
+/* ── DISCLAIMER ── */
+.disclaimer {
+  background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px;
+  padding: 14px 16px; margin-bottom: 20px; font-size: 12.5px; color: #9a3412; line-height: 1.6;
+}
+.disclaimer b { color: #7c2d12; }
+
+/* ── PANEL ── */
+.panel {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  padding: 22px; margin-bottom: 18px;
+}
+.panel-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.panel-sub { font-size: 12px; color: var(--muted2); margin-bottom: 16px; }
+
+/* ── TARGET SETTINGS ── */
+.target-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.target-row label { font-size: 12.5px; color: var(--muted); font-weight: 700; }
+.target-row input[type=number] {
+  width: 90px; padding: 8px 10px; border-radius: 7px; border: 1px solid var(--border2);
+  font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 700; color: var(--text); background: var(--panel2);
+}
+.target-note { font-size: 11px; color: var(--muted2); font-style: italic; margin-top: 6px; }
+
+/* ── DASHBOARD ── */
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 4px; }
+.dash-stat { background: var(--panel2); border-radius: 10px; padding: 16px; text-align: center; }
+.dash-stat-n { font-family: 'IBM Plex Mono', monospace; font-size: 28px; font-weight: 800; color: var(--text); }
+.dash-stat-l { font-size: 11px; color: var(--muted2); margin-top: 2px; }
+.progress-wrap { margin-top: 18px; }
+.progress-bar-outer { width: 100%; height: 22px; background: var(--panel2); border-radius: 11px; overflow: hidden; border: 1px solid var(--border); }
+.progress-bar-inner {
+  height: 100%; background: linear-gradient(90deg, var(--accent), var(--orange));
+  border-radius: 11px; transition: width .4s ease; display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 8px; min-width: 32px;
+}
+.progress-bar-inner span { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: white; font-weight: 700; }
+.progress-label { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted2); margin-top: 6px; font-family: 'IBM Plex Mono', monospace; }
+
+/* ── CATEGORY BREAKDOWN ── */
+.cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 10px; margin-top: 16px; }
+.cat-card { background: var(--panel2); border-radius: 8px; padding: 12px; }
+.cat-card-label { font-size: 10.5px; color: var(--muted2); font-family: 'IBM Plex Mono', monospace; margin-bottom: 4px; }
+.cat-card-n { font-size: 18px; font-weight: 800; color: var(--text); }
+.cat-bar-outer { height: 5px; background: #d7e9f5; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+.cat-bar-inner { height: 100%; background: var(--blue); border-radius: 3px; }
+
+/* ── FORM ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-grid .full { grid-column: 1 / -1; }
+.field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 5px; font-family: 'IBM Plex Mono', monospace; letter-spacing: .02em; }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 9px 11px; border-radius: 7px; border: 1px solid var(--border2);
+  font-family: 'Noto Sans KR', sans-serif; font-size: 13px; color: var(--text); background: var(--panel2);
+}
+.field textarea { resize: vertical; min-height: 54px; }
+.add-btn {
+  margin-top: 14px; padding: 11px 20px; border-radius: 8px; border: none;
+  background: var(--accent); color: white; font-weight: 700; font-size: 13px; cursor: pointer;
+}
+.add-btn:hover { background: #dc2626; }
+
+/* ── LOG TABLE ── */
+.log-table-wrap { overflow-x: auto; }
+table.log-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+table.log-table th {
+  text-align: left; padding: 9px 10px; background: var(--panel2); color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: .03em; border-bottom: 2px solid var(--border);
+}
+table.log-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.log-table tr:hover td { background: #f8fbfd; }
+.cat-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
+.cat-tag.battery { background: #dbeafe; color: #1d4ed8; }
+.cat-tag.drivetrain { background: #fef3c7; color: #92400e; }
+.cat-tag.thermal { background: #fee2e2; color: #b91c1c; }
+.cat-tag.complex { background: #ede9fe; color: #6d28d9; }
+.cat-tag.other { background: #e5e7eb; color: #374151; }
+.del-btn { background: none; border: none; cursor: pointer; color: #cbd5e1; font-size: 15px; }
+.del-btn:hover { color: var(--accent); }
+.empty-note { text-align: center; padding: 30px; color: var(--muted2); font-size: 12.5px; }
+
+/* ── ACTIONS ── */
+.actions-row { display: flex; gap: 10px; margin-top: 4px; }
+.btn-secondary {
+  padding: 9px 16px; border-radius: 7px; border: 1px solid var(--border2); background: var(--panel);
+  color: var(--muted); font-size: 12.5px; font-weight: 700; cursor: pointer;
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── PRINT ── */
+@media print {
+  body { background: white; }
+  .no-print { display: none !important; }
+  .hero { background: white !important; color: black !important; border: 1px solid #ccc; }
+  .hero-eyebrow, .hero-sub { color: #444 !important; }
+  .hero::before { display: none; }
+  .panel { border: 1px solid #999; break-inside: avoid; }
+}
+@media (max-width: 640px) {
+  .dash-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-eyebrow">🔴 RED PATHWAY LOGBOOK</div>
+    <div class="hero-title">Post-Graduation Supervised Live-HV Hours Tracker</div>
+    <div class="hero-sub">For graduates of the 12-week EV Diagnostic &amp; Repair program moving from Orange-level (supervised, de-energized HV work) toward Red-level (independent, live-HV) authorization.</div>
+  </div>
+
+  <div class="disclaimer">
+    <b>What this is — and isn't:</b> This is a self-tracking log to help you organize your supervised hours in one place. It does <b>not</b> itself grant Red-level certification. Red authorization is issued by your employer's own internal certification process — check with them for the exact required hours and sign-off procedure. The default target below (200 hours) is a placeholder; replace it with your employer's actual requirement once confirmed.
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">🎯 Target Hours</div>
+    <div class="panel-sub">Set this to your employer's actual Red-certification requirement once confirmed.</div>
+    <div class="target-row">
+      <label for="targetInput">Target supervised hours:</label>
+      <input type="number" id="targetInput" min="1" value="200">
+      <button class="btn-secondary" onclick="updateTarget()">Save</button>
+    </div>
+    <div class="target-note">⚠ Placeholder value — confirm the real number with Kia/Kostanay (or your employer's certification standard) and update it here.</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">📊 Progress Dashboard</div>
+    <div class="dash-grid">
+      <div class="dash-stat">
+        <div class="dash-stat-n" id="statTotal">0</div>
+        <div class="dash-stat-l">Hours Logged</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-n" id="statRemaining">200</div>
+        <div class="dash-stat-l">Hours Remaining</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-n" id="statEntries">0</div>
+        <div class="dash-stat-l">Logged Sessions</div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar-outer">
+        <div class="progress-bar-inner" id="progressBar" style="width:2%"><span id="progressPct">0%</span></div>
+      </div>
+      <div class="progress-label"><span>0 hrs</span><span id="progressTargetLabel">Target: 200 hrs</span></div>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+
+  <div class="panel no-print">
+    <div class="panel-title">➕ Log a New Session</div>
+    <div class="panel-sub">Fill this in right after a supervised live-HV session while it's fresh.</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="fDate">
+      </div>
+      <div class="field">
+        <label>Hours</label>
+        <input type="number" id="fHours" min="0.25" step="0.25" placeholder="e.g. 2.5">
+      </div>
+      <div class="field">
+        <label>Task Category</label>
+        <select id="fCategory">
+          <option value="battery">Battery / Charging</option>
+          <option value="drivetrain">Drivetrain / Brakes</option>
+          <option value="thermal">Thermal / Component Repair</option>
+          <option value="complex">Complex / Multi-System Diagnosis</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Supervisor Name</label>
+        <input type="text" id="fSupervisor" placeholder="e.g. Ahmed R.">
+      </div>
+      <div class="field full">
+        <label>What did you work on?</label>
+        <textarea id="fDesc" placeholder="e.g. Live insulation resistance test + battery pack connector torque check on vehicle #4"></textarea>
+      </div>
+      <div class="field full">
+        <label>Supervisor Sign-off (initials, entered by supervisor)</label>
+        <input type="text" id="fSignoff" placeholder="Supervisor enters their initials to confirm this session">
+      </div>
+    </div>
+    <button class="add-btn" onclick="addEntry()">Add to Logbook</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">📋 Session Log</div>
+    <div class="panel-sub no-print">Newest first. Supervisor sign-off shown in the last column.</div>
+    <div class="log-table-wrap">
+      <table class="log-table">
+        <thead>
+          <tr><th>Date</th><th>Hrs</th><th>Category</th><th>Description</th><th>Supervisor</th><th>Sign-off</th><th class="no-print"></th></tr>
+        </thead>
+        <tbody id="logTableBody"></tbody>
+      </table>
+      <div class="empty-note" id="emptyNote" style="display:none;">No sessions logged yet. Add your first one above.</div>
+    </div>
+    <div class="actions-row no-print">
+      <button class="btn-secondary" onclick="window.print()">🖨 Print / Export Summary</button>
+      <button class="btn-secondary" onclick="clearAll()">🗑 Clear All Entries</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const CAT_LABELS = {
+  battery: 'Battery/Charging', drivetrain: 'Drivetrain/Brakes',
+  thermal: 'Thermal/Repair', complex: 'Complex Diagnosis', other: 'Other'
+};
+const STORAGE_KEY = 'red_pathway_logbook_v1';
+const TARGET_KEY = 'red_pathway_target_v1';
+
+let entries = [];
+let targetHours = 200;
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    entries = Array.isArray(saved) ? saved : [];
+  } catch (e) { entries = []; }
+  try {
+    const t = parseFloat(localStorage.getItem(TARGET_KEY));
+    if (t && t > 0) targetHours = t;
+  } catch (e) {}
+}
+
+function saveEntries() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); } catch (e) {}
+}
+function saveTarget() {
+  try { localStorage.setItem(TARGET_KEY, String(targetHours)); } catch (e) {}
+}
+
+function updateTarget() {
+  const v = parseFloat(document.getElementById('targetInput').value);
+  if (!v || v <= 0) { alert('Enter a valid target number of hours.'); return; }
+  targetHours = v;
+  saveTarget();
+  render();
+}
+
+function addEntry() {
+  const date = document.getElementById('fDate').value;
+  const hours = parseFloat(document.getElementById('fHours').value);
+  const category = document.getElementById('fCategory').value;
+  const supervisor = document.getElementById('fSupervisor').value.trim();
+  const desc = document.getElementById('fDesc').value.trim();
+  const signoff = document.getElementById('fSignoff').value.trim();
+
+  if (!date) { alert('Please enter a date.'); return; }
+  if (!hours || hours <= 0) { alert('Please enter a valid number of hours.'); return; }
+  if (!supervisor) { alert("Please enter the supervising technician's name."); return; }
+
+  entries.push({ id: Date.now(), date, hours, category, supervisor, desc, signoff });
+  saveEntries();
+
+  document.getElementById('fDate').value = '';
+  document.getElementById('fHours').value = '';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fSupervisor').value = '';
+  document.getElementById('fSignoff').value = '';
+
+  render();
+}
+
+function deleteEntry(id) {
+  entries = entries.filter(e => e.id !== id);
+  saveEntries();
+  render();
+}
+
+function clearAll() {
+  if (!confirm('Delete all logged sessions? This cannot be undone.')) return;
+  entries = [];
+  saveEntries();
+  render();
+}
+
+function render() {
+  document.getElementById('targetInput').value = targetHours;
+
+  const total = entries.reduce((s, e) => s + e.hours, 0);
+  const remaining = Math.max(0, targetHours - total);
+  const pct = Math.min(100, Math.round((total / targetHours) * 100));
+
+  document.getElementById('statTotal').textContent = total.toFixed(2).replace(/\\.00$/, '');
+  document.getElementById('statRemaining').textContent = remaining.toFixed(2).replace(/\\.00$/, '');
+  document.getElementById('statEntries').textContent = entries.length;
+  document.getElementById('progressBar').style.width = Math.max(pct, 2) + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressTargetLabel').textContent = 'Target: ' + targetHours + ' hrs';
+
+  // category breakdown
+  const catTotals = { battery: 0, drivetrain: 0, thermal: 0, complex: 0, other: 0 };
+  entries.forEach(e => { catTotals[e.category] = (catTotals[e.category] || 0) + e.hours; });
+  const maxCat = Math.max(1, ...Object.values(catTotals));
+  document.getElementById('catGrid').innerHTML = Object.keys(CAT_LABELS).map(k => `
+    <div class="cat-card">
+      <div class="cat-card-label">${CAT_LABELS[k].toUpperCase()}</div>
+      <div class="cat-card-n">${catTotals[k].toFixed(2).replace(/\\.00$/, '')} hrs</div>
+      <div class="cat-bar-outer"><div class="cat-bar-inner" style="width:${(catTotals[k] / maxCat) * 100}%"></div></div>
+    </div>
+  `).join('');
+
+  // table
+  const sorted = [...entries].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+  const tbody = document.getElementById('logTableBody');
+  if (sorted.length === 0) {
+    tbody.innerHTML = '';
+    document.getElementById('emptyNote').style.display = 'block';
+  } else {
+    document.getElementById('emptyNote').style.display = 'none';
+    tbody.innerHTML = sorted.map(e => `
+      <tr>
+        <td>${e.date}</td>
+        <td><b>${e.hours}</b></td>
+        <td><span class="cat-tag ${e.category}">${CAT_LABELS[e.category]}</span></td>
+        <td>${escapeHtml(e.desc) || '<span style="color:#94a3b8">—</span>'}</td>
+        <td>${escapeHtml(e.supervisor)}</td>
+        <td>${escapeHtml(e.signoff) || '<span style="color:#94a3b8">unsigned</span>'}</td>
+        <td class="no-print"><button class="del-btn" onclick="deleteEntry(${e.id})" title="Delete entry">✕</button></td>
+      </tr>
+    `).join('');
+  }
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+loadState();
+render();
+</script>
+</body>
+</html>
