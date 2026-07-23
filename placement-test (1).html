@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICE Fundamentals Placement Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #eef6fb; --surface: #eaf6fc; --panel: #ffffff; --panel2: #eaf5fb;
+  --border: #bfe0f0; --border2: #94c9e3; --accent: #3b82f6; --accent2: #60a5fa;
+  --green: #22c55e; --amber: #f59e0b; --red: #ef4444; --purple: #a78bfa;
+  --text: #0f2436; --muted: #2f4a63; --muted2: #43617d;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-weight: 500; background: #87CEEB; color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 14px; line-height: 1.55; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
+
+.hero { background: linear-gradient(135deg, #1a2f42, #0f2436); border-radius: 14px; padding: 30px 26px; color: #fff; margin-bottom: 20px; }
+.hero-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .1em; color: #93c5fd; font-weight: 700; margin-bottom: 8px; }
+.hero-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+.hero-sub { font-size: 13px; color: #b9c9d8; line-height: 1.7; }
+.hero-sub b { color: #fff; }
+
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--accent); font-weight: 700; letter-spacing: .05em; margin-bottom: 4px; }
+.section-title { font-size: 16px; font-weight: 800; margin-bottom: 14px; }
+
+.q-block { margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+.q-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.q-text { font-size: 13.5px; font-weight: 700; margin-bottom: 10px; }
+.q-opts { display: flex; flex-direction: column; gap: 7px; }
+.q-opt { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-radius: 7px; background: var(--panel2); cursor: pointer; font-size: 12.5px; border: 1.5px solid transparent; }
+.q-opt:hover { border-color: var(--border2); }
+.q-opt.selected { border-color: var(--accent); background: #dbeafe; font-weight: 700; }
+.q-opt input { accent-color: var(--accent); }
+
+.submit-btn { width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--accent); color: white; font-weight: 800; font-size: 14px; cursor: pointer; margin-top: 6px; }
+.submit-btn:hover { background: #2563eb; }
+.submit-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+.progress-note { text-align: center; font-size: 11.5px; color: var(--muted2); margin-top: 8px; font-family: 'IBM Plex Mono', monospace; }
+
+/* ── RESULTS ── */
+.result-hero { text-align: center; padding: 28px 20px; }
+.result-badge { display: inline-block; padding: 8px 20px; border-radius: 20px; font-weight: 800; font-size: 15px; margin-bottom: 14px; }
+.result-badge.skip { background: #dcfce7; color: #15803d; }
+.result-badge.review { background: #fef3c7; color: #92400e; }
+.result-badge.start { background: #fee2e2; color: #b91c1c; }
+.result-score { font-family: 'IBM Plex Mono', monospace; font-size: 42px; font-weight: 800; margin-bottom: 4px; }
+.result-detail { font-size: 13px; color: var(--muted2); max-width: 520px; margin: 0 auto; }
+
+.cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 10px; margin-top: 16px; }
+.cat-card { background: var(--panel2); border-radius: 8px; padding: 12px; }
+.cat-card-label { font-size: 10px; color: var(--muted2); font-family: 'IBM Plex Mono', monospace; margin-bottom: 4px; }
+.cat-card-score { font-size: 20px; font-weight: 800; }
+.cat-card-score.good { color: var(--green); }
+.cat-card-score.weak { color: var(--red); }
+.cat-bar-outer { height: 5px; background: #d7e9f5; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+.cat-bar-inner { height: 100%; border-radius: 3px; }
+
+.ladder-note { background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 10px; padding: 14px 16px; margin-top: 16px; font-size: 12px; color: #3730a3; line-height: 1.7; }
+
+.hidden { display: none !important; }
+@media print { .no-print { display: none !important; } body { background: white; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-eyebrow">📋 PLACEMENT TEST</div>
+    <div class="hero-title">Where Should You Start?</div>
+    <div class="hero-sub">
+      <b>Why this test exists:</b> the 12-week EV Diagnosis &amp; Repair program (Weeks 1-8 theory/simulator + Weeks 9-12 real-vehicle OJT) assumes you already have basic ICE-technician-level skills, including circuit fundamentals, electromagnetism, and basic mechanical concepts. This 50-question test checks whether that's true for you yet.<br><br>
+      <b>What happens with your result:</b> a high score means you can start directly at Week 1 of the 12-week program. A lower score means you should complete the 6-week / 30-session ICE Fundamentals Preliminary track first — that's not a failure, it's the track doing its job correctly.
+    </div>
+  </div>
+
+  <div id="quizArea">
+    <div class="panel">
+      <div class="section-label">SECTION 1 — SYSTEMS &amp; SAFETY</div>
+      <div class="section-title">Vehicle systems, shop safety, documentation, Ohm's Law</div>
+      <div id="section1"></div>
+    </div>
+    <div class="panel">
+      <div class="section-label">SECTION 2 — CIRCUITS &amp; ELECTROMAGNETISM</div>
+      <div class="section-title">Series/parallel circuits, electromagnetism, diodes, transformers, thermistors</div>
+      <div id="section2"></div>
+    </div>
+    <div class="panel">
+      <div class="section-label">SECTION 3 — DIAGNOSTIC REASONING</div>
+      <div class="section-title">The 4-step pattern, multimeter use, DTC basics</div>
+      <div id="section3"></div>
+    </div>
+    <div class="panel">
+      <div class="section-label">SECTION 4 — MECHANICAL FUNDAMENTALS</div>
+      <div class="section-title">Gear ratio, torque vs. power, ICE cooling/heat management</div>
+      <div id="section4"></div>
+    </div>
+    <div class="panel">
+      <div class="section-label">SECTION 5 — ELECTRICAL SYSTEMS</div>
+      <div class="section-title">12V battery/charging, wiring diagrams, sensor-actuator-ECU</div>
+      <div id="section5"></div>
+    </div>
+    <div class="panel">
+      <div class="section-label">SECTION 6 — PROFESSIONAL READINESS</div>
+      <div class="section-title">Documentation, communication, safety culture</div>
+      <div id="section6"></div>
+    </div>
+    <button class="submit-btn no-print" id="submitBtn" onclick="submitTest()" disabled>Answer all questions to see your result (0/50)</button>
+  </div>
+
+  <div id="resultArea" class="hidden"></div>
+
+</div>
+
+<script>
+const QUESTIONS = {
+  1: [
+    { q: "What is the ECU?", opts: ["A type of tire", "The vehicle's onboard computer", "A fuel additive", "A brake part"], correct: 1 },
+    { q: "What's the first question a technician should ask about any symptom?", opts: ["How much will the repair cost?", "Which system is this symptom coming from?", "What color is the car?", "How old is the car?"], correct: 1 },
+    { q: "What's the difference between a jack and a jack stand?", opts: ["No difference", "A jack lifts; a jack stand safely supports the weight", "A jack stand is for tires only", "A jack is safer"], correct: 1 },
+    { q: "What is a 'spec' in a service manual?", opts: ["A tool brand", "An exact required value for a correct repair", "A car color code", "A customer's name"], correct: 1 },
+    { q: "What does Ohm's Law state?", opts: ["V = I + R", "V = I \u00d7 R", "V = I / R", "V = I - R"], correct: 1 },
+    { q: "What is resistance measured in?", opts: ["Volts", "Amps", "Ohms", "Watts"], correct: 2 },
+    { q: "If resistance increases and voltage stays the same, what happens to current?", opts: ["Increases", "Decreases", "Stays the same", "Becomes zero"], correct: 1 },
+    { q: "What must support a vehicle before someone works underneath it?", opts: ["A jack alone", "Jack stands", "Nothing needed", "A friend holding it"], correct: 1 },
+  ],
+  2: [
+    { q: "In a series circuit, what stays the same throughout?", opts: ["Voltage", "Current", "Resistance", "Power"], correct: 1 },
+    { q: "In a parallel circuit, what stays the same across each branch?", opts: ["Current", "Voltage", "Nothing", "Resistance always"], correct: 1 },
+    { q: "How do you find total resistance in a series circuit?", opts: ["Add them all together", "Average them", "Multiply them", "Use the largest only"], correct: 0 },
+    { q: "What creates a magnetic field around a wire?", opts: ["Resistance", "Current flowing through it", "Voltage alone with no current", "Heat"], correct: 1 },
+    { q: "What is induction?", opts: ["Adding a fuse", "Generating current by moving a magnetic field near a wire", "Increasing resistance", "A type of connector"], correct: 1 },
+    { q: "What does a diode do?", opts: ["Stores charge", "Allows current in only one direction", "Increases voltage", "Measures resistance"], correct: 1 },
+    { q: "What is rectification?", opts: ["Increasing voltage", "Converting AC to DC using diodes", "Reducing current", "A type of wire"], correct: 1 },
+    { q: "What does a step-up transformer do to voltage?", opts: ["Decreases it", "Increases it", "Keeps it the same", "Eliminates it"], correct: 1 },
+    { q: "As temperature rises, what happens to an NTC thermistor's resistance?", opts: ["Increases", "Decreases", "Stays the same", "Becomes infinite"], correct: 1 },
+  ],
+  3: [
+    { q: "What is the first step in the diagnostic process?", opts: ["Replace a part", "Get a precise symptom description", "Test the most expensive cause", "Close the work order"], correct: 1 },
+    { q: "Why test low-cost causes first?", opts: ["It's required by law", "It's faster and cheaper if it turns out to be the actual cause", "It's more fun", "No real reason"], correct: 1 },
+    { q: "How should a multimeter be connected to measure voltage?", opts: ["In series", "In parallel", "Doesn't matter", "Only with the circuit off"], correct: 1 },
+    { q: "Why start on the highest range if unsure of the expected value?", opts: ["It's faster", "It protects the meter from damage", "It's required by law", "No reason"], correct: 1 },
+    { q: "What does a DTC tell you?", opts: ["The exact root cause", "Where the ECU detected an out-of-range reading", "The repair cost", "Nothing useful"], correct: 1 },
+    { q: "What does a 'P' prefix generally indicate?", opts: ["Body system", "Powertrain system", "Chassis system", "Communication network"], correct: 1 },
+    { q: "What's a valid low-cost first check for a mechanical rattle?", opts: ["Full engine teardown", "Visual inspection for looseness/wear", "Replacing the transmission", "Ignoring it"], correct: 1 },
+    { q: "What are the 4 steps of the diagnostic pattern, in order?", opts: ["Fix, test, symptom, verify", "Symptom, possible causes, test, verify", "Verify, symptom, test, fix", "Test, fix, symptom, verify"], correct: 1 },
+  ],
+  4: [
+    { q: "What does a high gear ratio provide?", opts: ["More speed, less torque", "More torque, less speed", "No change", "More fuel economy only"], correct: 1 },
+    { q: "Do EVs use gear ratios?", opts: ["No, never", "Yes, typically a single fixed reduction gear", "Only in reverse", "Only for the radio"], correct: 1 },
+    { q: "What happens to output speed with a low gear ratio (overdrive)?", opts: ["Decreases", "Increases", "Stays the same", "Becomes zero"], correct: 1 },
+    { q: "What is torque?", opts: ["Rate of doing work", "Rotational/twisting force", "A type of gear", "Fuel efficiency"], correct: 1 },
+    { q: "How is power related to torque?", opts: ["No relationship", "Power = Torque \u00d7 RPM (with a constant)", "Power = Torque only", "Power is unrelated to RPM"], correct: 1 },
+    { q: "Why do EVs often feel quick off the line?", opts: ["They don't, this is a myth", "They deliver maximum torque instantly from 0 RPM", "They have more gears", "They are lighter always"], correct: 1 },
+    { q: "What does the thermostat control?", opts: ["Fuel flow", "Coolant flow based on temperature", "Oil pressure", "Tire pressure"], correct: 1 },
+    { q: "What keeps coolant circulating while the engine runs?", opts: ["The thermostat alone", "The water pump", "The radiator alone", "Nothing, it's static"], correct: 1 },
+    { q: "What two mechanical factors combine to raise overheating risk when towing uphill?", opts: ["Tire pressure and radio volume", "High sustained load and reduced airflow at low speed", "Fuel type and paint color", "None, towing has no effect"], correct: 1 },
+  ],
+  5: [
+    { q: "What does the alternator do?", opts: ["Starts the engine directly", "Recharges the battery and powers electrical loads while running", "Cools the engine", "Controls the brakes"], correct: 1 },
+    { q: "Roughly what resting voltage indicates a healthy 12V battery?", opts: ["8V", "12.6V+", "24V", "0V"], correct: 1 },
+    { q: "What does 'ground' mean in a circuit?", opts: ["The car's tires", "The return path back to the battery negative", "A type of fuse", "A wire color"], correct: 1 },
+    { q: "What 3 things does a basic circuit need?", opts: ["Power, ground, and a complete path through a component", "Just power", "Just a component", "Just a fuse"], correct: 0 },
+    { q: "What does a sensor do?", opts: ["Performs a physical action", "Measures a condition and reports it electrically", "Stores fuel", "Nothing"], correct: 1 },
+    { q: "What does an actuator do?", opts: ["Measures temperature", "Receives a command and performs a physical action", "Reads sensor data only", "Nothing"], correct: 1 },
+    { q: "What's a quick way to start separating electrical vs mechanical causes?", opts: ["Guess randomly", "Check if the fault changes with vibration/movement or stays constant", "Always assume electrical", "Always assume mechanical"], correct: 1 },
+    { q: "What 3-part relationship will resurface in the EV program's BMS content?", opts: ["Tire-wheel-axle", "Sensor-ECU-actuator", "Battery-radio-lights", "Engine-transmission-wheel"], correct: 1 },
+  ],
+  6: [
+    { q: "What should a work order record, in order?", opts: ["Fix, symptom, tests, findings", "Symptom, tests, findings, fix", "Findings, fix, symptom, tests", "Random order"], correct: 1 },
+    { q: "Why write precise findings instead of vague ones?", opts: ["No real reason", "Precise findings are actually useful if reviewed later", "Vague is faster and just as good", "Findings don't need to be written"], correct: 1 },
+    { q: "Why explain WHY a repair is needed, not just the cost?", opts: ["Customers don't care why", "Explanations build trust more than just cost figures", "It's required by law", "No reason"], correct: 1 },
+    { q: "What should you do if unsure of an answer to a customer's question?", opts: ["Guess confidently", "Say so honestly and check further", "Ignore the question", "Make something up"], correct: 1 },
+    { q: "What does PPE stand for?", opts: ["Personal Protective Equipment", "Public Property Equipment", "Personal Parts Exchange", "Professional Practice Exam"], correct: 0 },
+    { q: "Should a near-miss be reported even if nothing actually happened?", opts: ["No, ignore it", "Yes, it's valuable information about a real risk", "Only if someone got hurt", "Only if a manager saw it"], correct: 1 },
+    { q: "What should you do if you're not confident in a bridge-track skill area?", opts: ["Push ahead anyway", "Repeat that specific area before moving on", "Ignore it forever", "Blame the instructor"], correct: 1 },
+    { q: "Does the main EV program re-explain bridge-track concepts like Ohm's Law?", opts: ["Yes, in full detail", "No, it assumes you already have this foundation", "Only sometimes", "Only for EVs"], correct: 1 },
+  ],
+};
+
+const SECTION_LABELS = { 1: "Systems & Safety", 2: "Circuits & Electromagnetism", 3: "Diagnostic Reasoning", 4: "Mechanical Fundamentals", 5: "Electrical Systems", 6: "Professional Readiness" };
+let answers = {}; // key: "sectionNum-qIndex" -> selected option index
+
+function renderQuestions() {
+  Object.keys(QUESTIONS).forEach(sec => {
+    const container = document.getElementById('section' + sec);
+    container.innerHTML = QUESTIONS[sec].map((item, qi) => {
+      const key = sec + '-' + qi;
+      return `
+        <div class="q-block">
+          <div class="q-text">${(qi+1)}. ${item.q}</div>
+          <div class="q-opts">
+            ${item.opts.map((opt, oi) => `
+              <label class="q-opt" id="opt-${key}-${oi}" onclick="selectAnswer('${key}', ${oi}, ${sec}, ${qi})">
+                <input type="radio" name="q-${key}" />
+                <span>${opt}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+  });
+}
+
+function selectAnswer(key, optionIndex, sec, qi) {
+  answers[key] = optionIndex;
+  document.querySelectorAll(`[id^="opt-${key}-"]`).forEach(el => el.classList.remove('selected'));
+  document.getElementById(`opt-${key}-${optionIndex}`).classList.add('selected');
+  document.getElementById(`opt-${key}-${optionIndex}`).querySelector('input').checked = true;
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = 50;
+  const answered = Object.keys(answers).length;
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = answered === total ? 'See My Result' : `Answer all questions to see your result (${answered}/${total})`;
+  btn.disabled = answered !== total;
+}
+
+function submitTest() {
+  const sectionScores = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
+  const sectionMax = {};
+  Object.keys(QUESTIONS).forEach(sec => { sectionMax[sec] = QUESTIONS[sec].length; });
+  Object.keys(QUESTIONS).forEach(sec => {
+    QUESTIONS[sec].forEach((item, qi) => {
+      const key = sec + '-' + qi;
+      if (answers[key] === item.correct) sectionScores[sec]++;
+    });
+  });
+  const totalScore = Object.values(sectionScores).reduce((a,b)=>a+b, 0);
+  const pct = Math.round((totalScore / 50) * 100);
+
+  let badgeClass, badgeText, recTitle, recBody;
+  if (pct >= 80) {
+    badgeClass = 'skip'; badgeText = '✅ Ready to Start at Week 1';
+    recTitle = 'Skip the Preliminary track — start directly at Week 1 of the 12-week EV program.';
+    recBody = "Your score shows a solid ICE-technician-level baseline already, including circuits, electromagnetism, and mechanical fundamentals. The 12-week program's Week 1 content will build on exactly what you've already demonstrated here, so starting the Preliminary track would likely feel redundant.";
+  } else if (pct >= 50) {
+    badgeClass = 'review'; badgeText = '⚠️ Review Recommended';
+    recTitle = 'Complete the Preliminary track, focusing especially on your weaker section(s) below.';
+    recBody = "You have partial ICE fundamentals, but at least one area isn't solid yet. Rather than guessing which parts to skip, complete the full 6-week Preliminary track — the weak section(s) below tell you where to pay closest attention.";
+  } else {
+    badgeClass = 'start'; badgeText = '🔴 Start at Week B1';
+    recTitle = 'Begin the 6-week / 30-session ICE Fundamentals Preliminary track from Week B1.';
+    recBody = "This is a completely normal starting point, not a bad result — it just means the Preliminary track is exactly the right next step, doing exactly what it's designed to do.";
+  }
+
+  const catHtml = Object.keys(sectionScores).map(sec => {
+    const score = sectionScores[sec], max = sectionMax[sec];
+    const scorePct = (score/max)*100;
+    const isWeak = scorePct < 60;
+    return `
+      <div class="cat-card">
+        <div class="cat-card-label">${SECTION_LABELS[sec].toUpperCase()}</div>
+        <div class="cat-card-score ${isWeak ? 'weak' : 'good'}">${score}/${max}</div>
+        <div class="cat-bar-outer"><div class="cat-bar-inner" style="width:${scorePct}%;background:${isWeak ? 'var(--red)' : 'var(--green)'}"></div></div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('quizArea').classList.add('hidden');
+  const resultArea = document.getElementById('resultArea');
+  resultArea.classList.remove('hidden');
+  resultArea.innerHTML = `
+    <div class="panel result-hero">
+      <div class="result-badge ${badgeClass}">${badgeText}</div>
+      <div class="result-score">${pct}%</div>
+      <div class="result-detail">${totalScore} out of 20 correct</div>
+    </div>
+    <div class="panel">
+      <div class="section-title">${recTitle}</div>
+      <p style="font-size:13px;color:var(--muted2);line-height:1.7">${recBody}</p>
+      <div class="cat-grid">${catHtml}</div>
+      <div class="ladder-note">
+        📍 <b>Where this fits on the bigger picture:</b> this test only places you at the <i>start</i> of the pathway. The full picture is: <b>Preliminary track</b> (if needed) → <b>12-week program Weeks 1-8</b> get you to solid <b>Blue-level</b> judgment → <b>Weeks 9-12 OJT</b> get you to <b>Orange-level</b> supervised competence → independent <b>Red-level</b> live-HV authorization comes afterward, from your employer's own certification process, tracked with the companion Red Pathway Logbook.
+      </div>
+    </div>
+    <button class="submit-btn no-print" onclick="window.print()">🖨 Print / Save This Result</button>
+    <button class="submit-btn no-print" style="background:var(--panel);color:var(--muted);border:1px solid var(--border2);margin-top:10px" onclick="location.reload()">↺ Retake Test</button>
+  `;
+}
+
+renderQuestions();
+</script>
+</body>
+</html>
