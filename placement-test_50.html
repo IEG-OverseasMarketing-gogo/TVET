@@ -16,17 +16,14 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-weight: 500; background: #87CEEB; color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 14px; line-height: 1.55; }
 .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
-
 .hero { background: linear-gradient(135deg, #1a2f42, #0f2436); border-radius: 14px; padding: 30px 26px; color: #fff; margin-bottom: 20px; }
 .hero-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .1em; color: #93c5fd; font-weight: 700; margin-bottom: 8px; }
 .hero-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
 .hero-sub { font-size: 13px; color: #b9c9d8; line-height: 1.7; }
 .hero-sub b { color: #fff; }
-
 .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
 .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--accent); font-weight: 700; letter-spacing: .05em; margin-bottom: 4px; }
 .section-title { font-size: 16px; font-weight: 800; margin-bottom: 14px; }
-
 .q-block { margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
 .q-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 .q-text { font-size: 13.5px; font-weight: 700; margin-bottom: 10px; }
@@ -35,11 +32,21 @@ body { font-weight: 500; background: #87CEEB; color: var(--text); font-family: '
 .q-opt:hover { border-color: var(--border2); }
 .q-opt.selected { border-color: var(--accent); background: #dbeafe; font-weight: 700; }
 .q-opt input { accent-color: var(--accent); }
-
 .submit-btn { width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--accent); color: white; font-weight: 800; font-size: 14px; cursor: pointer; margin-top: 6px; }
 .submit-btn:hover { background: #2563eb; }
 .submit-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 .progress-note { text-align: center; font-size: 11.5px; color: var(--muted2); margin-top: 8px; font-family: 'IBM Plex Mono', monospace; }
+
+/* ── STUDENT INFO ── */
+.field-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.field { flex: 1; min-width: 200px; }
+.field-label { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--muted2); font-weight: 700; letter-spacing: .05em; margin-bottom: 6px; display: block; }
+.field input[type=text] {
+  width: 100%; padding: 10px 12px; border-radius: 8px; border: 1.5px solid var(--border);
+  background: var(--panel2); color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 13px; outline: none;
+}
+.field input[type=text]:focus { border-color: var(--accent); }
+.field input[type=text].error { border-color: var(--red); }
 
 /* ── RESULTS ── */
 .result-hero { text-align: center; padding: 28px 20px; }
@@ -49,7 +56,6 @@ body { font-weight: 500; background: #87CEEB; color: var(--text); font-family: '
 .result-badge.start { background: #fee2e2; color: #b91c1c; }
 .result-score { font-family: 'IBM Plex Mono', monospace; font-size: 42px; font-weight: 800; margin-bottom: 4px; }
 .result-detail { font-size: 13px; color: var(--muted2); max-width: 520px; margin: 0 auto; }
-
 .cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 10px; margin-top: 16px; }
 .cat-card { background: var(--panel2); border-radius: 8px; padding: 12px; }
 .cat-card-label { font-size: 10px; color: var(--muted2); font-family: 'IBM Plex Mono', monospace; margin-bottom: 4px; }
@@ -58,64 +64,102 @@ body { font-weight: 500; background: #87CEEB; color: var(--text); font-family: '
 .cat-card-score.weak { color: var(--red); }
 .cat-bar-outer { height: 5px; background: #d7e9f5; border-radius: 3px; margin-top: 6px; overflow: hidden; }
 .cat-bar-inner { height: 100%; border-radius: 3px; }
-
 .ladder-note { background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 10px; padding: 14px 16px; margin-top: 16px; font-size: 12px; color: #3730a3; line-height: 1.7; }
-
 .hidden { display: none !important; }
+
+/* ── SYNC STATUS ── */
+.sync-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted2); }
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: var(--amber); }
+.sync-dot.ok { background: var(--green); }
+.sync-dot.err { background: var(--red); }
+.sync-dot.pending { animation: pulse 1.1s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
 @media print { .no-print { display: none !important; } body { background: white; } }
 </style>
 </head>
 <body>
 <div class="wrap">
+<div class="hero">
+  <div class="hero-eyebrow">📋 PLACEMENT TEST</div>
+  <div class="hero-title">Where Should You Start?</div>
+  <div class="hero-sub">
+    <b>Why this test exists:</b> the 12-week EV Diagnosis &amp; Repair program (Weeks 1-8 theory/simulator + Weeks 9-12 real-vehicle OJT) assumes you already have basic ICE-technician-level skills, including circuit fundamentals, electromagnetism, and basic mechanical concepts. This 50-question test checks whether that's true for you yet.<br><br>
+    <b>What happens with your result:</b> a high score means you can start directly at Week 1 of the 12-week program. A lower score means you should complete the 6-week / 30-session ICE Fundamentals Preliminary track first — that's not a failure, it's the track doing its job correctly.
+  </div>
+</div>
 
-  <div class="hero">
-    <div class="hero-eyebrow">📋 PLACEMENT TEST</div>
-    <div class="hero-title">Where Should You Start?</div>
-    <div class="hero-sub">
-      <b>Why this test exists:</b> the 12-week EV Diagnosis &amp; Repair program (Weeks 1-8 theory/simulator + Weeks 9-12 real-vehicle OJT) assumes you already have basic ICE-technician-level skills, including circuit fundamentals, electromagnetism, and basic mechanical concepts. This 50-question test checks whether that's true for you yet.<br><br>
-      <b>What happens with your result:</b> a high score means you can start directly at Week 1 of the 12-week program. A lower score means you should complete the 6-week / 30-session ICE Fundamentals Preliminary track first — that's not a failure, it's the track doing its job correctly.
+<div id="quizArea">
+
+  <div class="panel">
+    <div class="section-label">BEFORE YOU START</div>
+    <div class="section-title">Your details</div>
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label" for="studentName">FULL NAME *</label>
+        <input type="text" id="studentName" placeholder="e.g. Budi Santoso" />
+      </div>
+      <div class="field">
+        <label class="field-label" for="studentClass">CLASS / SCHOOL</label>
+        <input type="text" id="studentClass" placeholder="e.g. SMKN 1 Adiwerna" value="SMKN 1 Adiwerna" />
+      </div>
+      <div class="field">
+        <label class="field-label" for="studentId">STUDENT ID (OPTIONAL)</label>
+        <input type="text" id="studentId" placeholder="e.g. 2026-0142" />
+      </div>
     </div>
   </div>
 
-  <div id="quizArea">
-    <div class="panel">
-      <div class="section-label">SECTION 1 — SYSTEMS &amp; SAFETY</div>
-      <div class="section-title">Vehicle systems, shop safety, documentation, Ohm's Law</div>
-      <div id="section1"></div>
-    </div>
-    <div class="panel">
-      <div class="section-label">SECTION 2 — CIRCUITS &amp; ELECTROMAGNETISM</div>
-      <div class="section-title">Series/parallel circuits, electromagnetism, diodes, transformers, thermistors</div>
-      <div id="section2"></div>
-    </div>
-    <div class="panel">
-      <div class="section-label">SECTION 3 — DIAGNOSTIC REASONING</div>
-      <div class="section-title">The 4-step pattern, multimeter use, DTC basics</div>
-      <div id="section3"></div>
-    </div>
-    <div class="panel">
-      <div class="section-label">SECTION 4 — MECHANICAL FUNDAMENTALS</div>
-      <div class="section-title">Gear ratio, torque vs. power, ICE cooling/heat management</div>
-      <div id="section4"></div>
-    </div>
-    <div class="panel">
-      <div class="section-label">SECTION 5 — ELECTRICAL SYSTEMS</div>
-      <div class="section-title">12V battery/charging, wiring diagrams, sensor-actuator-ECU</div>
-      <div id="section5"></div>
-    </div>
-    <div class="panel">
-      <div class="section-label">SECTION 6 — PROFESSIONAL READINESS</div>
-      <div class="section-title">Documentation, communication, safety culture</div>
-      <div id="section6"></div>
-    </div>
-    <button class="submit-btn no-print" id="submitBtn" onclick="submitTest()" disabled>Answer all questions to see your result (0/50)</button>
+  <div class="panel">
+    <div class="section-label">SECTION 1 — SYSTEMS &amp; SAFETY</div>
+    <div class="section-title">Vehicle systems, shop safety, documentation, Ohm's Law</div>
+    <div id="section1"></div>
   </div>
 
-  <div id="resultArea" class="hidden"></div>
+  <div class="panel">
+    <div class="section-label">SECTION 2 — CIRCUITS &amp; ELECTROMAGNETISM</div>
+    <div class="section-title">Series/parallel circuits, electromagnetism, diodes, transformers, thermistors</div>
+    <div id="section2"></div>
+  </div>
 
+  <div class="panel">
+    <div class="section-label">SECTION 3 — DIAGNOSTIC REASONING</div>
+    <div class="section-title">The 4-step pattern, multimeter use, DTC basics</div>
+    <div id="section3"></div>
+  </div>
+
+  <div class="panel">
+    <div class="section-label">SECTION 4 — MECHANICAL FUNDAMENTALS</div>
+    <div class="section-title">Gear ratio, torque vs. power, ICE cooling/heat management</div>
+    <div id="section4"></div>
+  </div>
+
+  <div class="panel">
+    <div class="section-label">SECTION 5 — ELECTRICAL SYSTEMS</div>
+    <div class="section-title">12V battery/charging, wiring diagrams, sensor-actuator-ECU</div>
+    <div id="section5"></div>
+  </div>
+
+  <div class="panel">
+    <div class="section-label">SECTION 6 — PROFESSIONAL READINESS</div>
+    <div class="section-title">Documentation, communication, safety culture</div>
+    <div id="section6"></div>
+  </div>
+
+  <button class="submit-btn no-print" id="submitBtn" onclick="submitTest()" disabled>Answer all questions to see your result (0/50)</button>
+</div>
+
+<div id="resultArea" class="hidden"></div>
 </div>
 
 <script>
+/* =========================================================
+   Google Sheets result intake.
+   Paste your Apps Script Web App URL below (ends in /exec).
+   See Code.gs for how to create it.
+   ========================================================= */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRoYh6v7gL4QvhzwIz1zLDcGJ8jJ9tG9cYU6ikWXWi9I5UADrNAeWtv55U34mH6zkGXw/exec";
+
 const QUESTIONS = {
   1: [
     { q: "What is the ECU?", opts: ["A type of tire", "The vehicle's onboard computer", "A fuel additive", "A brake part"], correct: 1 },
@@ -182,6 +226,7 @@ const QUESTIONS = {
 };
 
 const SECTION_LABELS = { 1: "Systems & Safety", 2: "Circuits & Electromagnetism", 3: "Diagnostic Reasoning", 4: "Mechanical Fundamentals", 5: "Electrical Systems", 6: "Professional Readiness" };
+
 let answers = {}; // key: "sectionNum-qIndex" -> selected option index
 
 function renderQuestions() {
@@ -222,7 +267,43 @@ function updateProgress() {
   btn.disabled = answered !== total;
 }
 
+async function submitToSheet(record) {
+  const statusEl = document.getElementById('syncStatus');
+  if (!SCRIPT_URL || SCRIPT_URL.indexOf('PASTE_YOUR') === 0) {
+    if (statusEl) statusEl.innerHTML = `<span class="sync-dot err"></span>Result was not sent — SCRIPT_URL is not configured yet.`;
+    return;
+  }
+  if (statusEl) statusEl.innerHTML = `<span class="sync-dot pending"></span>Sending your result to your instructor...`;
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight against Apps Script
+      body: JSON.stringify(record)
+    });
+    const data = await res.json().catch(() => null);
+    if (statusEl) {
+      statusEl.innerHTML = (data && data.status === 'ok')
+        ? `<span class="sync-dot ok"></span>Result sent to your instructor.`
+        : `<span class="sync-dot err"></span>Could not confirm delivery — please show this screen to your instructor.`;
+    }
+  } catch (e) {
+    if (statusEl) statusEl.innerHTML = `<span class="sync-dot err"></span>Could not send automatically — please show this screen to your instructor.`;
+  }
+}
+
 function submitTest() {
+  const nameInput = document.getElementById('studentName');
+  const name = nameInput.value.trim();
+  if (!name) {
+    nameInput.classList.add('error');
+    nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    nameInput.focus();
+    return;
+  }
+  nameInput.classList.remove('error');
+  const cls = document.getElementById('studentClass').value.trim() || 'SMKN 1 Adiwerna';
+  const sid = document.getElementById('studentId').value.trim();
+
   const sectionScores = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
   const sectionMax = {};
   Object.keys(QUESTIONS).forEach(sec => { sectionMax[sec] = QUESTIONS[sec].length; });
@@ -232,6 +313,7 @@ function submitTest() {
       if (answers[key] === item.correct) sectionScores[sec]++;
     });
   });
+
   const totalScore = Object.values(sectionScores).reduce((a,b)=>a+b, 0);
   const pct = Math.round((totalScore / 50) * 100);
 
@@ -270,7 +352,7 @@ function submitTest() {
     <div class="panel result-hero">
       <div class="result-badge ${badgeClass}">${badgeText}</div>
       <div class="result-score">${pct}%</div>
-      <div class="result-detail">${totalScore} out of 20 correct</div>
+      <div class="result-detail">${totalScore} out of 50 correct</div>
     </div>
     <div class="panel">
       <div class="section-title">${recTitle}</div>
@@ -279,10 +361,20 @@ function submitTest() {
       <div class="ladder-note">
         📍 <b>Where this fits on the bigger picture:</b> this test only places you at the <i>start</i> of the pathway. The full picture is: <b>Preliminary track</b> (if needed) → <b>12-week program Weeks 1-8</b> get you to solid <b>Blue-level</b> judgment → <b>Weeks 9-12 OJT</b> get you to <b>Orange-level</b> supervised competence → independent <b>Red-level</b> live-HV authorization comes afterward, from your employer's own certification process, tracked with the companion Red Pathway Logbook.
       </div>
+      <div class="sync-row no-print" id="syncStatus"><span class="sync-dot pending"></span>Preparing to send your result...</div>
     </div>
     <button class="submit-btn no-print" onclick="window.print()">🖨 Print / Save This Result</button>
     <button class="submit-btn no-print" style="background:var(--panel);color:var(--muted);border:1px solid var(--border2);margin-top:10px" onclick="location.reload()">↺ Retake Test</button>
   `;
+
+  submitToSheet({
+    name, cls, sid,
+    timestamp: Date.now(),
+    correct: totalScore, total: 50, pct, pass: pct >= 80,
+    sectionScores: Object.keys(sectionScores).map(sec => ({
+      name: SECTION_LABELS[sec], correct: sectionScores[sec], total: sectionMax[sec]
+    }))
+  });
 }
 
 renderQuestions();
