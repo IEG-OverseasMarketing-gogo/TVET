@@ -1,0 +1,1370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Comfort Zone Quest · IEG HVAC</title>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap');
+
+:root{
+  --bg:#EEF1F4; --panel:#FFFFFF; --line:#D9DEE5; --line-soft:#E7EBF0;
+  --ink:#0F1A2E; --ink-2:#2E3A52; --ink-3:#5B6577; --ink-4:#8A93A4;
+  --primary:#14B8A6; --primary-d:#0E8A7C; --navy:#0F2D55;
+  --mint:#DCF1E6; --mint-d:#1F8A5B;
+  --sky:#DDEBFB; --sky-d:#2A6FDB;
+  --peach:#FBE3D5; --peach-d:#D97757;
+  --lilac:#E8E2F4; --lilac-d:#6B5BD2;
+  --lemon:#F6EDC8; --lemon-d:#9C7B14;
+  --rose:#FBD7DC; --rose-d:#C0364E;
+  --radius:16px; --radius-sm:10px;
+  --font-sans:'Pretendard','Pretendard Variable',ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;min-height:100%;
+  background:
+    radial-gradient(circle at 14% -8%, rgba(20,184,166,.22) 0%, transparent 40%),
+    radial-gradient(circle at 88% 108%, rgba(58,110,255,.22) 0%, transparent 46%),
+    radial-gradient(circle at 50% 0%, #17399e 0%, #0a1c52 42%, #050c26 100%);
+}
+body{font-family:var(--font-sans);color:var(--ink);-webkit-font-smoothing:antialiased;}
+button{font-family:inherit;cursor:pointer;}
+
+.wrap{max-width:1180px;margin:0 auto;padding:14px 18px 30px;}
+
+/* ── Header ─────────────────────────────────────────────── */
+.head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px;color:#e7ecf5;}
+.head-left{display:flex;align-items:center;gap:12px;}
+.badge{width:38px;height:38px;border-radius:9px;background:#fff;
+  display:grid;place-items:center;padding:5px;
+  box-shadow:0 6px 16px rgba(0,0,0,.28);}
+.badge img{width:100%;height:100%;object-fit:contain;display:block;}
+.head h1{margin:0;font-size:17px;font-weight:700;letter-spacing:.01em;}
+.head p{margin:2px 0 0;font-size:12px;color:#9aa7c0;}
+.head-right{display:flex;align-items:center;gap:10px;font-family:var(--font-mono);}
+.clock{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;
+  padding:8px 14px;font-size:13px;color:#e7ecf5;display:flex;align-items:center;gap:8px;}
+.clock .dot{width:7px;height:7px;border-radius:50%;background:var(--primary);box-shadow:0 0 8px var(--primary);}
+
+/* ── Layout ─────────────────────────────────────────────── */
+.grid{display:grid;grid-template-columns:1fr 300px;gap:16px;}
+@media (max-width:880px){.grid{grid-template-columns:1fr;}}
+
+.panel{background:var(--panel);border-radius:var(--radius);border:1px solid var(--line);
+  box-shadow:0 10px 30px rgba(10,17,32,.25);}
+
+/* ── Score strip ────────────────────────────────────────── */
+.scorebar{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:8px;}
+@media (max-width:760px){.scorebar{grid-template-columns:repeat(2,1fr);}}
+.score-card{padding:14px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--line);}
+.score-card .lbl{font-size:11px;color:var(--ink-4);font-weight:600;letter-spacing:.03em;text-transform:uppercase;}
+.score-card .val{font-family:var(--font-mono);font-weight:800;font-size:24px;margin-top:4px;color:var(--ink);}
+.score-card .sc-target{font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--ink-4);margin-top:3px;}
+.score-card .sc-target b{color:var(--primary-d);}
+.score-card .val small{font-size:13px;color:var(--ink-4);font-weight:600;margin-left:2px;}
+
+/* ── Room stage ─────────────────────────────────────────── */
+.zoneTabs{display:flex;justify-content:center;gap:22px;padding:32px 4px 6px;}
+.ztab{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;user-select:none;
+  position:relative;}
+.ztab .zi-badge{width:42px;height:42px;border-radius:50%;background:#fff;border:2px solid var(--line);
+  display:grid;place-items:center;font-size:19px;line-height:1;transition:.15s;
+  box-shadow:0 2px 6px rgba(15,26,46,.08);}
+.ztab .zn{font-size:9.5px;font-weight:700;color:var(--ink-4);letter-spacing:.01em;text-align:center;}
+.ztab .zratio{font-family:var(--font-mono);font-size:9px;font-weight:800;letter-spacing:.01em;}
+.ztab .zratio.c{color:var(--rose-d);}
+.ztab .zratio.b{color:var(--lemon-d);}
+.ztab .zratio.a{color:var(--primary-d);}
+.ztab .zratio.s{color:var(--sky-d);}
+.ztab:hover .zi-badge{border-color:var(--primary);transform:translateY(-2px);}
+.ztab.on .zi-badge{border-color:var(--primary);background:var(--mint);
+  box-shadow:0 0 0 4px rgba(20,184,166,.18);}
+.ztab.on .zn{color:var(--primary-d);}
+.ztab .zdot{position:absolute;top:-2px;right:0px;width:9px;height:9px;border-radius:50%;
+  background:transparent;border:2px solid #fff;}
+.ztab .zdot.warn{background:var(--lemon-d);}
+.ztab .zdot.bad{background:var(--rose-d);box-shadow:0 0 6px var(--rose-d);}
+.ztab .zocc{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+  background:var(--navy);color:#fff;font-family:var(--font-mono);font-size:9px;font-weight:800;
+  padding:1px 6px;border-radius:999px;border:2px solid #fff;white-space:nowrap;}
+
+/* popup bubbles float above each room's badge like a speech bubble, so
+   everything stays in the one cluster you're already watching */
+@keyframes popbubble{
+  0%{opacity:0;transform:translateX(-50%) translateY(6px) scale(.82);}
+  55%{opacity:1;transform:translateX(-50%) translateY(-3px) scale(1.05);}
+  100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
+}
+.zpop{position:absolute;bottom:100%;left:50%;margin-bottom:9px;
+  background:#fff;border-radius:12px;padding:5px 11px;font-size:10.5px;font-weight:800;
+  white-space:nowrap;box-shadow:0 8px 18px rgba(15,26,46,.2);color:var(--ink-2);
+  border:1.5px solid var(--line);z-index:6;pointer-events:none;
+  animation:popbubble .35s ease;}
+.zpop::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:#fff;}
+.zpop.occ{color:var(--navy);border-color:var(--navy);}
+.zpop.bad{color:var(--rose-d);border-color:var(--rose-d);}
+.zpop.warn{color:var(--lemon-d);border-color:var(--lemon-d);}
+
+.stage{padding:14px 16px;display:grid;gap:8px;}
+.stage-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.stage-title{font-size:14px;font-weight:700;color:var(--ink);}
+.occ{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);font-weight:600;}
+.occ .peeps{display:flex;gap:2px;}
+.peep{width:8px;height:8px;border-radius:50%;background:var(--sky-d);}
+.peep.off{background:var(--line);}
+
+.gauges{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+@media (max-width:700px){.gauges{grid-template-columns:repeat(2,1fr);}}
+.gauge{border-radius:12px;padding:9px 10px;position:relative;overflow:hidden;border:1px solid var(--line-soft);}
+.gauge .g-lbl{font-size:11px;font-weight:700;letter-spacing:.02em;}
+.gauge .g-val{font-family:var(--font-mono);font-weight:800;font-size:21px;margin-top:4px;}
+.gauge .g-unit{font-size:11px;font-weight:600;opacity:.65;margin-left:2px;}
+.gauge .g-bar{margin-top:6px;height:5px;border-radius:4px;background:rgba(0,0,0,.08);overflow:hidden;}
+.gauge .g-fill{height:100%;border-radius:4px;transition:width .35s ease, background .35s ease;}
+.gauge .g-state{margin-top:4px;font-size:10px;font-weight:700;letter-spacing:.02em;}
+
+.gauge.temp{background:var(--sky);color:#123a66;}
+.gauge.hum{background:var(--mint);color:#0f5334;}
+.gauge.co2{background:var(--lilac);color:#3a2d6e;}
+.gauge.pm{background:var(--peach);color:#6b3b23;}
+
+/* event log */
+.log{border-top:1px dashed var(--line);padding-top:8px;display:grid;gap:4px;max-height:72px;overflow:auto;}
+.log-row{font-size:12px;color:var(--ink-3);display:flex;gap:8px;align-items:baseline;}
+.log-row .t{font-family:var(--font-mono);color:var(--ink-4);width:44px;flex:none;}
+.log-row.warn{color:var(--rose-d);font-weight:600;}
+.log-row.good{color:var(--mint-d);font-weight:600;}
+
+/* ── Controls panel ─────────────────────────────────────── */
+.controls{padding:18px;display:grid;gap:16px;align-content:start;}
+.controls h2{margin:0;font-size:13px;font-weight:700;color:var(--ink);}
+.ctrl{display:grid;gap:8px;}
+.ctrl-h{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700;color:var(--ink-2);}
+.ctrl-h .cur{font-family:var(--font-mono);color:var(--primary-d);font-weight:800;}
+/* nickname + save/leaderboard */
+input#nickname{width:100%;padding:9px 12px;border-radius:9px;border:1px solid var(--line);
+  background:#fbfcfe;font-size:13px;font-family:inherit;color:var(--ink);outline:none;}
+input#nickname:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(20,184,166,.15);}
+
+.savebar{margin-top:16px;padding:9px 12px;border-radius:10px;background:var(--bg);
+  font-size:11.5px;font-weight:700;color:var(--ink-3);text-align:center;}
+.savebar.ok{background:var(--mint);color:var(--mint-d);}
+.savebar.err{background:var(--rose);color:var(--rose-d);}
+
+.planets{margin-top:14px;padding:12px 14px;border-radius:12px;
+  background:linear-gradient(135deg,#0F2D55,#1a3a6e);text-align:center;}
+.planets .pl-title{font-size:11px;font-weight:700;color:#9fc4ea;margin-bottom:8px;}
+.planets .pl-row{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;}
+.planet-slot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:16px;
+  background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.25);}
+.planet-slot.got{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);
+  box-shadow:0 0 10px rgba(255,255,255,.25);}
+.planet-slot.locked{opacity:.35;filter:grayscale(1);}
+
+.lbwrap{margin-top:14px;text-align:left;}
+.lbtabs{display:flex;gap:6px;margin-bottom:8px;}
+.lbtab{flex:1;padding:7px;border-radius:8px;border:1px solid var(--line);background:#fff;
+  font-size:11.5px;font-weight:700;color:var(--ink-3);}
+.lbtab.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+.lblist{display:grid;gap:5px;max-height:170px;overflow:auto;}
+.lbrow{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:9px;background:var(--bg);font-size:12px;}
+.lbrow .rk{width:20px;font-family:var(--font-mono);font-weight:800;color:var(--ink-4);text-align:center;flex:none;}
+.lbrow.top1 .rk{color:var(--lemon-d);}
+.lbrow.top2 .rk{color:#8a93a4;}
+.lbrow.top3 .rk{color:var(--peach-d);}
+.lbrow .nm{flex:1;font-weight:700;color:var(--ink-2);text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lbrow .sc{font-family:var(--font-mono);font-weight:800;color:var(--primary-d);}
+.lbempty{font-size:11.5px;color:var(--ink-4);text-align:center;padding:12px 0;}
+
+/* ── Range slider ───────────────────────────────────────── */
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:4px;background:var(--line-soft);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+  background:var(--primary);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);cursor:pointer;margin-top:-6px;}
+.seg{display:flex;gap:6px;}
+.seg button{flex:1;padding:8px 4px;border-radius:9px;border:1px solid var(--line);background:#fbfcfe;
+  font-size:12px;font-weight:700;color:var(--ink-3);transition:.15s;}
+.seg button.on{background:var(--primary);border-color:var(--primary-d);color:#fff;box-shadow:0 4px 10px rgba(20,184,166,.35);}
+.toggle{display:flex;align-items:center;justify-content:space-between;background:#fbfcfe;border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;}
+.toggle .t-lbl{font-size:12.5px;font-weight:700;color:var(--ink-2);}
+.toggle .t-sub{font-size:10.5px;color:var(--ink-4);margin-top:1px;}
+.switch{width:40px;height:22px;border-radius:99px;background:var(--line);position:relative;transition:.2s;flex:none;}
+.switch.on{background:var(--primary);}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.2s;}
+.switch.on::after{left:20px;}
+.hint{font-size:10.5px;color:var(--ink-4);line-height:1.5;}
+.toggle.auto{background:var(--sky);border-color:var(--sky-d);}
+.toggle.auto .t-lbl{color:var(--sky-d);}
+
+/* comfort streak */
+.streak{padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,#0F2D55,#123a66);color:#fff;
+  display:flex;align-items:center;justify-content:space-between;}
+.streak .lbl{font-size:11px;color:#9fc4ea;font-weight:700;letter-spacing:.03em;text-transform:uppercase;}
+.streak .n{font-family:var(--font-mono);font-weight:800;font-size:22px;margin-top:3px;}
+
+.dayClock{display:flex;align-items:center;gap:9px;}
+.clockRing{position:relative;width:38px;height:38px;flex:none;}
+.clockRing svg{width:100%;height:100%;transform:rotate(-90deg);}
+.clockRing .ring-bg{fill:none;stroke:var(--line-soft);stroke-width:6;}
+.clockRing .ring-fg{fill:none;stroke:var(--primary);stroke-width:6;stroke-linecap:round;
+  transition:stroke-dashoffset .3s linear;}
+.clockRing .clockCenter{position:absolute;inset:0;display:grid;place-items:center;
+  font-family:var(--font-mono);font-size:8.5px;font-weight:800;color:var(--ink);}
+.dayClock-labels{display:flex;flex-direction:column;gap:1px;}
+.dayClock-labels .dc-t{font-size:10px;font-weight:700;color:var(--ink-2);}
+.dayClock-labels .dc-range{font-size:9px;color:var(--ink-4);font-family:var(--font-mono);}
+
+.btnrow{display:flex;gap:10px;margin-top:6px;}
+.btn{flex:1;padding:11px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:700;font-size:13px;color:var(--ink-2);}
+.btn.primary{background:var(--primary);border-color:var(--primary-d);color:#fff;box-shadow:0 6px 16px rgba(20,184,166,.35);}
+
+/* ── Avatar / quest track ───────────────────────────────── */
+.avatar-track{position:relative;margin-top:0;padding:32px 14px 6px;border-radius:14px;
+  background:var(--bg);border:1px solid var(--line-soft);
+  display:grid;grid-template-columns:repeat(4,1fr);}
+.avatar-track::after{content:'';position:absolute;left:14%;right:14%;top:59px;height:2px;
+  background:var(--line);z-index:0;}
+.station{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;user-select:none;
+  position:relative;z-index:1;}
+.station .s-badge{width:40px;height:40px;border-radius:50%;background:#fff;border:2px solid var(--line);
+  display:grid;place-items:center;font-size:18px;line-height:1;transition:.15s;
+  box-shadow:0 2px 6px rgba(15,26,46,.08);}
+.station .s-lbl{font-size:9px;font-weight:700;color:var(--ink-4);letter-spacing:.01em;text-align:center;}
+.station:hover .s-badge{border-color:var(--primary);transform:translateY(-2px);}
+.station.active .s-badge{border-color:var(--primary);background:var(--mint);
+  box-shadow:0 0 0 4px rgba(20,184,166,.18);}
+.station.active .s-lbl{color:var(--primary-d);}
+.avatar{position:absolute;top:-8px;width:25%;left:0%;text-align:center;transition:left .3s cubic-bezier(.34,1.56,.64,1);}
+.avatar .sprite{font-size:26px;display:inline-block;animation:bob 1.1s ease-in-out infinite;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18));}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.avatar .bubble{position:relative;display:inline-block;max-width:170px;background:#fff;border:1px solid var(--line);
+  border-radius:10px;padding:6px 9px;font-size:10.5px;font-weight:600;color:var(--ink-2);
+  box-shadow:0 6px 14px rgba(10,17,32,.14);margin-bottom:6px;line-height:1.35;}
+.avatar .bubble::after{content:'';position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:#fff;}
+.avatar.mood-good .bubble{border-color:var(--mint-d);color:var(--mint-d);}
+.avatar.mood-warn .bubble{border-color:var(--lemon-d);color:var(--lemon-d);}
+.avatar.mood-bad  .bubble{border-color:var(--rose-d);color:var(--rose-d);}
+
+/* movement hint + D-pad */
+.movehint{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 2px;}
+.movehint>span{font-size:10.5px;color:var(--ink-4);font-weight:600;}
+.dpad{position:relative;width:82px;height:82px;border-radius:50%;flex:none;
+  background:var(--bg);border:1px solid var(--line-soft);box-shadow:inset 0 1px 3px rgba(15,26,46,.08);}
+.dpad button{position:absolute;width:26px;height:26px;border-radius:8px;border:1px solid var(--line);
+  background:#fff;color:var(--ink-3);font-size:11px;font-weight:800;cursor:pointer;transition:.12s;
+  display:grid;place-items:center;box-shadow:0 2px 5px rgba(15,26,46,.08);}
+.dpad #dpadUp{top:5px;left:50%;transform:translateX(-50%);}
+.dpad #dpadUp:active{transform:translateX(-50%) scale(.9);background:var(--primary);border-color:var(--primary-d);color:#fff;}
+.dpad #dpadDown{bottom:5px;left:50%;transform:translateX(-50%);}
+.dpad #dpadDown:active{transform:translateX(-50%) scale(.9);background:var(--primary);border-color:var(--primary-d);color:#fff;}
+.dpad #dpadLeft{left:5px;top:50%;transform:translateY(-50%);}
+.dpad #dpadLeft:active{transform:translateY(-50%) scale(.9);background:var(--primary);border-color:var(--primary-d);color:#fff;}
+.dpad #dpadRight{right:5px;top:50%;transform:translateY(-50%);}
+.dpad #dpadRight:active{transform:translateY(-50%) scale(.9);background:var(--primary);border-color:var(--primary-d);color:#fff;}
+.dpad-hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:26px;height:26px;border-radius:50%;background:#fff;border:1px solid var(--line-soft);}
+
+
+.quest-panel{border-top:1px solid var(--line);padding-top:14px;display:grid;gap:10px;}
+.quest-list{display:grid;gap:8px;}
+.quest{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;border-radius:10px;background:#fbfcfe;
+  border:1px solid var(--line);}
+.quest.done{background:var(--mint);border-color:var(--mint-d);}
+.quest .qchk{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none;margin-top:1px;
+  display:grid;place-items:center;font-size:10px;color:#fff;}
+.quest.done .qchk{background:var(--mint-d);border-color:var(--mint-d);}
+.quest .qbody{display:grid;gap:1px;}
+.quest .qt{font-size:12px;font-weight:700;color:var(--ink-2);}
+.quest.done .qt{color:var(--mint-d);}
+.quest .qd{font-size:10.5px;color:var(--ink-4);}
+.quest .qpts{font-family:var(--font-mono);font-size:10px;color:var(--primary-d);font-weight:700;margin-left:auto;flex:none;}
+
+/* ── Rule bot ───────────────────────────────────────────── */
+.botFab{position:fixed;right:20px;bottom:20px;width:54px;height:54px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--primary-d));border:none;color:#fff;
+  font-size:24px;box-shadow:0 10px 26px rgba(20,184,166,.45);z-index:60;
+  display:grid;place-items:center;transition:.15s;}
+.botFab:hover{transform:scale(1.06);}
+.botFab .pulse{position:absolute;inset:0;border-radius:50%;border:2px solid var(--primary);
+  animation:botpulse 2.2s ease-out infinite;}
+@keyframes botpulse{0%{transform:scale(1);opacity:.7;}100%{transform:scale(1.6);opacity:0;}}
+
+.botPanel{position:fixed;right:20px;bottom:86px;width:340px;max-width:calc(100vw - 32px);
+  height:440px;max-height:calc(100vh - 130px);background:#fff;border-radius:18px;
+  box-shadow:0 30px 80px rgba(10,17,32,.45);border:1px solid var(--line);
+  display:none;flex-direction:column;overflow:hidden;z-index:60;}
+.botPanel.show{display:flex;}
+.bot-head{background:var(--navy);color:#fff;padding:13px 16px;display:flex;align-items:center;gap:10px;}
+.bot-head .bh-ic{width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.14);
+  display:grid;place-items:center;font-size:16px;flex:none;}
+.bot-head .bh-txt{flex:1;}
+.bot-head .bh-t{font-size:13px;font-weight:800;}
+.bot-head .bh-s{font-size:10px;color:#9fc4ea;}
+.bot-head button{background:none;border:none;color:#cdd8ea;font-size:16px;padding:4px;}
+
+.bot-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--bg);}
+.bmsg{max-width:84%;font-size:12.5px;line-height:1.55;padding:9px 12px;border-radius:13px;}
+.bmsg.bot{align-self:flex-start;background:#fff;border:1px solid var(--line);color:var(--ink-2);
+  border-bottom-left-radius:4px;}
+.bmsg.user{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px;}
+
+.bot-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px;background:var(--bg);}
+.bot-chips button{padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;
+  font-size:11px;font-weight:600;color:var(--ink-3);}
+.bot-chips button:hover{border-color:var(--primary);color:var(--primary-d);}
+
+.bot-inputrow{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:#fff;}
+.bot-inputrow input{flex:1;padding:9px 12px;border-radius:999px;border:1px solid var(--line);
+  background:var(--bg);font-size:12.5px;outline:none;}
+.bot-inputrow input:focus{border-color:var(--primary);}
+.bot-inputrow button{width:38px;height:38px;border-radius:50%;border:none;background:var(--primary);
+  color:#fff;font-size:14px;flex:none;}
+
+/* ── Result overlay ─────────────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(10,17,32,.72);backdrop-filter:blur(6px);
+  display:none;place-items:center;z-index:50;padding:20px;}
+.overlay.show{display:grid;}
+.result{width:100%;max-width:420px;background:#fff;border-radius:20px;padding:28px 26px;text-align:center;
+  box-shadow:0 40px 100px rgba(0,0,0,.5);}
+.result .grade{font-family:var(--font-mono);font-weight:800;font-size:64px;line-height:1;
+  background:linear-gradient(135deg,var(--primary-d),var(--primary));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.result .gradeLabel{font-size:12px;font-weight:800;color:var(--navy);letter-spacing:.02em;margin-top:2px;}
+.result h3{margin:8px 0 4px;font-size:16px;}
+.result p{margin:0 0 18px;font-size:12.5px;color:var(--ink-4);}
+.result .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.result .stats div{background:var(--bg);border-radius:10px;padding:10px;}
+.result .stats .l{font-size:10.5px;color:var(--ink-4);font-weight:700;}
+.result .stats .v{font-family:var(--font-mono);font-weight:800;font-size:17px;margin-top:2px;}
+.gradeFootnote{margin-top:14px;font-size:9.5px;color:var(--ink-4);line-height:1.5;text-align:left;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div class="head-left">
+      <div class="badge"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAAA2CAYAAACRO1RGAAAIEElEQVR4nO2af2xbVxXHP/e8Z8dptCRtaFnqTFsQhIbBmgk16tSmU0GVEIvoFCqgiG6Ayv4iorR/Fyb2D4OmmtSKP1DVf0ADIRS1IqqmdmpFo240GdoqMRK6SmuZnRRC0h9a2mC/dy5/PLt17OdfjatYIl/Jsn3Pu/ec9/W933PveTaqygoWQ5Y7gHrECikhWCElBCukhGCFlBCskBKCFVJC4NZ6wClpabOkNoI8BfbTABZ2Zu0GOwpmDswVCxccWt9v1+Sd2vnlWTBtYLostnuxTztrkXcFd3S93potNpYptXn7eEQ+4QpN+e2NEf5jd+j84oC8PRZeALu22huy2IOPsfm36Dmv2r4Jadpk0B9bTF81/QxmAvTncb17Nt9WcvkYh1+q8Pf818dpnsu9TvH6LPbAgxCSCfCVJGOnpiW2odI+U9LSlpSm02CHqyUEIJhF8lSYrW40xWK7feRMUlYdRbaXXNYJadqkpN/LLo8HheC/Ed5eZ7CwM8nF14rZg9lkh2vhq51nroS111xocyFEehYJmmx3k4w9CtoFZiBXgHNhYWdSGofz1/u0xFf5OK+DDfVnMBMWfuXgT1oaZnJ9T0lLm+J9yqD9FvN9gz1eTMMeKikFCq/nvDgkCF5nk9I4bJFDYVpkkUPTEt+am5mUuWNgiuiWGYzTO1LsRjOxzALj0xJ/Vbm5pljcy7p84nr3rEPr1iAT5MOuVW78IvvtI2n8brigmhkh0tOh8ycqzV7tmrwT1/lEMXvJlFwpEtL0PNgj+e0deuexSvonpanDYt8Oszms/mw7XakEFz8Mt+uOdl2YrCrgMqgLoY3rfMJgj4fZlLnNCcaeDrMZ7PFaEwJ1QgqAsObVcIsZMNgXq+uzNJTdDwDx/HYD75Rakzn9n89vc2g9Hbatb9fknYQ0zRSKrukK3hdnHIOZqMXxIAwlSTHYF8PSpsUMEmSQMijUGeXmM0DozRjsW/n+im/Q7OWibu+l/vIQWufyyX2oKbl6mCvF9iD5sJg3i9mSjD1aTLjz4XNzEDiR21Y3mgJg4epyxwB1RoqBJ5Y7BqjR8nFoPZ3RirKI03u9uDWov1QCgz5N3rSvFWpCSkaolpwJwkTdYEeLlAY+U2wcoXUuoxX5HgqEPwx1I7RT0tIWbpExg5JPjMX0IdvdsK195kc6kd+ekFUVkVI3mmJJhQYs+G8onA6zfcRfvvMwYqkLUpLS+KVih712XZh0iP4prJ/BvFJ8hj04lp2U4DAoh4qYfwbBsT8oPhfCkjpSrlJXLWpKypS0tFUcoGx3k9K0L9hkFdZTDJzs0PkT979HQ4Qz0JYEY2PV1HfLoaYMW1JHElzsM9J43CIjBqZzz0jBrKCd4Dz1k2KFboOZiNO7L7dtvd6aTUjTYHgGsWuD+m7jceDPIJfj9F7PFeGkNHVUeh8l6ylJWXU0vGRoBnN/RciWCm/8o1LHpVBQxlwUU+PrD1K9L47Ce6nZ8lHmNi99FDMDZqDkgyqigwZOLt1XcdRSU55dSmeDHXVo3dqh8+Olrluvt2bjeueHYAYCEmuPmpFikXfDa62lYeCkg+6I691vV1Mf6dD58Q56ew1mqFqfgV8zYbEHHVoL9kA1qdHmIvMooS84m5g2sGuyGvCwniMHenbzSQNbgvPTfZ9gZgz2LQDFviPwT0P00gM/S/5/xbJv3uoRK6SEYIWUENScFBFxRKS51uPWAiKyLirRbSKdsVLXldzmRyV6QKFP8V5ycTco7F/kBEZTmhoSESdKtMvDbhHcfgBXoijej1T12tJvpyCubQr7BQ6nNHX+XjzSGYNrnwTuquq/8/vdv4drLwELxcav+uwjMAqMB59lJniPfM9D+4MrzIgEjx82KY//q9rxlwKXZK/i7hc4DBSQUvk41WM8/9cRbL/F3rD4e1XVz5jO53cU6YxFmHrSQ/cAtyz+EIBDtE/xdxjkbSV9LuxXLgcRaTY4AwaDjx2ISnSTh/dahEiPh+4xyN/AUMkjlKpJyToEEOSUi65VQHD+mNa0LyLrXNwNGfvMgi5MZIJ2BPf3GcYuOZjbXXxuYZLLf7AoBhkBu1twd4t0fkv1w6LTu1IES1oPGgwWbTGY1ZX0W7LQauaxpmCvw/11G7z0q9nrIkR6gk/md76mf5rS1NAHfPCFTBCHPf3vscy0x2H6y1XHoXrbwQwH/c1wSlNDHnZLxueIxd+bWfplUfVMyTi8tzRiEsPD9nvo14C/pjR1XkQmBffXuf18yP5z4JH8NsW0515rsYu+VwuLPBK86xaDQUmfUVU/IrFJ0LJlh6pnimLaRWRd5tW8oAsTFnvDYDa60rA3JrHuCJGC/6W4mAuZkPtdafimSGdMSZ/JtO1ukIYvZrObkj4Tk1h3TGLdItIcleiBqES3lYllnYd3LWj3dwUaI28AGJyXg4zl78p0bRSR5ojEnssfM4i1agTrHu5loiGL/7IhsgNsv4ftD+u1oAsTjkSuGswTwRjJ3QovWOwlg9noYw8CWOwlIJHGPwYQIXLUx/a5yKlSsQRkeF8PSDCrHdwfeKR/Y3C+YjCrM4RfBVa7uI8DuxTtE5HxfGEveSCMSaxb0bUe8TG41pwV0CxyhRQCMY0S7QJIkZoNyyIi0uzi9ggykyJ1WVX9bJuH956q3s5eF/iIfMOin/c1vS9njHX5sQAES7cz5pLszcYmIk6ESE+a9e9DkLY9vEmC/791hO2j6v6U7ErDXhdzIZf8h426J2U5sHIgDMH/AAvvYKDGCVH7AAAAAElFTkSuQmCC" alt="IEG logo" /></div>
+      <div>
+        <h1>Comfort Zone Quest</h1>
+        <p>Watch temperature, humidity, CO2 and PM2.5 to keep the room comfortable</p>
+      </div>
+    </div>
+    <div class="head-right">
+      <div class="clock"><span class="dot"></span><span id="clockTxt">08:00</span></div>
+    </div>
+  </div>
+
+  <div class="scorebar">
+    <div class="score-card"><div class="lbl">Comfort Ratio · Grade Basis</div><div class="val" id="ratioVal">0<small>%</small></div><div class="sc-target" id="ratioTarget">Poor&lt;45 · Fair45 · Good65 · Excel85</div></div>
+    <div class="score-card"><div class="lbl">Comfort Score</div><div class="val" id="scoreVal">0</div></div>
+    <div class="score-card"><div class="lbl">Energy Used</div><div class="val" id="energyVal">0.0<small>kWh</small></div></div>
+    <div class="score-card"><div class="lbl">Comfort Streak</div><div class="val" id="streakVal">0<small>tick</small></div></div>
+    <div class="score-card"><div class="lbl">Elapsed Time</div><div class="val" id="timeVal">08:00</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel stage">
+      <div class="zoneTabs" id="zoneTabs"></div>
+
+      <div class="stage-top">
+        <div class="stage-title" id="stageTitle">Meeting Room A · 4F</div>
+        <div class="dayClock">
+          <div class="clockRing">
+            <svg viewBox="0 0 60 60">
+              <circle class="ring-bg" cx="30" cy="30" r="25"></circle>
+              <circle class="ring-fg" id="clockRingFg" cx="30" cy="30" r="25"></circle>
+            </svg>
+            <span class="clockCenter" id="clockCenterTxt">08:00</span>
+          </div>
+          <div class="dayClock-labels">
+            <span class="dc-t">Day progress</span>
+            <span class="dc-range">08:00 → 20:00</span>
+          </div>
+        </div>
+        <div class="occ"><span id="occTxt">0 occupants</span><span class="peeps" id="peeps"></span></div>
+      </div>
+
+      <div class="avatar-track">
+        <div class="station" data-k="ac"><div class="s-badge">❄️</div><span class="s-lbl">AC/Heat</span></div>
+        <div class="station" data-k="fan"><div class="s-badge">🌬️</div><span class="s-lbl">Vent Fan</span></div>
+        <div class="station" data-k="purifier"><div class="s-badge">🌀</div><span class="s-lbl">Purifier</span></div>
+        <div class="station" data-k="humidity"><div class="s-badge">💧</div><span class="s-lbl">Humidity</span></div>
+        <div class="avatar" id="avatar">
+          <div class="bubble" id="bubble">Ready! Press Start to begin</div>
+          <div class="sprite">🧑‍🔧</div>
+        </div>
+      </div>
+
+      <div class="movehint">
+        <span>← → move · ↑ ↓ operate · tap a station to act</span>
+        <div class="dpad">
+          <div class="dpad-hub"></div>
+          <button id="dpadUp" aria-label="Turn on / increase">▲</button>
+          <button id="dpadLeft" aria-label="Move left">◀</button>
+          <button id="dpadRight" aria-label="Move right">▶</button>
+          <button id="dpadDown" aria-label="Turn off / decrease">▼</button>
+        </div>
+      </div>
+
+      <div class="gauges">
+        <div class="gauge temp">
+          <div class="g-lbl">TEMPERATURE</div>
+          <div class="g-val" id="tempVal">--<span class="g-unit">°C</span></div>
+          <div class="g-bar"><div class="g-fill" id="tempFill"></div></div>
+          <div class="g-state" id="tempState">Good</div>
+        </div>
+        <div class="gauge hum">
+          <div class="g-lbl">HUMIDITY (RH)</div>
+          <div class="g-val" id="humVal">--<span class="g-unit">%</span></div>
+          <div class="g-bar"><div class="g-fill" id="humFill"></div></div>
+          <div class="g-state" id="humState">Good</div>
+        </div>
+        <div class="gauge co2">
+          <div class="g-lbl">CO2</div>
+          <div class="g-val" id="co2Val">--<span class="g-unit">ppm</span></div>
+          <div class="g-bar"><div class="g-fill" id="co2Fill"></div></div>
+          <div class="g-state" id="co2State">Good</div>
+        </div>
+        <div class="gauge pm">
+          <div class="g-lbl">PM2.5</div>
+          <div class="g-val" id="pmVal">--<span class="g-unit">㎍/㎥</span></div>
+          <div class="g-bar"><div class="g-fill" id="pmFill"></div></div>
+          <div class="g-state" id="pmState">Good</div>
+        </div>
+      </div>
+
+      <div class="log" id="log"></div>
+    </div>
+
+    <div class="panel controls">
+      <h2>Control Panel</h2>
+
+      <div class="ctrl">
+        <div class="ctrl-h"><span>Nickname</span></div>
+        <input type="text" id="nickname" maxlength="16" placeholder="Nickname shown on the leaderboard" />
+        <div class="hint" id="nickHint">Enter a nickname and your result is added to the ranking automatically when you finish</div>
+      </div>
+
+      <div class="ctrl">
+        <div class="ctrl-h"><span>Setpoint Temp</span><span class="cur" id="setTempTxt">24°C</span></div>
+        <input type="range" id="setTemp" min="20" max="27" step="1" value="24" />
+        <div class="hint">Heating/cooling targets this temperature</div>
+      </div>
+
+      <div class="ctrl">
+        <div class="ctrl-h"><span>Ventilation (Fresh-air) Fan</span></div>
+        <div class="seg" id="fanSeg">
+          <button data-v="0">Off</button>
+          <button data-v="1">Low</button>
+          <button data-v="2">Mid</button>
+          <button data-v="3">High</button>
+        </div>
+        <div class="hint">CO2 drops faster, but outdoor temperature &amp; PM2.5 affect the room more</div>
+      </div>
+
+      <div class="toggle">
+        <div>
+          <div class="t-lbl">Air Purifier</div>
+          <div class="t-sub">Reduces PM2.5</div>
+        </div>
+        <div class="switch" id="purifierSw"></div>
+      </div>
+
+      <div class="toggle">
+        <div>
+          <div class="t-lbl">Auto Humidity Control</div>
+          <div class="t-sub">Pulls humidity toward 50%</div>
+        </div>
+        <div class="switch" id="humiditySw"></div>
+      </div>
+
+      <div class="toggle auto">
+        <div>
+          <div class="t-lbl">Optimal Start (Autopilot)</div>
+          <div class="t-sub">Auto pre-heat/cool &amp; setback based on occupancy forecast — hand this zone to AI</div>
+        </div>
+        <div class="switch" id="autoSw"></div>
+      </div>
+
+      <div class="streak">
+        <div>
+          <div class="lbl">Current Status</div>
+          <div class="n" id="statusTxt">Waiting to start</div>
+        </div>
+        <div style="font-size:26px" id="statusIcon">⏸</div>
+      </div>
+
+      <div class="quest-panel">
+        <h2>Quests · Manager Kim</h2>
+        <div class="quest-list" id="questList"></div>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn primary" id="startBtn">Start Playing</button>
+        <button class="btn" id="resetBtn">Reset</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="result">
+    <div class="grade" id="gradeTxt">A</div>
+    <div class="gradeLabel" id="gradeLabel">Good</div>
+    <h3>Workday Complete</h3>
+    <p id="gradeDesc">You managed the room comfort well.</p>
+    <div class="stats">
+      <div><div class="l">Final Score</div><div class="v" id="finalScore">0</div></div>
+      <div><div class="l">Comfort Ratio</div><div class="v" id="finalRatio">0%</div></div>
+      <div><div class="l">Best Streak</div><div class="v" id="finalStreak">0 tick</div></div>
+      <div><div class="l">Alerts</div><div class="v" id="finalAlerts">0</div></div>
+      <div><div class="l">Total Energy Used</div><div class="v" id="finalEnergy">0.0 kWh</div></div>
+      <div><div class="l">Wasted on Empty Rooms</div><div class="v" id="finalWaste">0.0 kWh</div></div>
+    </div>
+
+    <div class="savebar" id="saveStatus">Saving your result…</div>
+
+    <div class="planets" id="planetStrip" style="display:none">
+      <div class="pl-title">🏆 Win this month's throne to earn a planet!</div>
+      <div class="pl-row" id="planetRow"></div>
+    </div>
+
+    <div class="lbwrap">
+      <div class="lbtabs">
+        <button class="lbtab on" id="lbTabMonth">This Month</button>
+        <button class="lbtab" id="lbTabWeek">This Week</button>
+        <button class="lbtab" id="lbTabAll">All-Time</button>
+      </div>
+      <div class="lblist" id="lbList"><div class="lbempty">Loading…</div></div>
+    </div>
+
+    <button class="btn primary" style="width:100%" id="playAgainBtn">Play Again</button>
+    <div class="gradeFootnote">Grade tiers (Excellent / Good / Fair / Poor) follow how BMS/IAQ reports commonly bucket "% of time in comfort range." The comfort range itself is a simplified stand-in for ASHRAE 55 (thermal comfort) and 62.1 (ventilation).</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ── Leaderboard config ──────────────────────────────────────
+  // Paste the Google Apps Script Web App URL here after deploying it (see setup notes).
+  // Leave blank to run the game with the leaderboard/save features quietly disabled.
+  const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbzdu8-5FtHQd15qrsisube7YddgvoKrPPjCjoi4bbNgEF5DFIwczwo1VEovFvYVDFCA/exec';
+
+  // ── Comfort bands ─────────────────────────────────────────
+  const BAND = {
+    temp:{lo:22, hi:26, warnLo:20, warnHi:28},
+    hum: {lo:40, hi:60, warnLo:30, warnHi:70},
+    co2: {hi:1000, warnHi:1500},
+    pm:  {hi:35,  warnHi:75},
+  };
+
+  // ── Zones (building spaces the player manages) ─────────────
+  const ZONES = [
+    { key:'meeting', name:'Meeting Room A', floor:'4F', icon:'🗣️' },
+    { key:'office',  name:'Office B',       floor:'3F', icon:'💻' },
+    { key:'lobby',   name:'Lobby',          floor:'1F', icon:'🚪' },
+  ];
+
+  function scheduleMeeting(t, TOTAL){
+    const f=t/TOTAL;
+    if(f<0.06) return 1;
+    if(f<0.20) return 10;   // morning meeting
+    if(f<0.28) return 4;
+    if(f<0.36) return 1;    // lunch
+    if(f<0.55) return 12;   // afternoon big meeting
+    if(f<0.65) return 6;
+    if(f<0.85) return 3;
+    return 1;
+  }
+  function scheduleOffice(t, TOTAL){
+    const f=t/TOTAL;
+    if(f<0.05) return 2;
+    if(f<0.34) return 14;   // steady morning work
+    if(f<0.40) return 5;    // lunch dip
+    if(f<0.85) return 15;   // steady afternoon
+    return 3;
+  }
+  function scheduleLobby(t, TOTAL){
+    const f=t/TOTAL;
+    if(f<0.04) return 1;
+    if(f<0.10) return 12;   // morning arrival rush
+    if(f<0.30) return 3;
+    if(f<0.38) return 9;    // lunch rush
+    if(f<0.42) return 3;
+    if(f<0.80) return 2;
+    if(f<0.92) return 11;   // evening departure rush
+    return 1;
+  }
+  const SCHEDULES = [scheduleMeeting, scheduleOffice, scheduleLobby];
+
+  function makeZoneState(){
+    return {
+      room:{temp:24.5,hum:50,co2:480,pm:18},
+      ctrl:{setTemp:24, fan:1, purifier:false, humidityAuto:true, auto:false},
+      occ:0,
+      mStreak:{temp:0,hum:0,co2:0,pm:0},
+      states:{temp:'good',hum:'good',co2:'good',pm:'good'},
+      prevStates:{temp:'good',hum:'good',co2:'good',pm:'good'},
+      kwh:0, wastedKwh:0, autoMode:null, comfortSum:0,
+    };
+  }
+
+  // ── Game / sim state ──────────────────────────────────────
+  let running=false, tick=0, TOTAL_TICKS=144;         // 144 ticks = 08:00→20:00, 5 sim-min/tick
+  let outdoor = { temp:29, pm:40 };
+  let zs = ZONES.map(makeZoneState);
+  let activeZone = 0;
+
+  let score=0, comfortFractionSum=0, streak=0, bestStreak=0, alerts=0;
+  let timer=null;
+
+  // ── Grade is decided purely by comfort ratio (see endGame) — S/A/B/C
+  // sit at 85/65/45%. Score is a separate leaderboard stat, not the grade.
+  // Labels mirror how BMS/IAQ reports commonly bucket "% time in comfort
+  // range" performance (excellent/good/fair/poor); the comfort range itself
+  // is a simplified stand-in for ASHRAE 55 (thermal) / 62.1 (ventilation).
+  const GRADE_LABELS = { S:'Excellent', A:'Good', B:'Fair', C:'Poor' };
+  const RATIO_TARGETS = [ {g:'B',pct:45}, {g:'A',pct:65}, {g:'S',pct:85} ];
+  function renderRatioTarget(curRatio){
+    const next = RATIO_TARGETS.find(t => curRatio < t.pct);
+    $('ratioTarget').innerHTML = next
+      ? next.g+'('+GRADE_LABELS[next.g]+') needs <b>'+(next.pct-curRatio)+'pp</b> more'
+      : '🎉 Hit S (Excellent)!';
+  }
+
+  const QUESTS = [
+    { id:'vent',      title:'Ventilation Chief',  desc:'Raise the ventilation fan to High (3) in at least one zone',
+      pts:10, done:false, check: ()=> zs.some(z=>z.ctrl.fan===3) },
+    { id:'purifier',  title:'Purity Manager',     desc:'Clear a PM2.5 alert using the air purifier',
+      pts:15, done:false, check: ()=> zs.some(z=> z.ctrl.purifier && z.prevStates.pm==='bad' && z.states.pm!=='bad') },
+    { id:'temp',      title:'Temperature Guardian', desc:'Keep one zone\'s temperature comfortable for 20 consecutive ticks',
+      pts:15, done:false, check: ()=> zs.some(z=>z.mStreak.temp>=20) },
+    { id:'co2',       title:'CO2 Master',         desc:'Keep one zone\'s CO2 at or below 1000ppm for 10 consecutive ticks',
+      pts:15, done:false, check: ()=> zs.some(z=>z.mStreak.co2>=10) },
+    { id:'perfect',   title:'Perfect Day',        desc:'Keep all 3 zones — meeting room, office, and lobby — comfortable at once for 30 consecutive ticks',
+      pts:25, done:false, check: ()=> streak>=30 },
+  ];
+
+  function renderQuests(){
+    const el = $('questList'); el.innerHTML='';
+    QUESTS.forEach(q=>{
+      const row=document.createElement('div');
+      row.className='quest'+(q.done?' done':'');
+      row.innerHTML = '<div class="qchk">'+(q.done?'✓':'')+'</div>'
+        + '<div class="qbody"><div class="qt">'+q.title+'</div><div class="qd">'+q.desc+'</div></div>'
+        + '<div class="qpts">+'+q.pts+'</div>';
+      el.appendChild(row);
+    });
+  }
+
+  function checkQuests(){
+    QUESTS.forEach(q=>{
+      if(!q.done && q.check()){
+        q.done=true; score += q.pts;
+        log('🏅 Quest complete: '+q.title+' (+'+q.pts+' pts)', 'good');
+      }
+    });
+    renderQuests();
+  }
+
+  // ── Avatar ── player-controlled: move with ←/→ or tap, act with ↑/↓ or tap ─
+  // (operates on whichever zone is currently active via the zone tabs)
+  const STATIONS = [
+    { key:'ac',        icon:'❄️', label:'AC/Heat' },
+    { key:'fan',       icon:'🌬️', label:'Vent Fan' },
+    { key:'purifier',  icon:'🌀', label:'Purifier' },
+    { key:'humidity',  icon:'💧', label:'Humidity' },
+  ];
+  let avatarIdx = 0;
+
+  function setTempVal(v){
+    const ctrl = zs[activeZone].ctrl;
+    ctrl.setTemp = clamp(v, 20, 27);
+    $('setTemp').value = ctrl.setTemp;
+    $('setTempTxt').textContent = ctrl.setTemp+'°C';
+  }
+  function setFanVal(v){
+    const ctrl = zs[activeZone].ctrl;
+    ctrl.fan = clamp(v, 0, 3);
+    document.querySelectorAll('#fanSeg button').forEach(b=>b.classList.toggle('on', +b.dataset.v===ctrl.fan));
+  }
+  function setPurifier(on){
+    const ctrl = zs[activeZone].ctrl;
+    ctrl.purifier = on;
+    $('purifierSw').classList.toggle('on', ctrl.purifier);
+  }
+  function setHumidityAuto(on){
+    const ctrl = zs[activeZone].ctrl;
+    ctrl.humidityAuto = on;
+    $('humiditySw').classList.toggle('on', ctrl.humidityAuto);
+  }
+  function setAuto(on){
+    const ctrl = zs[activeZone].ctrl;
+    ctrl.auto = on;
+    $('autoSw').classList.toggle('on', ctrl.auto);
+  }
+  // pull the on-screen controls into sync with whichever zone just became active
+  function syncControlsToActiveZone(){
+    const ctrl = zs[activeZone].ctrl;
+    $('setTemp').value = ctrl.setTemp;
+    $('setTempTxt').textContent = ctrl.setTemp+'°C';
+    document.querySelectorAll('#fanSeg button').forEach(b=>b.classList.toggle('on', +b.dataset.v===ctrl.fan));
+    $('purifierSw').classList.toggle('on', ctrl.purifier);
+    $('humiditySw').classList.toggle('on', ctrl.humidityAuto);
+    $('autoSw').classList.toggle('on', ctrl.auto);
+  }
+
+  function moveAvatar(delta){
+    avatarIdx = clamp(avatarIdx+delta, 0, STATIONS.length-1);
+    renderAvatar();
+  }
+  // primary "operate" action at the current station — used by ↑/↓, the D-pad, and tapping the station
+  function stepStation(dir){
+    const ctrl = zs[activeZone].ctrl;
+    const key = STATIONS[avatarIdx].key;
+    if(key==='ac') setTempVal(ctrl.setTemp + dir);
+    else if(key==='fan') setFanVal(ctrl.fan + dir);
+    else if(key==='purifier') setPurifier(dir>0);
+    else if(key==='humidity') setHumidityAuto(dir>0);
+    renderAvatar();
+  }
+  function tapStation(i){
+    avatarIdx = i;
+    const ctrl = zs[activeZone].ctrl;
+    const key = STATIONS[i].key;
+    // tapping toggles switches, and nudges sliders up one step — one tap = one action
+    if(key==='purifier') setPurifier(!ctrl.purifier);
+    else if(key==='humidity') setHumidityAuto(!ctrl.humidityAuto);
+    else stepStation(+1);
+    renderAvatar();
+  }
+
+  function stationInfoText(){
+    const ctrl = zs[activeZone].ctrl;
+    const st = STATIONS[avatarIdx];
+    if(st.key==='ac') return st.label+' '+ctrl.setTemp+'°C — use ↑/↓';
+    if(st.key==='fan') return st.label+' '+['Off','Low','Mid','High'][ctrl.fan]+' — use ↑/↓';
+    if(st.key==='purifier') return st.label+' '+(ctrl.purifier?'ON':'OFF')+' — ↑ on / ↓ off';
+    return st.label+' '+(ctrl.humidityAuto?'ON':'OFF')+' — ↑ on / ↓ off';
+  }
+
+  function renderAvatar(){
+    const av = $('avatar');
+    av.style.left = (avatarIdx*25)+'%';
+    $('bubble').textContent = stationInfoText();
+
+    document.querySelectorAll('.station').forEach((el,i)=>{
+      el.classList.toggle('active', i===avatarIdx);
+    });
+
+    // mood reflects the worst reading in the zone currently being viewed
+    const s = zs[activeZone].states;
+    const rank={bad:2,warn:1,good:0};
+    let worstRank=0;
+    ['temp','hum','co2','pm'].forEach(k=>{ worstRank = Math.max(worstRank, rank[s[k]]||0); });
+    av.classList.remove('mood-good','mood-warn','mood-bad');
+    av.classList.add(worstRank===2?'mood-bad':worstRank===1?'mood-warn':'mood-good');
+  }
+
+  const $=id=>document.getElementById(id);
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+  function fmtClock(t){
+    const totalMin = 8*60 + Math.round(t/TOTAL_TICKS*12*60);
+    const h = Math.floor(totalMin/60), m = totalMin%60;
+    return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+  }
+
+  function log(msg, cls, zoneIdx){
+    const row=document.createElement('div');
+    row.className='log-row'+(cls?(' '+cls):'');
+    const zoneTag = (zoneIdx!=null) ? '['+ZONES[zoneIdx].name+'] ' : '';
+    row.innerHTML='<span class="t">'+fmtClock(tick)+'</span><span>'+zoneTag+msg+'</span>';
+    $('log').prepend(row);
+    while($('log').children.length>18) $('log').removeChild($('log').lastChild);
+  }
+
+  // real-time popup for events in any room, whether it's on screen or not.
+  // side: 'left' for alerts, 'right' for occupancy changes — keeps the two
+  // kinds of notices from ever competing for the same spot.
+  // popups attach directly to their room's badge (one per zone at a time),
+  // tracked with an expiry and redrawn every render() call so they survive
+  // renderZoneTabs() rebuilding the row each tick.
+  let zonePopups = {}; // zoneIdx -> { msg, cls, expiresAt }
+  function pushZonePopup(zoneIdx, msg, cls){
+    zonePopups[zoneIdx] = { msg, cls, expiresAt: Date.now()+3200 };
+  }
+
+  // ── Zone tabs ──────────────────────────────────────────────
+  function renderZoneTabs(){
+    const rank={bad:2,warn:1,good:0};
+    const now = Date.now();
+    $('zoneTabs').innerHTML = ZONES.map((z,i)=>{
+      const s = zs[i].states;
+      let worst=0;
+      ['temp','hum','co2','pm'].forEach(k=>{ worst = Math.max(worst, rank[s[k]]||0); });
+      const dotCls = worst===2?'bad':worst===1?'warn':'';
+
+      const pop = zonePopups[i];
+      let popHtml = '';
+      if(pop && pop.expiresAt > now){
+        popHtml = '<span class="zpop '+(pop.cls||'')+'">'+pop.msg+'</span>';
+      } else if(pop){
+        delete zonePopups[i];
+      }
+
+      const zRatio = tick ? Math.round(zs[i].comfortSum/tick*100) : 0;
+      const zrLabel = zRatio>=85?'S Excellent':zRatio>=65?'A Good':zRatio>=45?'B Fair':'C Poor';
+      const zrCls = zRatio>=85?'s':zRatio>=65?'a':zRatio>=45?'b':'c';
+
+      return '<div class="ztab'+(i===activeZone?' on':'')+'" data-z="'+i+'">'
+        + '<div class="zi-badge">'+z.icon+'<span class="zdot '+dotCls+'"></span>'
+        + '<span class="zocc">'+Math.round(zs[i].occ)+'</span>'+popHtml+'</div>'
+        + '<span class="zn">'+z.name+'</span>'
+        + '<span class="zratio '+zrCls+'" title="'+zrLabel+'">'+zRatio+'%</span></div>';
+    }).join('');
+    document.querySelectorAll('.ztab').forEach(el=>{
+      el.addEventListener('click', ()=> selectZone(+el.dataset.z));
+    });
+  }
+
+  function selectZone(i){
+    activeZone = i;
+    $('stageTitle').textContent = ZONES[i].name+' · '+ZONES[i].floor;
+    syncControlsToActiveZone();
+    render();
+  }
+
+  // ── Controls wiring ───────────────────────────────────────
+  $('setTemp').addEventListener('input', e=> setTempVal(+e.target.value));
+  document.querySelectorAll('#fanSeg button').forEach(b=>{
+    b.addEventListener('click', ()=> setFanVal(+b.dataset.v));
+  });
+
+  $('purifierSw').addEventListener('click', ()=> setPurifier(!zs[activeZone].ctrl.purifier));
+  $('humiditySw').addEventListener('click', ()=> setHumidityAuto(!zs[activeZone].ctrl.humidityAuto));
+  $('autoSw').addEventListener('click', ()=> setAuto(!zs[activeZone].ctrl.auto));
+
+  // ── Avatar input: arrow keys, on-screen D-pad, or tap the station ──
+  document.addEventListener('keydown', e=>{
+    if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) e.preventDefault();
+    if(e.key==='ArrowLeft') moveAvatar(-1);
+    else if(e.key==='ArrowRight') moveAvatar(+1);
+    else if(e.key==='ArrowUp') stepStation(+1);
+    else if(e.key==='ArrowDown') stepStation(-1);
+  });
+  $('dpadLeft').addEventListener('click', ()=> moveAvatar(-1));
+  $('dpadRight').addEventListener('click', ()=> moveAvatar(+1));
+  $('dpadUp').addEventListener('click', ()=> stepStation(+1));
+  $('dpadDown').addEventListener('click', ()=> stepStation(-1));
+  document.querySelectorAll('.station').forEach((el,i)=>{
+    el.addEventListener('click', ()=> tapStation(i));
+  });
+
+  // ── Simulation step (every zone updates in parallel, every tick) ──
+  function step(){
+    tick++;
+
+    const newLevel = levelForTick(tick);
+    if(newLevel !== speedLevel){
+      speedLevel = newLevel;
+      log('⚡ Speed level '+(speedLevel+1)+' — the day picks up pace a bit', 'warn');
+    }
+
+    // outdoor drifts across the day (peaks midday) + small noise, shared by all zones
+    const dayPos = tick/TOTAL_TICKS;
+    outdoor.temp = 27 + 6*Math.sin(dayPos*Math.PI) + (Math.random()-0.5)*0.6;
+    outdoor.pm   = clamp(35 + 30*Math.sin(dayPos*Math.PI*1.3+1) + (Math.random()-0.5)*10, 8, 140);
+
+    zs.forEach((z, zi)=>{
+      const ctrl = z.ctrl, room = z.room;
+
+      // occupancy toward this zone's schedule (+ small random wobble), with event logs on big jumps
+      const target = SCHEDULES[zi](tick, TOTAL_TICKS) + Math.round((Math.random()-0.5)*2);
+      if(Math.abs(target-z.occ) >= 5){
+        if(target>z.occ){
+          log('Occupancy rises to '+target, 'warn', zi);
+          pushZonePopup(zi, '▲ '+target, 'occ');
+        } else {
+          log('People are leaving', 'good', zi);
+          pushZonePopup(zi, '▼ leaving', 'occ');
+        }
+      }
+      z.occ = clamp(z.occ + (target-z.occ)*0.5, 0, 20);
+
+      // ── Optimal Start autopilot: look ~10 sim-min ahead at this zone's own schedule.
+      // Coming occupancy → pre-condition now, like a BMS optimal-start routine.
+      // Staying empty → setback to the wide/cheap band instead of holding tight comfort limits.
+      if(ctrl.auto){
+        const lookaheadOcc = SCHEDULES[zi](Math.min(tick+2, TOTAL_TICKS), TOTAL_TICKS);
+        const mode = lookaheadOcc>=5 ? 'precondition' : 'setback';
+        if(mode==='precondition'){
+          ctrl.setTemp=24; ctrl.humidityAuto=true;
+          ctrl.fan = lookaheadOcc>=12 ? 3 : lookaheadOcc>=8 ? 2 : Math.max(ctrl.fan,1);
+          if(outdoor.pm>55) ctrl.purifier=true;
+        } else {
+          ctrl.setTemp=26; ctrl.fan=Math.min(ctrl.fan,1); ctrl.purifier=false;
+        }
+        if(z.autoMode!==mode){
+          z.autoMode = mode;
+          log(mode==='precondition' ? '🤖 Autopilot — occupancy expected, pre-conditioning' : '🤖 Autopilot — expected empty, switching to setback', 'good', zi);
+        }
+        if(zi===activeZone) syncControlsToActiveZone();
+      }
+
+      // ── temperature: AC pulls toward setTemp, outdoor+fan pulls toward outdoor temp
+      const acPull = 0.16;
+      const ventPull = ctrl.fan*0.045;
+      room.temp += (ctrl.setTemp - room.temp)*acPull + (outdoor.temp - room.temp)*ventPull
+                 + z.occ*0.012 + (Math.random()-0.5)*0.12;
+
+      // ── humidity: occupants add moisture; auto system pulls to 50; vent pulls toward outdoor-ish 65
+      room.hum += z.occ*0.35 - (ctrl.humidityAuto ? (room.hum-50)*0.6 : 0)
+                + (65-room.hum)*ctrl.fan*0.01 + (Math.random()-0.5)*0.8;
+      room.hum = clamp(room.hum, 15, 90);
+
+      // ── CO2: occupants generate, ventilation removes, baseline decay toward outdoor 420
+      room.co2 += z.occ*26 - ctrl.fan*140 - (room.co2-420)*0.02 + (Math.random()-0.5)*15;
+      room.co2 = clamp(room.co2, 400, 3000);
+
+      // ── PM2.5: purifier removes, ventilation brings outdoor air in
+      room.pm += (ctrl.fan>0 ? (outdoor.pm-room.pm)*ctrl.fan*0.05 : 0)
+               - (ctrl.purifier ? room.pm*0.12 : 0) + (Math.random()-0.5)*1.2;
+      room.pm = clamp(room.pm, 3, 200);
+
+      // ── Energy: rough kW draw per device, converted to kWh for this 5-sim-min tick.
+      // Not a precise engineering model — enough to make "leaving devices running
+      // in an empty room" visibly cost something, the way a real BMS setback avoids.
+      const acKw = 0.4 + 0.08*Math.abs(outdoor.temp - ctrl.setTemp);
+      const fanKw = [0, 0.15, 0.35, 0.65][ctrl.fan];
+      const purifierKw = ctrl.purifier ? 0.08 : 0;
+      const humidityKw = ctrl.humidityAuto ? 0.05 : 0;
+      const kwhTick = (acKw+fanKw+purifierKw+humidityKw) * (5/60);
+      z.kwh += kwhTick;
+      if(z.occ<1){
+        z.wastedKwh += kwhTick;
+        score -= kwhTick*3; // empty-room energy waste costs points, same logic a BMS setback avoids
+      }
+    });
+
+    evaluate();
+    render();
+
+    if(tick>=TOTAL_TICKS){ endGame(); return; }
+  }
+
+  function stateOf(kind,val){
+    const b=BAND[kind];
+    if(kind==='co2'||kind==='pm'){
+      if(val<=b.hi) return 'good';
+      if(val<=b.warnHi) return 'warn';
+      return 'bad';
+    }
+    if(val>=b.lo && val<=b.hi) return 'good';
+    if(val>=b.warnLo && val<=b.warnHi) return 'warn';
+    return 'bad';
+  }
+
+  function evaluate(){
+    let zonesAllGood = 0;
+
+    zs.forEach((z, zi)=>{
+      const states = {
+        temp: stateOf('temp',z.room.temp),
+        hum:  stateOf('hum',z.room.hum),
+        co2:  stateOf('co2',z.room.co2),
+        pm:   stateOf('pm',z.room.pm),
+      };
+      const good = Object.values(states).filter(s=>s==='good').length;
+      const bad  = Object.values(states).filter(s=>s==='bad').length;
+
+      score += good*2 - bad*1;
+      if(good===4){ zonesAllGood++; z.comfortSum++; }
+
+      if(bad>0 && tick%6===0){
+        alerts++;
+        const names={temp:'Temperature',hum:'Humidity',co2:'CO2',pm:'PM2.5'};
+        const worst=Object.keys(states).find(k=>states[k]==='bad');
+        if(worst){
+          log('⚠ '+names[worst]+' alert — outside the comfort range', 'warn', zi);
+          pushZonePopup(zi, '⚠ '+names[worst], 'bad');
+        }
+      }
+
+      ['temp','hum','co2','pm'].forEach(k=>{
+        z.mStreak[k] = states[k]==='good' ? z.mStreak[k]+1 : 0;
+      });
+
+      z.prevStates = z.states;
+      z.states = states;
+    });
+
+    comfortFractionSum += zonesAllGood/ZONES.length;
+    if(zonesAllGood===ZONES.length){ streak++; bestStreak=Math.max(bestStreak,streak); }
+    else streak=0;
+
+    checkQuests();
+  }
+
+  // ── Rendering ─────────────────────────────────────────────
+  function pct(val,min,max){ return clamp((val-min)/(max-min)*100,0,100); }
+  const stateColor = { good:'#1F8A5B', warn:'#9C7B14', bad:'#C0364E' };
+  const stateLabel = { good:'Good', warn:'Caution', bad:'Alert' };
+
+  function render(){
+    $('clockTxt').textContent = fmtClock(tick);
+    $('timeVal').textContent = fmtClock(tick);
+    const dayProgress = tick/TOTAL_TICKS;
+    const ringC = 2*Math.PI*25;
+    const ring = $('clockRingFg');
+    ring.style.strokeDasharray = ringC;
+    ring.style.strokeDashoffset = ringC*(1-dayProgress);
+    $('clockCenterTxt').textContent = fmtClock(tick);
+
+    renderZoneTabs();
+
+    const z = zs[activeZone];
+    const room = z.room, s = z.states;
+
+    $('occTxt').textContent = Math.round(z.occ)+' occupants';
+    const peepsEl=$('peeps'); peepsEl.innerHTML='';
+    for(let i=0;i<16;i++){
+      const d=document.createElement('span');
+      d.className='peep'+(i<Math.round(z.occ)?'':' off');
+      peepsEl.appendChild(d);
+    }
+
+    $('tempVal').innerHTML = room.temp.toFixed(1)+'<span class="g-unit">°C</span>';
+    $('humVal').innerHTML  = room.hum.toFixed(0)+'<span class="g-unit">%</span>';
+    $('co2Val').innerHTML  = Math.round(room.co2)+'<span class="g-unit">ppm</span>';
+    $('pmVal').innerHTML   = Math.round(room.pm)+'<span class="g-unit">㎍/㎥</span>';
+
+    $('tempFill').style.width = pct(room.temp,16,32)+'%'; $('tempFill').style.background = stateColor[s.temp];
+    $('humFill').style.width  = pct(room.hum,15,90)+'%';  $('humFill').style.background  = stateColor[s.hum];
+    $('co2Fill').style.width  = pct(room.co2,400,2200)+'%'; $('co2Fill').style.background = stateColor[s.co2];
+    $('pmFill').style.width   = pct(room.pm,0,150)+'%';   $('pmFill').style.background   = stateColor[s.pm];
+
+    $('tempState').textContent = stateLabel[s.temp]; $('tempState').style.color = stateColor[s.temp];
+    $('humState').textContent  = stateLabel[s.hum];  $('humState').style.color  = stateColor[s.hum];
+    $('co2State').textContent  = stateLabel[s.co2];  $('co2State').style.color  = stateColor[s.co2];
+    $('pmState').textContent   = stateLabel[s.pm];   $('pmState').style.color   = stateColor[s.pm];
+
+    $('scoreVal').textContent = Math.max(0,score);
+    $('ratioVal').innerHTML = (tick? Math.round(comfortFractionSum/tick*100):0)+'<small>%</small>';
+    renderRatioTarget(tick? Math.round(comfortFractionSum/tick*100):0);
+    $('energyVal').innerHTML = zs.reduce((sum,zz)=>sum+zz.kwh,0).toFixed(1)+'<small>kWh</small>';
+    $('streakVal').innerHTML = streak+'<small>tick</small>';
+
+    const allGood = s.temp==='good'&&s.hum==='good'&&s.co2==='good'&&s.pm==='good';
+    $('statusTxt').textContent = allGood ? 'Perfect comfort zone' : 'Needs adjustment';
+    $('statusIcon').textContent = allGood ? '😊' : '🛠️';
+
+    renderAvatar();
+  }
+
+  // ── Game control ──────────────────────────────────────────
+  // ── Game speed: starts calm, speeds up in 4 levels across the day ──
+  const SPEED_LEVELS = [1200, 1000, 800, 600]; // ms per tick, level 1 → 4
+  let speedLevel = 0;
+
+  function levelForTick(t){
+    const q = Math.floor((t / TOTAL_TICKS) * SPEED_LEVELS.length);
+    return Math.min(q, SPEED_LEVELS.length - 1);
+  }
+
+  function scheduleNextTick(){
+    timer = setTimeout(function(){
+      step();
+      if(running) scheduleNextTick();
+    }, SPEED_LEVELS[speedLevel]);
+  }
+
+  function startGame(){
+    if(running) return;
+    running=true;
+    $('startBtn').textContent='In progress…';
+    log('Play started — 08:00, managing meeting room, office, and lobby together', 'good');
+    speedLevel = 0;
+    scheduleNextTick();
+  }
+
+  function resetGame(){
+    clearTimeout(timer); running=false;
+    tick=0; score=0; comfortFractionSum=0; streak=0; bestStreak=0; alerts=0;
+    outdoor = { temp:29, pm:40 };
+    zs = ZONES.map(makeZoneState);
+    activeZone = 0;
+    avatarIdx=0;
+    zonePopups = {};
+    speedLevel = 0;
+    $('stageTitle').textContent = ZONES[0].name+' · '+ZONES[0].floor;
+    syncControlsToActiveZone();
+    QUESTS.forEach(q=>q.done=false);
+    $('log').innerHTML='';
+    $('startBtn').textContent='Start Playing';
+    $('overlay').classList.remove('show');
+    evaluate(); render();
+  }
+
+  function endGame(){
+    clearTimeout(timer); running=false;
+    const ratio = Math.round(comfortFractionSum/tick*100);
+    const totalKwh = zs.reduce((sum,z)=>sum+z.kwh,0);
+    const wastedKwh = zs.reduce((sum,z)=>sum+z.wastedKwh,0);
+    let grade='C', desc='Room management was a bit shaky. Try rebalancing ventilation and cooling.';
+    if(ratio>=85){ grade='S'; desc='Near-perfect control across all 3 zones! You qualify as an IEG Smart Building Manager.'; }
+    else if(ratio>=65){ grade='A'; desc='You kept the whole building comfortable.'; }
+    else if(ratio>=45){ grade='B'; desc='Not bad. Try making the rounds more often so no zone gets neglected.'; }
+
+    $('gradeTxt').textContent=grade;
+    $('gradeLabel').textContent=GRADE_LABELS[grade];
+    $('gradeDesc').textContent=desc;
+    $('finalScore').textContent=Math.max(0,score);
+    $('finalRatio').textContent=ratio+'%';
+    $('finalStreak').textContent=bestStreak+' ticks';
+    $('finalAlerts').textContent=alerts;
+    $('finalEnergy').textContent=totalKwh.toFixed(1)+' kWh';
+    $('finalWaste').textContent=wastedKwh.toFixed(1)+' kWh';
+    $('overlay').classList.add('show');
+    $('startBtn').textContent='Start Playing';
+
+    submitScore({ nickname:getNickname(), score:Math.max(0,score), ratio, streak:bestStreak, grade, alerts, energyKwh:+totalKwh.toFixed(2), wastedKwh:+wastedKwh.toFixed(2) });
+  }
+
+  // ── Leaderboard: Google Sheets via Apps Script Web App ──────
+  let lbScope = 'month';
+
+  function getNickname(){
+    let v = $('nickname').value.trim();
+    if(!v){
+      v = 'Guest-'+Math.floor(1000+Math.random()*9000);
+      $('nickname').value = v;
+    }
+    return v.slice(0,16);
+  }
+
+  function submitScore(payload){
+    const bar = $('saveStatus');
+    if(!SHEET_API_URL){
+      bar.textContent = 'Leaderboard not connected yet — an admin needs to set the sheet URL';
+      bar.className = 'savebar';
+      fetchLeaderboard(lbScope);
+      return;
+    }
+    bar.textContent = 'Saving your result…';
+    bar.className = 'savebar';
+    // text/plain avoids a CORS preflight against the Apps Script endpoint
+    fetch(SHEET_API_URL, {
+      method:'POST',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+    }).then(r=>r.json()).then(res=>{
+      if(res && res.ok){
+        bar.textContent = 'Saved to the leaderboard ✅ ('+payload.nickname+')';
+        bar.className = 'savebar ok';
+      } else {
+        bar.textContent = 'Save failed — please try again shortly';
+        bar.className = 'savebar err';
+      }
+      fetchLeaderboard(lbScope);
+      fetchPlanets(payload.nickname);
+    }).catch(()=>{
+      bar.textContent = 'Save failed — please check your network';
+      bar.className = 'savebar err';
+      fetchLeaderboard(lbScope);
+      fetchPlanets(payload.nickname);
+    });
+  }
+
+  function fetchLeaderboard(scope){
+    lbScope = scope;
+    $('lbTabMonth').classList.toggle('on', scope==='month');
+    $('lbTabWeek').classList.toggle('on', scope==='week');
+    $('lbTabAll').classList.toggle('on', scope==='all');
+    const list = $('lbList');
+    if(!SHEET_API_URL){
+      list.innerHTML = '<div class="lbempty">Rankings will appear once an admin connects Google Sheets</div>';
+      return;
+    }
+    list.innerHTML = '<div class="lbempty">Loading…</div>';
+    fetch(SHEET_API_URL+'?action=leaderboard&scope='+scope+'&limit=10')
+      .then(r=>r.json())
+      .then(res=> renderLeaderboard(res && res.ok ? res.rows : []))
+      .catch(()=>{ list.innerHTML = '<div class="lbempty">Could not load rankings</div>'; });
+  }
+
+  // ── Planet collection: this month's #1 wins the throne + a planet ──
+  function fetchPlanets(nickname){
+    const strip = $('planetStrip');
+    if(!SHEET_API_URL || !nickname){ strip.style.display='none'; return; }
+    fetch(SHEET_API_URL+'?action=planets&nickname='+encodeURIComponent(nickname))
+      .then(r=>r.json())
+      .then(res=>{
+        if(!res || !res.ok){ strip.style.display='none'; return; }
+        renderPlanets(res.planets || []);
+        strip.style.display = '';
+      })
+      .catch(()=>{ strip.style.display='none'; });
+  }
+
+  function renderPlanets(planets){
+    const collected = {};
+    planets.forEach(p=>{ collected[p.planetIndex] = p; });
+    let html = '';
+    for(let i=0;i<8;i++){
+      if(collected[i]){
+        const p = collected[i];
+        html += '<div class="planet-slot got" title="'+p.month+' champion · '+p.planetName+'">'+p.planetEmoji+'</div>';
+      } else {
+        html += '<div class="planet-slot locked">?</div>';
+      }
+    }
+    $('planetRow').innerHTML = html;
+    const wins = planets.length;
+    document.querySelector('#planetStrip .pl-title').textContent =
+      wins>0 ? '🏆 '+wins+'-time champion — My planet collection' : "🏆 Win this month's throne to earn a planet!";
+  }
+
+  function renderLeaderboard(rows){
+    const list = $('lbList');
+    if(!rows || !rows.length){
+      list.innerHTML = '<div class="lbempty">No results yet — be the first on the board!</div>';
+      return;
+    }
+    list.innerHTML = rows.map((r,i)=>{
+      const rankCls = i===0?'top1':i===1?'top2':i===2?'top3':'';
+      return '<div class="lbrow '+rankCls+'"><div class="rk">'+(i+1)+'</div>'
+        + '<div class="nm">'+String(r.nickname||'').slice(0,16)+'</div>'
+        + '<div class="sc">'+r.score+'</div></div>';
+    }).join('');
+  }
+
+  $('lbTabMonth').addEventListener('click', ()=> fetchLeaderboard('month'));
+  $('lbTabWeek').addEventListener('click', ()=> fetchLeaderboard('week'));
+  $('lbTabAll').addEventListener('click', ()=> fetchLeaderboard('all'));
+
+  $('startBtn').addEventListener('click', startGame);
+  $('resetBtn').addEventListener('click', resetGame);
+  $('playAgainBtn').addEventListener('click', resetGame);
+
+  $('stageTitle').textContent = ZONES[0].name+' · '+ZONES[0].floor;
+  syncControlsToActiveZone();
+  evaluate(); render();
+})();
+</script>
+<button class="botFab" id="botFab" aria-label="Open game rules chatbot"><span class="pulse"></span>❓</button>
+
+<div class="botPanel" id="botPanel">
+  <div class="bot-head">
+    <div class="bh-ic">🤖</div>
+    <div class="bh-txt">
+      <div class="bh-t">Rule Bot · Comfort Zone Quest</div>
+      <div class="bh-s">Ask me anything about how to play</div>
+    </div>
+    <button id="botCloseBtn" aria-label="Close">✕</button>
+  </div>
+  <div class="bot-msgs" id="botMsgs"></div>
+  <div class="bot-chips" id="botChips"></div>
+  <div class="bot-inputrow">
+    <input type="text" id="botInput" placeholder="e.g. how do the controls work?" />
+    <button id="botSendBtn" aria-label="Send">➤</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+
+  const KB = [
+    { kws:['goal','point of the game','what do i do','how to play','how do i start','rules','win'],
+      a:'Keep the temperature, humidity, CO2, and PM2.5 comfortable across all 3 zones — meeting room, office, and lobby. A full 08:00-20:00 workday plays out in about a minute, and you get a grade (S/A/B/C) at the end.' },
+    { kws:['control','arrow key','d-pad','dpad','touch','move','keyboard','operate'],
+      a:'Use ← → to move between the 4 stations (❄️ AC/Heat · 🌬️ Vent Fan · 🌀 Purifier · 💧 Humidity), and ↑ ↓ to operate whichever one you\'re standing at. You can also use the on-screen D-pad buttons, or just tap a station icon to act on it immediately.' },
+    { kws:['range','comfort','threshold','what temperature','what humidity','what co2','pm2.5'],
+      a:'The comfort targets are: temperature 22-26°C, humidity 40-60%, CO2 at or below 1000ppm, and PM2.5 at or below 35㎍/㎥. Outside that, you\'ll see Caution (yellow) then Alert (red).' },
+    { kws:['score','scoring','points','how is it calculated'],
+      a:'Each tick, every metric in the comfort range adds +2 points across all 3 zones, and every metric in Alert subtracts 1. Running devices in an empty zone also costs points (see "energy"). Completing quests adds bonus points too.' },
+    { kws:['grade','s grade','a grade','b grade','c grade','rating'],
+      a:'Grades are based on your comfort ratio — the average share of zones that were fully comfortable at each moment: 85%+ is S, 65%+ is A, 45%+ is B, and below that is C.' },
+    { kws:['quest','mission','ventilation chief','purity manager','co2 master','perfect day','temperature guardian'],
+      a:'There are 5 quests — Ventilation Chief (fan on High in any zone), Purity Manager (clear a PM2.5 alert with the purifier), Temperature Guardian (20 consecutive comfortable ticks in one zone), CO2 Master (CO2 under 1000ppm for 10 ticks in one zone), and Perfect Day (all 3 zones comfortable at once for 30 ticks). Completing one gives bonus points.' },
+    { kws:['device','station','ac','heat','vent fan','purifier','humidity','what does'],
+      a:'❄️ AC/Heat targets your setpoint temperature. 🌬️ The vent fan drops CO2 fastest but lets in more outdoor temperature/PM2.5 influence. 🌀 The purifier reduces PM2.5. 💧 Auto humidity control pulls humidity toward 50%.' },
+    { kws:['nickname','leaderboard','ranking','rank'],
+      a:'Enter a nickname before playing and your result is saved automatically, feeding into the This Month / This Week / All-Time rankings. Leave it blank and you\'ll get a temporary name like Guest-1234.' },
+    { kws:['planet','throne','collection','reward'],
+      a:'Whoever is #1 for the month wins the throne and earns a planet — Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune, in order. Collect all 8 and the next win starts a fresh orbit.' },
+    { kws:['occupant','occupancy','meeting','why does it change','people'],
+      a:'Each zone has its own daily schedule — the meeting room spikes around meetings, the office stays steadily busy all day, and the lobby has rush periods at arrival, lunch, and departure. More people means CO2 and humidity rise faster.' },
+    { kws:['switch zone','tab','other room','meeting room office lobby','why 3','building'],
+      a:'Use the tabs at the top of the screen to switch between the meeting room, office, and lobby any time. All 3 keep simulating in the background even when you\'re not looking at them — a red dot on a tab means that zone needs attention, so make the rounds often.' },
+    { kws:['how long','duration','when does it end','play time'],
+      a:'It takes about a minute in real time, but in-game it plays out a full 08:00-20:00 workday.' },
+    { kws:['energy','kwh','power','electricity','consumption'],
+      a:'Running AC/heat, the vent fan, the purifier, or humidity control all add up kWh over time. Devices left running in an empty zone (0 occupants) count as "wasted energy" and cost you points — turn them down yourself, or hand the zone to autopilot.' },
+    { kws:['schedule','autopilot','optimal start','auto','hand it to ai','automatic'],
+      a:'Flip the "Optimal Start (Autopilot)" switch in a zone\'s control panel and that zone looks about 10 minutes ahead at its own occupancy schedule: it pre-heats/cools before people arrive, and automatically switches to a power-saving setback when it expects to stay empty — mimicking a real building management system\'s Optimal Start and setback features.' },
+  ];
+  const FALLBACK = "Hmm, I didn't quite catch that. Try asking with a word like \"controls\", \"scoring\", \"comfort range\", \"quests\", \"leaderboard\", \"planets\", \"energy\", or \"autopilot\".";
+  const CHIPS = ['How do the controls work?','How is scoring calculated?','How is energy calculated?','What does autopilot do?','What quests are there?'];
+
+  function matchAnswer(query){
+    const q = query.toLowerCase();
+    let best=null, bestScore=0;
+    KB.forEach(entry=>{
+      let score=0;
+      entry.kws.forEach(k=>{ if(q.includes(k.toLowerCase())) score++; });
+      if(score>bestScore){ bestScore=score; best=entry; }
+    });
+    return best ? best.a : FALLBACK;
+  }
+
+  function addMsg(text, who){
+    const el = document.createElement('div');
+    el.className = 'bmsg '+who;
+    el.textContent = text;
+    $('botMsgs').appendChild(el);
+    $('botMsgs').scrollTop = $('botMsgs').scrollHeight;
+  }
+
+  function renderChips(){
+    $('botChips').innerHTML = '';
+    CHIPS.forEach(c=>{
+      const b = document.createElement('button');
+      b.textContent = c;
+      b.addEventListener('click', ()=> ask(c));
+      $('botChips').appendChild(b);
+    });
+  }
+
+  function ask(text){
+    if(!text.trim()) return;
+    addMsg(text, 'user');
+    $('botInput').value = '';
+    setTimeout(()=> addMsg(matchAnswer(text), 'bot'), 250);
+  }
+
+  let opened = false;
+  function openBot(){
+    $('botPanel').classList.add('show');
+    if(!opened){
+      opened = true;
+      addMsg("Hi! I'm the Comfort Zone Quest rule bot 🤖 Ask me about the rules, controls, quests, leaderboard, or planet rewards.", 'bot');
+      renderChips();
+    }
+  }
+
+  $('botFab').addEventListener('click', openBot);
+  $('botCloseBtn').addEventListener('click', ()=> $('botPanel').classList.remove('show'));
+  $('botSendBtn').addEventListener('click', ()=> ask($('botInput').value));
+  $('botInput').addEventListener('keydown', e=>{ if(e.key==='Enter') ask($('botInput').value); });
+})();
+</script>
+</body>
+</html>
