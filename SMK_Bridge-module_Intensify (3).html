@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IEG EV Bridge Module — Blue / Orange / Red</title>
+<style>
+  :root{
+    --bg:#0A3A8C;
+    --bg-deep:#052255;
+    --panel: rgba(255,255,255,0.14);
+    --panel-2: rgba(255,255,255,0.22);
+    --line: rgba(255,255,255,0.30);
+    --text:#FFFFFF;
+    --text-dim: rgba(255,255,255,0.78);
+    --blue:#00D4FF;
+    --blue-glow: rgba(0,212,255,.45);
+    --orange:#FF8A2A;
+    --orange-glow: rgba(255,138,42,.45);
+    --green:#3DDC8A;
+    --red:#FF5C68;
+    --yellow:#FFD84D;
+    --mono: "JetBrains Mono","Consolas","SF Mono",monospace;
+    --disp: "Bahnschrift","Segoe UI Semibold","Pretendard","Noto Sans KR",sans-serif;
+    --body: "Segoe UI","Pretendard","Noto Sans KR",sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--body);height:100%;overflow:hidden;}
+  body{min-height:100vh;}
+  #shell{display:flex;flex-direction:column;height:100vh;height:100dvh;}
+  #viz-panel{
+    position:relative;z-index:18;width:100%;height:200px;flex-shrink:0;
+    background:radial-gradient(circle at 30% 20%, #0d3a72, #041634 75%);
+    border-bottom:2px solid var(--line);overflow:hidden;
+  }
+  #viz-canvas-wrap{position:absolute;inset:0;}
+  #viz-canvas-wrap canvas{display:block;width:100%;height:100%;}
+  #viz-label{
+    position:absolute;top:8px;left:10px;font-family:var(--disp);font-size:12px;color:#fff;
+    background:rgba(4,22,52,0.55);padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.25);
+    pointer-events:none;letter-spacing:.2px;
+  }
+  #viz-hint{
+    position:absolute;bottom:6px;right:10px;font-family:var(--mono);font-size:9.5px;color:rgba(255,255,255,0.55);
+    pointer-events:none;
+  }
+  .app{display:flex;flex-direction:column;flex:1;min-height:0;max-width:560px;margin:0 auto;position:relative;width:100%;overflow:hidden;}
+  #intro-overlay{position:absolute;inset:0;z-index:25;background:linear-gradient(180deg,rgba(5,20,50,0.97),rgba(4,17,42,0.97));
+    display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;}
+  .intro-box{max-width:400px;}
+  .intro-kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:2px;color:var(--yellow);margin-bottom:12px;}
+  .intro-box h2{font-family:var(--disp);font-size:19px;margin:0 0 10px;line-height:1.35;}
+  .intro-box p{color:var(--text-dim);font-size:12.5px;line-height:1.65;margin:0 0 18px;}
+  .intro-target{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:13px;margin-bottom:12px;font-size:14px;transition:transform .08s;}
+  .intro-target.shake{animation:shakeX .4s;border-color:var(--red);}
+  @keyframes shakeX{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+  #intro-skip-btn{margin-top:16px;display:inline-block;width:auto;}
+  @media (min-width:900px){
+    #shell{flex-direction:row;align-items:stretch;}
+    #viz-panel{width:400px;height:100%;flex-shrink:0;border-bottom:none;border-right:2px solid var(--line);}
+    .app{flex:1;max-width:560px;margin:0 auto;height:100%;}
+  }
+
+  header{position:sticky;top:0;z-index:20;display:flex;flex-direction:column;gap:10px;
+    padding:12px 14px 10px;background:linear-gradient(180deg,var(--bg),var(--bg-deep));border-bottom:1px solid var(--line);}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{width:40px;height:32px;border-radius:7px;background:#FFFFFF;box-shadow:0 2px 6px rgba(0,20,60,.35);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:3px;}
+  .brand-mark img{width:100%;height:100%;object-fit:contain;display:block;}
+  .brand-text h1{font-family:var(--disp);font-size:14px;margin:0;letter-spacing:.2px;line-height:1.2;}
+  .brand-text p{margin:0;font-size:9.5px;color:var(--text-dim);letter-spacing:.4px;text-transform:uppercase;}
+  .lang-switch{display:flex;gap:4px;margin-left:auto;background:var(--panel);padding:3px;border-radius:9px;border:1px solid var(--line);flex-shrink:0;}
+  .lang-btn{border:none;background:transparent;color:var(--text-dim);font-family:var(--mono);font-size:11px;
+    padding:6px 9px;border-radius:6px;cursor:pointer;transition:.2s;}
+  .lang-btn.active{background:var(--yellow);color:#2b2200;}
+  .lang-btn:not(.active):hover{color:var(--text);}
+  nav.tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;background:var(--panel);padding:4px;border-radius:10px;border:1px solid var(--line);}
+  .tab-btn{border:none;background:transparent;color:var(--text-dim);font-family:var(--disp);font-size:9.5px;
+    padding:10px 3px;border-radius:7px;cursor:pointer;transition:.2s;letter-spacing:.05px;line-height:1.25;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tab-btn[data-mod="blue"].active{background:var(--blue);color:#08222c;}
+  .tab-btn[data-mod="orange"].active{background:var(--orange);color:#2b1200;}
+  .tab-btn[data-mod="red"].active{background:var(--red);color:#2b0d0f;}
+  .tab-btn[data-mod="glossary"].active{background:#7fe3ff;color:#08222c;}
+  .tab-btn:not(.active):hover{color:var(--text);}
+
+  main{flex:1;min-height:0;padding:16px 14px;overflow-y:auto;padding-bottom:96px;-webkit-overflow-scrolling:touch;}
+  .module{display:none;}
+  .module.active{display:block;animation:fadeIn .35s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .module-head{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+  .module-head h2{font-family:var(--disp);font-size:18px;margin:0 0 4px;line-height:1.3;}
+  .module-head .sub{color:var(--text-dim);font-size:12.5px;margin:0;line-height:1.5;}
+  .progress-wrap{width:100%;}
+  .progress-track{height:6px;background:var(--panel-2);border-radius:4px;overflow:hidden;border:1px solid var(--line);}
+  .progress-fill{height:100%;width:0%;transition:width .4s ease;}
+  #blue-module .progress-fill{background:linear-gradient(90deg,var(--blue),#7fe3ff);}
+  #orange-module .progress-fill{background:linear-gradient(90deg,var(--orange),#ffb066);}
+  #red-module .progress-fill{background:linear-gradient(90deg,var(--red),#ff9aa0);}
+  .progress-label{font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-top:5px;text-align:right;}
+
+  .sense-badge{display:inline-flex;align-items:center;gap:5px;background:#241417;border:1px solid #5a2a2f;
+    color:#ff9aa0;font-size:10.5px;padding:4px 9px;border-radius:999px;margin:0 0 10px;font-family:var(--mono);}
+
+  .listen-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+  .listen-btn{flex:1;min-width:130px;background:var(--panel-2);border:2px solid var(--line);border-radius:12px;
+    padding:14px 10px;text-align:center;cursor:pointer;transition:.15s;}
+  .listen-btn:hover{border-color:var(--red);}
+  .listen-btn.picked-ok{border-color:var(--green);background:#12241a;}
+  .listen-btn.picked-bad{border-color:var(--red);background:#241417;}
+  .listen-btn .ic{font-size:22px;margin-bottom:4px;}
+  .listen-btn .lb{font-size:11px;color:var(--text-dim);}
+
+  .cell-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+  .cell{background:var(--panel-2);border:2px solid var(--line);border-radius:8px;padding:10px 4px;text-align:center;cursor:pointer;transition:.15s;}
+  .cell:hover{border-color:var(--red);}
+  .cell .cv{font-family:var(--mono);font-size:13px;}
+  .cell .cn{font-size:9px;color:var(--text-dim);margin-top:2px;}
+  .cell.picked-ok{border-color:var(--green);}
+  .cell.picked-bad{border-color:var(--red);}
+
+  .thermal-wrap{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);}
+  .hot-zone{position:absolute;cursor:pointer;border-radius:8px;}
+
+  .choice-row{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+  .choice-btn{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:11px 14px;
+    font-size:12.5px;color:var(--text);text-align:left;cursor:pointer;transition:.15s;}
+  .choice-btn:hover{border-color:var(--red);}
+  .choice-btn.picked-ok{border-color:var(--green);background:#12241a;}
+  .choice-btn.picked-bad{border-color:var(--red);background:#241417;}
+
+  .symptom-list{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px;}
+  .symptom-list li{font-size:12.5px;color:var(--text-dim);margin-bottom:4px;line-height:1.5;}
+
+  .completion-banner{position:relative;background:linear-gradient(135deg,rgba(255,216,77,.18),rgba(255,138,42,.14));
+    border:1px solid var(--yellow);border-radius:16px;padding:22px 20px;margin-bottom:20px;text-align:center;
+    animation:fadeIn .5s ease;}
+  .completion-banner .cb-close{position:absolute;top:10px;right:12px;background:var(--panel-2);border:1px solid var(--line);
+    color:var(--text-dim);font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:999px;cursor:pointer;}
+  .completion-banner .cb-close:hover{color:var(--text);border-color:var(--yellow);}
+  .completion-banner .cb-icon{font-size:34px;margin-bottom:8px;}
+  .completion-banner h2{font-family:var(--disp);font-size:18px;margin:0 0 8px;color:var(--yellow);}
+  .completion-banner .cb-summary{font-family:var(--mono);font-size:13px;color:var(--text);margin:0 0 10px;}
+  .completion-banner .cb-note{font-size:12px;color:var(--text-dim);line-height:1.6;margin:0;max-width:440px;margin-left:auto;margin-right:auto;}
+  .completion-banner .cb-retry-flag{background:rgba(255,92,104,.16);border:1px solid var(--red);color:#ffb3b8;
+    font-family:var(--mono);font-size:12px;padding:8px 14px;border-radius:999px;display:inline-block;margin-bottom:10px;}
+
+  .cap-budget{display:inline-flex;align-items:center;gap:6px;background:rgba(255,216,77,.16);border:1px solid rgba(255,216,77,.5);
+    color:var(--yellow);font-family:var(--mono);font-size:11.5px;padding:6px 12px;border-radius:999px;margin-bottom:14px;}
+  .cap-substep-label{font-size:12px;color:var(--text-dim);margin:0 0 8px;font-weight:600;}
+  .choice-btn.danger{border-color:rgba(255,92,104,.5);}
+  .choice-btn.danger:hover{border-color:var(--red);}
+  .choice-btn.used{opacity:.45;pointer-events:none;}
+  .cap-evidence{margin:10px 0;}
+  .cap-evidence .ev-line{background:var(--panel-2);border-left:3px solid var(--blue);border-radius:6px;
+    padding:9px 12px;font-size:12px;color:var(--text);margin-bottom:8px;line-height:1.5;}
+  .cap-evidence .ev-line.warn{border-left-color:var(--orange);}
+  .cap-step{margin-top:6px;}
+  .cap-blind-link{display:block;background:none;border:none;color:var(--text-dim);font-size:11px;text-decoration:underline;
+    cursor:pointer;padding:8px 0 0;text-align:left;font-family:var(--body);}
+  .cap-blind-link:hover{color:var(--text);}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;}
+  .card h3{font-family:var(--disp);font-size:14px;margin:0 0 4px;display:flex;align-items:flex-start;gap:8px;line-height:1.4;}
+  .card .step-badge{width:20px;height:20px;border-radius:50%;background:var(--panel-2);color:var(--text-dim);
+    font-family:var(--mono);font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .card.done .step-badge{background:var(--green);color:#06180e;}
+  .card p.desc{color:var(--text-dim);font-size:12.5px;margin:6px 0 14px;line-height:1.6;}
+
+  .card-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
+  .zone-icon{width:46px;height:46px;flex-shrink:0;background:var(--panel-2);border:1px solid var(--line);
+    border-radius:12px;display:flex;align-items:center;justify-content:center;padding:9px;}
+  .zone-icon svg{width:100%;height:100%;}
+  .card-head-text{flex:1;min-width:0;}
+  .card-head-text h3{margin:0 0 4px;}
+  .card-head-text p.desc{margin:0;}
+
+  .compare-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+  .compare-box{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center;
+    cursor:pointer;transition:.2s;position:relative;}
+  .compare-box:hover{transform:translateY(-2px);}
+  .compare-box.lv{border-bottom:3px solid #444a58;}
+  .compare-box.hv{border-bottom:3px solid var(--orange);}
+  .compare-box svg{width:100%;height:120px;}
+  .compare-box .cb-title{font-family:var(--disp);font-size:13px;margin-top:8px;}
+  .compare-box .cb-volt{font-family:var(--mono);font-size:20px;margin-top:2px;}
+  .compare-box.lv .cb-volt{color:#a9b0c0;}
+  .compare-box.hv .cb-volt{color:var(--orange);}
+  .reveal{max-height:0;overflow:hidden;transition:max-height .35s ease;font-size:12px;color:var(--text-dim);
+    text-align:left;line-height:1.7;}
+  .compare-box.open .reveal{max-height:160px;margin-top:10px;}
+
+  .ohm-grid{display:grid;grid-template-columns:1fr;gap:16px;align-items:center;}
+  .slider-row{margin-bottom:16px;}
+  .slider-row label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--text-dim);margin-bottom:6px;}
+  .slider-row output{color:var(--text);}
+  input[type=range]{width:100%;accent-color:var(--blue);}
+  .readout{background:#0d1b22;border:1px solid #1c3a45;border-radius:10px;padding:14px;text-align:center;margin-top:8px;}
+  .readout .val{font-family:var(--mono);font-size:26px;color:var(--blue);text-shadow:0 0 12px var(--blue-glow);}
+  .readout .lbl{font-size:10px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;}
+  .circuit-wrap{display:flex;justify-content:center;align-items:center;background:var(--panel-2);border-radius:12px;padding:14px;border:1px solid var(--line);}
+
+  .quiz-scene{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);}
+  .quiz-feedback{margin-top:10px;font-family:var(--mono);font-size:12px;min-height:18px;}
+  .quiz-feedback.ok{color:var(--green);}
+  .quiz-feedback.bad{color:var(--red);}
+
+  .ppe-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  .ppe-item{background:var(--panel-2);border:2px solid var(--line);border-radius:12px;width:110px;padding:12px 8px;text-align:center;
+    cursor:pointer;transition:.15s;user-select:none;}
+  .ppe-item:hover{border-color:var(--orange);}
+  .ppe-item.selected{border-color:var(--green);background:#12241a;}
+  .ppe-item svg{width:100%;height:56px;}
+  .ppe-item .name{font-size:11px;margin-top:6px;color:var(--text-dim);}
+  .ppe-item.selected .name{color:var(--green);}
+
+  .loto-list{display:flex;flex-direction:column;gap:8px;}
+  .loto-step{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+    display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s;}
+  .loto-step:hover{border-color:var(--orange);}
+  .loto-step .num{width:24px;height:24px;border-radius:50%;background:#2a2e39;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:11px;color:var(--text-dim);flex-shrink:0;}
+  .loto-step.done{border-color:var(--green);}
+  .loto-step.done .num{background:var(--green);color:#06180e;}
+  .loto-step .txt{font-size:13px;}
+
+  .meg-scene{display:flex;gap:22px;align-items:center;flex-wrap:wrap;}
+  .meter{background:#0d1b22;border:2px solid #1c3a45;border-radius:14px;padding:18px;width:200px;text-align:center;}
+  .meter .screen{background:#06110c;border-radius:8px;padding:10px;font-family:var(--mono);color:#4fff9a;font-size:22px;
+    text-shadow:0 0 10px rgba(79,255,154,.5);margin-bottom:8px;}
+  .meter .screen small{display:block;font-size:9px;color:#2f7f52;letter-spacing:1px;}
+  .probe-btn{background:var(--orange);border:none;color:#2b1200;font-family:var(--disp);font-size:12px;padding:10px 16px;
+    border-radius:8px;cursor:pointer;width:100%;}
+  .probe-btn:disabled{background:#3a3f4b;color:#6b7280;cursor:not-allowed;}
+  .warn-box{background:#2b1a10;border:1px solid var(--orange);border-radius:10px;padding:10px 14px;font-size:12px;
+    color:#ffb066;display:none;align-items:center;gap:8px;}
+  .warn-box.show{display:flex;}
+
+  /* ---- Aziz: fixed bottom bar that expands into a sheet ---- */
+  aside.gilbert{position:absolute;left:0;right:0;bottom:0;z-index:30;max-width:560px;margin:0 auto;
+    background:linear-gradient(180deg,var(--bg-deep),#052E7A);border-top:1px solid var(--line);
+    border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.35);
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;gap:0;transition:padding .25s ease;}
+  .g-bar{display:flex;align-items:center;gap:10px;cursor:pointer;}
+  .g-avatar{width:40px;height:40px;flex-shrink:0;transition:width .25s ease,height .25s ease;}
+  .g-bar-text{flex:1;min-width:0;}
+  .g-name{font-family:var(--disp);font-size:9.5px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:1px;}
+  .g-msg{font-size:12.5px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .g-chevron{flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+    color:var(--text-dim);transition:transform .25s ease;}
+  aside.gilbert.expanded .g-chevron{transform:rotate(180deg);}
+  aside.gilbert.expanded .g-msg{white-space:normal;}
+  aside.gilbert.expanded .g-avatar{width:56px;height:56px;}
+
+  .g-expand-panel{max-height:0;overflow:hidden;transition:max-height .3s ease,margin-top .3s ease;}
+  aside.gilbert.expanded .g-expand-panel{max-height:140px;margin-top:12px;}
+  .g-score{display:flex;align-items:center;justify-content:space-between;background:var(--panel-2);
+    border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px;}
+  .g-score .num{font-family:var(--mono);font-size:18px;color:var(--yellow);}
+  .g-score .lbl{font-size:9.5px;color:var(--text-dim);letter-spacing:.6px;text-transform:uppercase;}
+  .sound-toggle{background:transparent;border:1px solid var(--line);color:var(--text-dim);
+    font-size:11px;padding:9px 12px;border-radius:8px;cursor:pointer;width:100%;}
+  .sound-toggle.off{color:var(--red);border-color:var(--red);}
+
+  /* ===== Diagnostic Bay deep-link integration ===== */
+  @keyframes dlPulse{
+    0%{box-shadow:0 0 0 0 rgba(79,209,255,.55);}
+    70%{box-shadow:0 0 0 14px rgba(79,209,255,0);}
+    100%{box-shadow:0 0 0 0 rgba(79,209,255,0);}
+  }
+  .deep-link-highlight{outline:2px solid var(--tech,#4fd1ff)!important;animation:dlPulse 1.1s ease-out 2;border-radius:14px;}
+  #embed-back-bar{display:none;}
+  body.embedded-mode #embed-back-bar{
+    display:flex;align-items:center;position:sticky;top:0;left:0;right:0;z-index:500;
+    background:#0d1520;border-bottom:1px solid var(--line);padding:8px 14px;
+  }
+  #embed-back-btn{
+    background:transparent;border:1px solid var(--line);color:var(--text);font-family:var(--disp);
+    font-size:11px;padding:7px 12px;border-radius:8px;cursor:pointer;letter-spacing:.4px;
+  }
+  #embed-back-btn:hover{border-color:var(--tech,#4fd1ff);color:var(--tech,#4fd1ff);}
+</style>
+</head>
+<body>
+<div id="pw-gate" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#04112a,#071d3f);display:flex;align-items:center;justify-content:center;font-family:sans-serif;">
+  <div style="background:#0c2648;border:1px solid #1e3a63;border-radius:16px;padding:32px 28px;max-width:320px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.5);">
+    <div style="font-size:32px;margin-bottom:8px;">🔒</div>
+    <h2 style="color:#fff;font-size:18px;margin:0 0 6px;">Access Restricted</h2>
+    <p style="color:#9fb2cc;font-size:13px;margin:0 0 18px;">Enter the password to open this module.</p>
+    <input type="password" id="pw-input" placeholder="Password" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:8px;border:1px solid #2a4a78;background:#08192f;color:#fff;font-size:14px;margin-bottom:10px;">
+    <button id="pw-submit" style="width:100%;padding:10px 12px;border:none;border-radius:8px;background:#3DDC8A;color:#04112a;font-weight:700;font-size:14px;cursor:pointer;">Enter</button>
+    <div id="pw-error" style="color:#ff8b93;font-size:12px;margin-top:10px;min-height:14px;"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var GATE_PW = "6982200!";
+  var gate = document.getElementById('pw-gate');
+  var input = document.getElementById('pw-input');
+  var err = document.getElementById('pw-error');
+  function tryUnlock(){
+    if(input.value === GATE_PW){
+      gate.style.display = 'none';
+    } else {
+      err.textContent = 'Incorrect password. Try again.';
+      input.value = '';
+      input.focus();
+    }
+  }
+  document.getElementById('pw-submit').addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', function(e){ if(e.key === 'Enter') tryUnlock(); });
+  window.addEventListener('load', function(){ input.focus(); });
+})();
+</script>
+<div id="shell">
+  <div id="viz-panel">
+    <div id="viz-canvas-wrap"></div>
+    <div id="viz-label">EV Powertrain Reference</div>
+    <div id="viz-hint">Drag to rotate · scroll to zoom</div>
+  </div>
+<div class="app">
+  <div id="intro-overlay">
+    <div class="intro-box">
+      <div class="intro-kicker" data-i18n="introKicker">STEP 0 — KNOW YOUR SIMULATOR</div>
+      <h2 data-i18n="introTitle">Learn the powertrain layout first</h2>
+      <p data-i18n="introBody">Before starting Blue Level, tap each part in the 3D reference panel when its name is called below. This builds real spatial memory of the actual components.</p>
+      <div class="intro-target" id="intro-target-label">Tap: <b>Traction Battery Pack</b></div>
+      <div class="progress-track"><div class="progress-fill" id="intro-fill" style="background:linear-gradient(90deg,#3DDC8A,#7fe3ff);"></div></div>
+      <div class="progress-label" id="intro-progress-label">0 / 5</div>
+      <button class="choice-btn danger" id="intro-skip-btn" data-i18n="introSkip">Skip for now</button>
+    </div>
+  </div>
+  <header>
+    <div class="brand">
+      <div class="brand-mark"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAAA2CAIAAAAeWcMRAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAH1ElEQVRoQ+1ae1BUVRgHdtllJYGWeDiR2KSwqYkh4CBtmaGDiqOhGWJZmjlWaCJOD2fyWf+pkPpXPhEHCYlS8TFDOta6mW9AVB5WohiKiTzEFdiVfpdj18M5l8tlgc1xYHZ2zv3Od77v+32ve85ZnFtaWpyeoD+XJwiLAKUXz+Md0N749MbHkR540vJN3RXnPbhd3VxQ2FxYZL38B+RY9uQSaVrjKBe9Xj3wBU1UpOuQwc59dJ3VQiQ3/mLCwFp6uflSMSQQsS7eeteXh2uNURjwYp0l36ctTf842RpobmfNM04qd0KBjnvpGQ07Mh7cusVL5Ckeq5e5v5PgpFbxUzyl6dSZuynrG02/8VMMxfVFQ98vkrVjRtN0aTyNhbNtN7JoPs1L29T9phOK5ad9NQsWd6iPZoBur/Vr1IZgmVVwU/WM90goZNjoqb7Jnz61KJGmOKh+YOWtsbE1iUlOVpukrQjLzeEjOwUGctxixjLSulQ/kpbJEEmBeW1MYXisxSW34+JlFrY3pR44sEfw+OWfeFSdVpvtxg1raZklZ4/YIUStoOjiJtNJ33LPcjthNm8xUtT943muhiAXHx9RuNAe/vzrfu6Bhq073OfM4muye+LTptWoVaqAZ/GB0TC9ZslSpm2A4nvssNj07sydz/cVrw3rdLETeHOhSINP+Ii+ny95UF3Ne6Fn6weQYDo8TSuG9bWfLSWUhu3pTCtDNBBt3ZRJPBhaCNwBl/F4pPsbz0dT+P7W71qZzBJbxfWqyNEMg39JobNGU/l8G6jg8cnLlW+DMoow1bPxIbrhSCHX2/41/X6i6Vw+QwRbV8A4CA/UIN0Z09Et7qXtZIg8G8PQ4aN0P8DbwHb9b3qxJixUMl8JDzKQZnYbF83scfCIwqDrHrsYxjiUmR07I0aINB54jmm1QsORqj8ijtku+B4/qurDFqt21EhaJv/qVAexLxNBeGv3Z4ymH7FRpL0gjUdmvd1T2J7Kr9VGj+EZAIbvJTSb4Gg0w//+HNEPiC7VgEDe3G6nOA6P7Up5t1vPC7Qn31DuqBBelkhR+fvzs+SMxNNFSvO5fDpzZDhlpuzBI7ybuXKX0UGmmAaDwxmzM7CWsR0PC1HuqBBauPxRxR48HZrOM2AfyRA1EeGg0JCEMU4TbY998B0TNHk8DqqfmgVJDB4cXbTjohliw84M3hedojgCT+ORo/ymE/sa3aSJjK11X63iI/l44cFmFAcExiaPZV+Cgs0/qoiZEiLZzhlWCTD74yM4Ul6x1XY3dSPehszxRjc5ViwJrw3sWRWRvBlhxIlVifU8j/144Ejs9uuWrxY2exXXRdEYg4IdHcyqX/sto1K4GEldIxIRIqZ9YQr4cdkAyUhUQTLlNVoRDwYUO/sbDsmkJHDuxUdStCRRvyuN6WCIlSUrm7+g6qxkos7O+OD0ImmuDBH7a++cTMlLQGQdklBmrfIpO/Hg5lK5DnCi7nHwxrlfcpWQdRtTBLQ+PpIMyol24sGNK3Mr0J5KOB5HaH1GWodnG6D1O2nCFWF7ohg6DMDNKzZfNN2e+wNxPVpco8mMfRcGuG0hNdD1y2sUZ/OFi03m49jyiWIROpygoNo1LFTd/znXkGGSqdslPAod6Ug2O/PNkSZ2Slcvnk65y+HMXYqPzWarq6tzsM1VVVWmX0337zdK6pXGk7I2JW7KVLISA/EDOqQARvGl4i2bt741dfr7s2Zjtry8q2dpmAg5+BathMUQCxsYu0uKS1LWpdbV1UriUbTfMRpfCQsPw3qf1vfd9m1p+3P3YzAxdmJQ0KDTp077+UkcsCX1KSeeOnkSdictXuTr66t8lSI8AGN81UiEwm0A4/W016bN36lUwk+I4pTIcPHChfT0nZ6enouThWPcMZM5Ly8vMjJy9OuvKTQOaZyT8yPW4hv+WrhoYUF+AWQOHTpUHpsiPEQoBI2fMB57XwymTZsGMEgGRB+PiJuh9UcEpGJCfAIGw0KGeXp46Nx0b08XfqhCJDN3ZeKTkZnh5qaVt4mfLSst+3r1N6DX1tbW3KnhGUSKdP3ILCgtFX5K8Pf3wzdJZWTFwQMHyRJ4EYP4GfErVi5PSk46f/48HpEzH8ydg2+Mjxw+IiNcnPLw8IiLexOP+IYcs1n4eRhOQVIg+WUkKIoPhNJJhXzbu3df6IhQEIMNwfPnfSQqONf6k0F9fT2hkMfKykcXtpWVlTLW8FP19XdBNJvN+I4e+waSIthgMJmO8ZyEoig+MAiphT+kNfIKxVNYUIj+hi5Xca2CFh0VJZyfATjr+92oNFiAR6TZ2TNnEUZiE1bhA1HolnRDw6yoCLr6B/YHJTs7G5wxMTEYr1yxCvygYGyxWEA/sP9hXog2KIoPSX2sQawR/eUrlv2cdxhGky4nysIAaAMHBJZfKSdLtu/YhkICeJL9GAcEBHw4dx44ExM/gZtRkPRyURGIu38Q/mEA1bJl05aZ7848dOgQxnAK5GNwtfxqTnYOJISFj6B7jPR+FP5D3YdHRKDNk4onWsW6xyNKH2WKgd5bz3QteA6FBOZBQYOQIeQxZHgIqgL85BW8Oyu7qKgoJfXhXaHYWkR4SGZEGF2bKIU6yBw8ZAgYQESee3t7V1RUBAa2uRaXxiMK7bkB0hXJSbpiN2r53/B0IwZalKJ+0EO6e0Lsv3rLiLkCa+b2AAAAAElFTkSuQmCC" alt="IEG logo"></div>
+      <div class="brand-text">
+        <h1 data-i18n="brandTitle">IEG EV Bridge Module</h1>
+        <p data-i18n="brandSub">ICE → EV Diagnostic Bridge · SMK Training Program</p>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tab-btn active" data-mod="blue"><span data-i18n="tabBlue">🔵 Blue</span></button>
+      <button class="tab-btn" data-mod="orange"><span data-i18n="tabOrange">🟠 Orange</span></button>
+      <button class="tab-btn" data-mod="red"><span data-i18n="tabRed">🔴 Red</span></button>
+      <button class="tab-btn" data-mod="glossary"><span>📘 Glossary</span></button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="completion-banner" id="completion-banner" style="display:none;">
+      <button class="cb-close" id="cb-close-btn" aria-label="Close" data-i18n="cbClose">✕ Close</button>
+      <div class="cb-icon">🎓</div>
+      <h2 data-i18n="compTitle">All 15 Steps Complete!</h2>
+      <p class="cb-summary" id="comp-summary"></p>
+      <p class="cb-retry-flag" id="comp-retry-flag" style="display:none;"></p>
+      <p class="cb-note" data-i18n="compNote">Congratulations — you've completed Blue, Orange, and Red. Remember: touch and smell can't be simulated, so hands-on training with real equipment is still required before certification.</p>
+    </div>
+    <!-- ================= BLUE MODULE ================= -->
+    <section id="blue-module" class="module active">
+      <div class="module-head">
+        <div>
+          <h2 data-i18n="blueHead">Blue — Electrical Basics Applied to Real Scenarios</h2>
+          <p class="sub" data-i18n="blueSub">Apply fundamental electrical concepts to real shop-floor situations — investigate before you decide</p>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-track"><div class="progress-fill" id="blue-fill"></div></div>
+          <div class="progress-label" id="blue-label">0 / 7</div>
+        </div>
+      </div>
+
+      <div class="card" id="card-b1" data-viz="overview">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><linearGradient id="ic-b1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#eef1f5"/><stop offset="55%" stop-color="#b8c2ce"/><stop offset="100%" stop-color="#7c8797"/></linearGradient></defs><ellipse cx="12" cy="18.3" rx="9" ry="1.2" fill="#000" opacity=".2"/><path d="M3 15.3h1.2a2.6 2.6 0 0 0 5.2 0h5.2a2.6 2.6 0 0 0 5.2 0H21v-2.7l-2.1-4a1.4 1.4 0 0 0-1.2-.7H6.3a1.4 1.4 0 0 0-1.2.7L3 12.6v2.7z" fill="url(#ic-b1)" stroke="#5b6270" stroke-width=".6"/><circle cx="7.3" cy="15.3" r="1.7" fill="#242833" stroke="#9aa1ac" stroke-width=".5"/><circle cx="16.7" cy="15.3" r="1.7" fill="#242833" stroke="#9aa1ac" stroke-width=".5"/><circle cx="18.2" cy="10" r=".9" fill="#ffe27a"/></svg></div><div class="card-head-text"><h3><span class="step-badge">1</span> <span data-i18n="b1Title">Scenario: Unknown Vehicle Intake</span></h3>
+        <p class="desc" data-i18n="b1Desc">A vehicle arrives with no model info on the work order. Before touching anything, determine whether this is an ICE or EV vehicle — every check has a time cost.</p></div></div>
+        <div class="sense-badge" data-i18n="senseB1">👁 Sense covered: Visual only (VIN plate, cable color)</div>
+        <div class="compare-grid" style="margin-bottom:14px;">
+          <div class="compare-box lv">
+            <svg viewBox="0 0 200 120">
+              <defs><linearGradient id="batLV" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5b6270"/><stop offset="100%" stop-color="#2b2f38"/></linearGradient></defs>
+              <rect x="55" y="30" width="90" height="60" rx="6" fill="url(#batLV)" stroke="#767d8c" stroke-width="1.5"/>
+              <rect x="70" y="20" width="14" height="14" rx="2" fill="#3a3f4b" stroke="#767d8c"/>
+              <rect x="116" y="20" width="14" height="14" rx="2" fill="#3a3f4b" stroke="#767d8c"/>
+              <circle cx="77" cy="27" r="2.4" fill="#e5555f"/><circle cx="123" cy="27" r="2.4" fill="#1b1d22"/>
+              <text x="100" y="65" text-anchor="middle" fill="#c7cbd4" font-family="monospace" font-size="11">12V LEAD-ACID</text>
+              <line x1="30" y1="60" x2="55" y2="60" stroke="#3a3f4b" stroke-width="4"/><line x1="145" y1="60" x2="170" y2="60" stroke="#3a3f4b" stroke-width="4"/>
+            </svg>
+            <div class="cb-title" data-i18n="lvTitle">Internal Combustion Engine (ICE) Battery</div>
+            <div class="cb-volt" data-i18n="lvVolt">12V DC</div>
+          </div>
+          <div class="compare-box hv">
+            <svg viewBox="0 0 200 120">
+              <defs><linearGradient id="batHV" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3a3f4b"/><stop offset="100%" stop-color="#1b1d22"/></linearGradient></defs>
+              <rect x="42" y="24" width="116" height="70" rx="8" fill="url(#batHV)" stroke="#ff7a1a" stroke-width="2"/>
+              <rect x="52" y="34" width="30" height="50" rx="3" fill="#242833"/><rect x="86" y="34" width="30" height="50" rx="3" fill="#242833"/><rect x="120" y="34" width="30" height="50" rx="3" fill="#242833"/>
+              <text x="100" y="18" text-anchor="middle" fill="#ff7a1a" font-family="monospace" font-size="9">⚠ HIGH VOLTAGE</text>
+              <line x1="20" y1="59" x2="42" y2="59" stroke="#ff7a1a" stroke-width="5"/><line x1="158" y1="59" x2="180" y2="59" stroke="#ff7a1a" stroke-width="5"/>
+            </svg>
+            <div class="cb-title" data-i18n="hvTitle">EV High-Voltage Battery Pack</div>
+            <div class="cb-volt" data-i18n="hvVolt">200–800V DC</div>
+          </div>
+        </div>
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="b1-cost">0</span> <span data-i18n="minUnit">min</span></div>
+        <p class="cap-substep-label" data-i18n="investigateLabel">Step 1 — Choose your next action:</p>
+        <div class="choice-row" id="b1-actions">
+          <div class="choice-btn" data-cost="1" data-kind="ok" data-evidence="b1EvA"><span data-i18n="b1ActionA">A. Check the VIN / service label (1 min)</span></div>
+          <div class="choice-btn" data-cost="2" data-kind="ok" data-evidence="b1EvB"><span data-i18n="b1ActionB">B. Open the hood and check cable colors (2 min)</span></div>
+          <div class="choice-btn danger" data-cost="0" data-kind="shortcut"><span data-i18n="b1ActionC">C. Skip checks, start standard ICE service</span></div>
+        </div>
+        <div class="cap-evidence" id="b1-evidence"></div>
+        <div class="cap-step" id="b1-step-final" style="display:none;">
+          <p class="cap-substep-label" data-i18n="finalLabel">Step 2 — What should you do first?</p>
+          <div class="choice-row" id="b1-final">
+            <div class="choice-btn" data-bad="0" data-i18n="b1OptA">A. Proceed with standard ICE service procedure</div>
+            <div class="choice-btn" data-bad="1" data-i18n="b1OptB">B. Regardless of HEV or full EV, start HV safety procedures if the label shows any HV system present</div>
+            <div class="choice-btn" data-bad="0" data-wrongkey="b1BadC" data-i18n="b1OptC">C. The label shows "HEV" (hybrid) — small battery, so standard ICE procedure is fine</div>
+          </div>
+        </div>
+        <div class="quiz-feedback" id="b1-fb" data-i18n="investDefault">Choose an action to begin.</div>
+      </div>
+
+      <div class="card" id="card-b2" data-viz="none">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><radialGradient id="ic-b2" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#fff6d8"/><stop offset="55%" stop-color="#ffcf5c"/><stop offset="100%" stop-color="#e0921f"/></radialGradient></defs><ellipse cx="12" cy="20" rx="5" ry="1" fill="#000" opacity=".18"/><circle cx="12" cy="10" r="6.2" fill="url(#ic-b2)" stroke="#c97a12" stroke-width=".5"/><path d="M9 16.2h6M9.7 18.6h4.6" stroke="#8a8f98" stroke-width="1.6" stroke-linecap="round"/><path d="M12 3.4v1.3M6.5 6.3l1 1M17.5 6.3l-1 1" stroke="#ffcf5c" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="9.8" cy="8" rx="1.6" ry="1" fill="#fff" opacity=".55"/></svg></div><div class="card-head-text"><h3><span class="step-badge">2</span> <span data-i18n="b2Title">Scenario: Headlight Circuit Fault (Ohm's Law)</span></h3>
+        <p class="desc" data-i18n="b2Desc">A customer reports the headlight doesn't turn on. Apply Ohm's Law (V = I × R) to find the real cause before replacing anything.</p></div></div>
+        <div class="sense-badge" data-i18n="senseB2">🔧 Sense covered: Instrument reading only (multimeter) — no physical shock/tactile feedback simulated</div>
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="b2-cost">0</span> <span data-i18n="minUnit">min</span></div>
+        <p class="cap-substep-label" data-i18n="investigateLabel">Step 1 — Choose your next action:</p>
+        <div class="choice-row" id="b2-actions">
+          <div class="choice-btn" data-cost="2" data-kind="ok" data-evidence="b2EvA"><span data-i18n="b2ActionA">A. Measure battery voltage (2 min)</span></div>
+          <div class="choice-btn" data-cost="2" data-kind="ok" data-evidence="b2EvB"><span data-i18n="b2ActionB">B. Measure headlight circuit resistance (2 min)</span></div>
+          <div class="choice-btn danger" data-cost="0" data-kind="shortcut"><span data-i18n="b2ActionC">C. Skip checks, replace the bulb right away</span></div>
+        </div>
+        <div class="cap-evidence" id="b2-evidence"></div>
+        <div class="cap-step" id="b2-step-final" style="display:none;">
+          <p class="cap-substep-label" data-i18n="finalLabel">Step 2 — What is the most likely cause?</p>
+          <div class="choice-row" id="b2-final">
+            <div class="choice-btn" data-bad="0" data-wrongkey="b2BadA" data-i18n="b2OptA">A. Infinite resistance means the bulb filament is definitely burnt out</div>
+            <div class="choice-btn" data-bad="0" data-i18n="b2OptB">B. The battery must be dead</div>
+            <div class="choice-btn" data-bad="1" data-i18n="b2OptC">C. Run a voltage-drop test across each connector and ground point to pinpoint the exact break location</div>
+          </div>
+        </div>
+        <div class="quiz-feedback" id="b2-fb" data-i18n="investDefault">Choose an action to begin.</div>
+      </div>
+
+      <div class="card" id="card-b3" data-viz="inverter">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><linearGradient id="ic-b3o" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffb066"/><stop offset="100%" stop-color="#d9600c"/></linearGradient></defs><path d="M4 6c4 0 4 12 8 12s4-12 8-12" fill="none" stroke="url(#ic-b3o)" stroke-width="2.4" stroke-linecap="round"/><circle cx="4" cy="6" r="1.6" fill="#3a3f4b" stroke="#9aa1ac" stroke-width=".4"/><circle cx="20" cy="6" r="1.6" fill="#3a3f4b" stroke="#9aa1ac" stroke-width=".4"/></svg></div><div class="card-head-text"><h3><span class="step-badge">3</span> <span data-i18n="b3Title">Scenario: Cable Routing Safety Check</span></h3>
+        <p class="desc" data-i18n="b3Desc">You need to reroute a new cable near the engine bay. Identify which existing cable is safe to work near before doing anything.</p></div></div>
+        <div class="sense-badge" data-i18n="senseB3">👁 Sense covered: Visual only (cable jacket color, diagram cross-check)</div>
+        <div class="quiz-scene" style="margin-bottom:14px;">
+          <svg viewBox="0 0 400 140" width="100%" style="background:#0f1116;display:block;">
+            <rect x="0" y="0" width="400" height="140" fill="#14161b"/>
+            <rect x="30" y="40" width="90" height="60" rx="6" fill="#242833" stroke="#3a3f4b"/>
+            <text x="75" y="75" text-anchor="middle" fill="#9aa1b2" font-size="10" font-family="monospace">ENGINE</text>
+            <rect x="280" y="40" width="90" height="60" rx="6" fill="#242833" stroke="#ff7a1a"/>
+            <text x="325" y="75" text-anchor="middle" fill="#ff9a4f" font-size="10" font-family="monospace">INVERTER</text>
+            <path d="M120,55 C160,55 160,55 200,55" stroke="#3a3f4b" stroke-width="6" fill="none"/>
+            <path d="M120,85 C160,85 160,85 280,60" stroke="#ff7a1a" stroke-width="6" fill="none"/>
+            <path d="M200,55 C240,55 240,90 280,90" stroke="#3a3f4b" stroke-width="6" fill="none"/>
+          </svg>
+        </div>
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="b3-cost">0</span> <span data-i18n="minUnit">min</span></div>
+        <p class="cap-substep-label" data-i18n="investigateLabel">Step 1 — Choose your next action:</p>
+        <div class="choice-row" id="b3-actions">
+          <div class="choice-btn" data-cost="2" data-kind="ok" data-evidence="b3EvA"><span data-i18n="b3ActionA">A. Check the wiring diagram manual (2 min)</span></div>
+          <div class="choice-btn" data-cost="1" data-kind="ok" data-evidence="b3EvB"><span data-i18n="b3ActionB">B. Visually check cable jacket color (1 min)</span></div>
+          <div class="choice-btn danger" data-cost="0" data-kind="shortcut"><span data-i18n="b3ActionC">C. Skip checks, cut whichever cable is in the way</span></div>
+        </div>
+        <div class="cap-evidence" id="b3-evidence"></div>
+        <div class="cap-step" id="b3-step-final" style="display:none;">
+          <p class="cap-substep-label" data-i18n="finalLabel">Step 2 — Which cable is safe to work near?</p>
+          <div class="choice-row" id="b3-final">
+            <div class="choice-btn" data-bad="0" data-i18n="b3OptA">A. The orange cable</div>
+            <div class="choice-btn" data-bad="0" data-wrongkey="b3BadB" data-i18n="b3OptB">B. It's black/red, so it's definitely low-voltage — no need to cross-check the diagram</div>
+            <div class="choice-btn" data-bad="1" data-i18n="b3OptC">C. It's black/red, but confirm against the wiring diagram before cutting, since color alone isn't proof</div>
+          </div>
+        </div>
+        <div class="quiz-feedback" id="b3-fb" data-i18n="investDefault">Choose an action to begin.</div>
+      </div>
+
+      <div class="card" id="card-b4" data-viz="none">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><linearGradient id="ic-b4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff8b93"/><stop offset="100%" stop-color="#e5384a"/></linearGradient></defs><path d="M12 20s-7-4.5-9.3-9C1.2 7.8 3 4.5 6.5 4.5c2 0 3.3 1.2 5.5 3.5 2.2-2.3 3.5-3.5 5.5-3.5C21 4.5 22.8 7.8 21.3 11c-2.3 4.5-9.3 9-9.3 9z" fill="url(#ic-b4)" stroke="#a8202f" stroke-width=".5"/><path d="M5.8 11.5h3l1.4-2.8 1.9 4.7 1.4-1.9h4.7" fill="none" stroke="#fff" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/></svg></div><div class="card-head-text"><h3><span class="step-badge">4</span> <span data-i18n="b4Title">Scenario: Electrical Accident Response (Safety + First Aid)</span></h3>
+        <p class="desc" data-i18n="b4Desc">A coworker is found collapsed near a high-voltage vehicle. Rushing in can make you a second victim — respond in the correct order.</p></div></div>
+        <div class="sense-badge" data-i18n="senseFirstAid">🚑 This scenario covers hazard identification + CPR/First Aid awareness (EV_Specialist 1.2)</div>
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="b4-cost">0</span> <span data-i18n="minUnit">min</span></div>
+        <p class="cap-substep-label" data-i18n="investigateLabel">Step 1 — Choose your next action:</p>
+        <div class="choice-row" id="b4-actions">
+          <div class="choice-btn" data-cost="2" data-kind="ok" data-evidence="b4EvA"><span data-i18n="b4ActionA">A. Check whether the power/breaker is off (LOTO status) (2 min)</span></div>
+          <div class="choice-btn" data-cost="1" data-kind="ok" data-evidence="b4EvB"><span data-i18n="b4ActionB">B. Keep a safe distance and assess the scene (1 min)</span></div>
+          <div class="choice-btn danger" data-cost="0" data-kind="shortcut"><span data-i18n="b4ActionC">C. Rush in immediately and grab the coworker</span></div>
+        </div>
+        <div class="cap-evidence" id="b4-evidence"></div>
+        <div class="cap-step" id="b4-step-final" style="display:none;">
+          <p class="cap-substep-label" data-i18n="finalLabel">Step 2 — What is the correct first response?</p>
+          <div class="choice-row" id="b4-final">
+            <div class="choice-btn" data-bad="0" data-i18n="b4OptA">A. Grab and shake the coworker immediately to wake them</div>
+            <div class="choice-btn" data-bad="1" data-i18n="b4OptB">B. Confirm power is off, then approach safely, call for emergency help, and give CPR if needed</div>
+            <div class="choice-btn" data-bad="0" data-wrongkey="b4BadC" data-i18n="b4OptC">C. Cardiac arrest risk is high — start CPR immediately, regardless of whether the power is confirmed off</div>
+          </div>
+        </div>
+        <div class="quiz-feedback" id="b4-fb" data-i18n="investDefault">Choose an action to begin.</div>
+      </div>
+
+      <div class="card" id="card-b5" data-viz="battery">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><linearGradient id="ic-b5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3a3f4b"/><stop offset="100%" stop-color="#1b1d22"/></linearGradient></defs><rect x="3" y="7.5" width="16" height="10" rx="1.6" fill="url(#ic-b5)" stroke="#ff7a1a" stroke-width="1.1"/><rect x="19.3" y="10.7" width="2" height="3.2" rx=".6" fill="#ff7a1a"/><rect x="5.3" y="9.5" width="3.4" height="6" rx=".5" fill="#2b2f38"/><rect x="9.6" y="9.5" width="3.4" height="6" rx=".5" fill="#2b2f38"/><rect x="13.9" y="9.5" width="3.4" height="6" rx=".5" fill="#2b2f38"/><path d="M9.5 11.5h2l-1 2h2l-2.3 3 .4-2.5H8.7z" fill="#ffcf5c"/></svg></div><div class="card-head-text"><h3><span class="step-badge">5</span> <span data-i18n="b5Title">Scenario: The BMS Trust Trap</span></h3>
+        <p class="desc" data-i18n="b5Desc">During service, a battery pack over-temperature warning flashed briefly, then cleared on its own — the BMS limited current and activated cooling. Is "the warning is gone" the same as "the problem is solved"? Investigate before you decide.</p></div></div>
+        <div class="sense-badge" data-i18n="factBadge">📋 Based on published BYD Blade Battery / BMS technical facts (LFP Cell-to-Pack, thermal-runaway threshold, active/passive cell balancing)</div>
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="b5-cost">0</span> <span data-i18n="minUnit">min</span></div>
+        <p class="cap-substep-label" data-i18n="investigateLabel">Step 1 — Choose your next action:</p>
+        <div class="choice-row" id="b5-actions">
+          <div class="choice-btn" data-cost="4" data-kind="ok" data-evidence="b5EvA"><span data-i18n="b5ActionA">A. Pull the warning history (DTC log) from the diagnostic tool (4 min)</span></div>
+          <div class="choice-btn" data-cost="5" data-kind="ok" data-evidence="b5EvB"><span data-i18n="b5ActionB">B. Inspect the cooling system condition (5 min)</span></div>
+          <div class="choice-btn" data-cost="3" data-kind="warn" data-evidence="b5EvC"><span data-i18n="b5ActionC">C. Check the cell-balancing history (3 min)</span></div>
+          <div class="choice-btn danger" data-cost="0" data-kind="shortcut"><span data-i18n="b5ActionD">D. Warning is gone — call it normal and hand the vehicle back</span></div>
+        </div>
+        <div class="cap-evidence" id="b5-evidence"></div>
+        <div class="cap-step" id="b5-step-final" style="display:none;">
+          <p class="cap-substep-label" data-i18n="finalLabel">Step 2 — What is the correct judgment?</p>
+          <div class="choice-row" id="b5-final">
+            <div class="choice-btn" data-bad="0" data-wrongkey="b5BadA" data-i18n="b5OptA">A. LFP's thermal-runaway threshold (~270°C) is higher than NMC's (~210°C), so a cleared warning means it's fine to drive normally</div>
+            <div class="choice-btn" data-bad="1" data-i18n="b5OptB">B. A cleared warning only means the BMS is suppressing the symptom — don't return the vehicle to normal service until the root cause is found</div>
+            <div class="choice-btn" data-bad="0" data-wrongkey="b5BadC" data-i18n="b5OptC">C. This is a Cell-to-Pack design — since cells are integrated into the pack without modules, an individual cell fault is safe</div>
+          </div>
+        </div>
+        <div class="quiz-feedback" id="b5-fb" data-i18n="investDefault">Choose an action to begin.</div>
+      </div>
+
+      <div class="card" id="card-b6" data-viz="wheel">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><radialGradient id="ic-b6" cx="45%" cy="40%" r="65%"><stop offset="0%" stop-color="#4a4f5b"/><stop offset="70%" stop-color="#26292f"/><stop offset="100%" stop-color="#111214"/></radialGradient></defs><circle cx="12" cy="12" r="8.4" fill="url(#ic-b6)" stroke="#565b66" stroke-width=".6"/><circle cx="12" cy="12" r="3.2" fill="#8b909a" stroke="#c7cbd4" stroke-width=".5"/><circle cx="12" cy="12" r="1.1" fill="#3a3f4b"/><path d="M12 4.2v2.2M12 17.6v2.2M4.2 12h2.2M17.6 12h2.2M6.6 6.6l1.5 1.5M15.9 15.9l1.5 1.5M17.4 6.6l-1.5 1.5M8.1 15.9l-1.5 1.5" stroke="#9aa1ac" stroke-width="1" stroke-linecap="round"/></svg></div><div class="card-head-text"><h3><span class="step-badge">6</span> <span data-i18n="b6Title">Scenario: Routine Inspection & Maintenance</span></h3>
+        <p class="desc" data-i18n="b6Desc">A customer brings the EV in for routine service. Check the basics before you sign off — every check has a time cost.</p></div></div>
+        <div class="sense-badge" data-i18n="senseB6">✋ Sense covered: Visual + tactile (gauge reading, fluid level) — real hand-feel of grip/wear not simulated</div>
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="b6-cost">0</span> <span data-i18n="minUnit">min</span></div>
+        <p class="cap-substep-label" data-i18n="investigateLabel">Step 1 — Choose your next action:</p>
+        <div class="choice-row" id="b6-actions">
+          <div class="choice-btn" data-cost="2" data-kind="ok" data-evidence="b6EvA"><span data-i18n="b6ActionA">A. Measure tire pressure on all four tires (2 min)</span></div>
+          <div class="choice-btn" data-cost="1" data-kind="ok" data-evidence="b6EvB"><span data-i18n="b6ActionB">B. Check washer fluid level (1 min)</span></div>
+          <div class="choice-btn danger" data-cost="0" data-kind="shortcut"><span data-i18n="b6ActionC">C. Skip checks, go straight to tire rotation</span></div>
+        </div>
+        <div class="cap-evidence" id="b6-evidence"></div>
+        <div class="cap-step" id="b6-step-final" style="display:none;">
+          <p class="cap-substep-label" data-i18n="finalLabel">Step 2 — Tire pressure is below spec. What should you do first?</p>
+          <div class="choice-row" id="b6-final">
+            <div class="choice-btn" data-bad="0" data-i18n="b6OptA">A. Ignore the pressure and proceed straight to rotation</div>
+            <div class="choice-btn" data-bad="0" data-wrongkey="b6BadB" data-i18n="b6OptB">B. Inflate to the recommended pressure, then perform a standard cross (X-pattern) rotation</div>
+            <div class="choice-btn" data-bad="1" data-i18n="b6OptC">C. Inflate to the recommended pressure, then check whether front/rear tire sizes match before choosing the rotation pattern</div>
+          </div>
+        </div>
+        <div class="quiz-feedback" id="b6-fb" data-i18n="investDefault">Choose an action to begin.</div>
+      </div>
+
+      <div class="card" id="card-b7" data-viz="wheel">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><radialGradient id="ic-b7" cx="42%" cy="38%" r="68%"><stop offset="0%" stop-color="#dfe3e8"/><stop offset="55%" stop-color="#a7afba"/><stop offset="100%" stop-color="#6b7280"/></radialGradient></defs><circle cx="12" cy="12" r="8.4" fill="url(#ic-b7)" stroke="#565b66" stroke-width=".5"/><circle cx="12" cy="12" r="2.3" fill="#3a3f4b"/><circle cx="12" cy="5.8" r=".8" fill="#3a3f4b"/><circle cx="17.4" cy="15.4" r=".8" fill="#3a3f4b"/><circle cx="6.6" cy="15.4" r=".8" fill="#3a3f4b"/><path d="M12 12 L12 5.8 M12 12 L17.4 15.4 M12 12 L6.6 15.4" stroke="#8b909a" stroke-width=".5"/></svg></div><div class="card-head-text"><h3><span class="step-badge">7</span> <span data-i18n="b7Title">Scenario: Mechanical Wear Check</span></h3>
+        <p class="desc" data-i18n="b7Desc">During a routine check, verify the brake and suspension components before closing out the service — every check has a time cost.</p></div></div>
+        <div class="sense-badge" data-i18n="senseB7">✋ Sense covered: Visual + tactile (pad thickness gauge, bushing play by hand) — real wear feel requires hands-on practice</div>
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="b7-cost">0</span> <span data-i18n="minUnit">min</span></div>
+        <p class="cap-substep-label" data-i18n="investigateLabel">Step 1 — Choose your next action:</p>
+        <div class="choice-row" id="b7-actions">
+          <div class="choice-btn" data-cost="3" data-kind="ok" data-evidence="b7EvA"><span data-i18n="b7ActionA">A. Measure brake pad thickness (3 min)</span></div>
+          <div class="choice-btn" data-cost="2" data-kind="ok" data-evidence="b7EvB"><span data-i18n="b7ActionB">B. Visually inspect suspension bushings (2 min)</span></div>
+          <div class="choice-btn danger" data-cost="0" data-kind="shortcut"><span data-i18n="b7ActionC">C. Skip measuring, it looks fine — sign off as complete</span></div>
+        </div>
+        <div class="cap-evidence" id="b7-evidence"></div>
+        <div class="cap-step" id="b7-step-final" style="display:none;">
+          <p class="cap-substep-label" data-i18n="finalLabel">Step 2 — Pad thickness is below the replacement spec. What's the correct action?</p>
+          <div class="choice-row" id="b7-final">
+            <div class="choice-btn" data-bad="0" data-i18n="b7OptA">A. Leave it for the next service visit</div>
+            <div class="choice-btn" data-bad="0" data-wrongkey="b7BadB" data-i18n="b7OptB">B. Below spec, so just replace the pads and close out the service</div>
+            <div class="choice-btn" data-bad="1" data-i18n="b7OptC">C. Replace the pads, and also check why they wore this fast — EVs rely on regen braking, so friction pads should normally last longer</div>
+          </div>
+        </div>
+        <div class="quiz-feedback" id="b7-fb" data-i18n="investDefault">Choose an action to begin.</div>
+      </div>
+    </section>
+
+    <!-- ================= ORANGE MODULE ================= -->
+    <section id="orange-module" class="module">
+      <div class="module-head">
+        <div>
+          <h2 data-i18n="orangeHead">Orange — Lessons 5–8 (Intermediate Level Certification)</h2>
+          <p class="sub" data-i18n="orangeSub">Based on the official EV Specialist Orange-grade competency spec (Indonesia SMK program) — de-energized electrical work, traction battery R&I, LOTO, fluid service</p>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-track"><div class="progress-fill" id="orange-fill"></div></div>
+          <div class="progress-label" id="orange-label">0 / 4</div>
+        </div>
+      </div>
+
+      <div class="card" id="card-l5" data-viz="deenergized">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><linearGradient id="ic-l5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffb066"/><stop offset="100%" stop-color="#d9600c"/></linearGradient></defs><rect x="9" y="2.6" width="2" height="4.6" rx=".7" fill="#8b909a"/><rect x="14.6" y="2.6" width="2" height="4.6" rx=".7" fill="#8b909a"/><path d="M6 7.6h13v3.4a6.5 6.5 0 0 1-13 0V7.6z" fill="url(#ic-l5)" stroke="#a8460a" stroke-width=".5"/><rect x="11.2" y="17.4" width="2" height="4.2" rx=".6" fill="#8b909a"/></svg></div><div class="card-head-text"><h3><span class="step-badge">5</span> <span data-i18n="l5Title">De-Energized Electrical Component Work</span></h3>
+        <p class="desc" data-i18n="l5Desc">Job order: service the DC-DC converter/PDU, motor & inverter, or charger unit. Confirm the de-energized state before touching anything — every check has a time cost.</p></div></div>
+        <div class="sense-badge" data-i18n="senseL5">🔧 Sense covered: Instrument reading only (meter, lock/tag check) — real arc-flash risk cannot be felt in simulation</div>
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="l5-cost">0</span> <span data-i18n="minUnit">min</span></div>
+        <p class="cap-substep-label" data-i18n="investigateLabel">Step 1 — Choose your next action:</p>
+        <div class="choice-row" id="l5-actions">
+          <div class="choice-btn" data-cost="3" data-kind="ok" data-evidence="l5EvA"><span data-i18n="l5ActionA">A. Re-verify LOTO lock/tag is applied (3 min)</span></div>
+          <div class="choice-btn" data-cost="5" data-kind="ok" data-evidence="l5EvB"><span data-i18n="l5ActionB">B. Measure voltage directly with a meter (5 min)</span></div>
+          <div class="choice-btn danger" data-cost="0" data-kind="shortcut"><span data-i18n="l5ActionC">C. Skip checks, start work immediately</span></div>
+        </div>
+        <div class="cap-evidence" id="l5-evidence"></div>
+        <div class="cap-step" id="l5-step-final" style="display:none;">
+          <p class="cap-substep-label" data-i18n="finalLabel">Step 2 — What is the correct procedure?</p>
+          <div class="choice-row" id="l5-final">
+            <div class="choice-btn" data-bad="0" data-i18n="l5OptA">A. If it looks fine visually, start work</div>
+            <div class="choice-btn" data-bad="0" data-wrongkey="l5BadB" data-i18n="l5OptB">B. Measured 0V immediately after power-off, so it's safe to start work right away</div>
+            <div class="choice-btn" data-bad="1" data-i18n="l5OptC">C. Apply LOTO, wait the manufacturer-specified discharge time for the DC-link capacitor, then re-verify 0V before starting work</div>
+          </div>
+        </div>
+        <div class="quiz-feedback" id="l5-fb" data-i18n="investDefault">Choose an action to begin.</div>
+      </div>
+
+      <div class="card" id="card-l6" data-viz="battery">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><linearGradient id="ic-l6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3a3f4b"/><stop offset="100%" stop-color="#1b1d22"/></linearGradient></defs><rect x="3" y="7.5" width="16" height="10" rx="1.6" fill="url(#ic-l6)" stroke="#ff7a1a" stroke-width="1.1"/><rect x="19.3" y="10.7" width="2" height="3.2" rx=".6" fill="#ff7a1a"/><rect x="5.3" y="9.5" width="3.4" height="6" rx=".5" fill="#2b2f38"/><rect x="9.6" y="9.5" width="3.4" height="6" rx=".5" fill="#2b2f38"/><rect x="13.9" y="9.5" width="3.4" height="6" rx=".5" fill="#2b2f38"/></svg></div><div class="card-head-text"><h3><span class="step-badge">6</span> <span data-i18n="l6Title">Traction Battery Assembly R&I</span></h3>
+        <p class="desc" data-i18n="l6Desc">Job order: remove and install the traction battery pack. Check before you lift — every check has a time cost.</p></div></div>
+        <div class="sense-badge" data-i18n="senseL6">✋ Sense covered: Visual + tactile (connector fit, load rating) — real pack weight/balance not simulated</div>
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="l6-cost">0</span> <span data-i18n="minUnit">min</span></div>
+        <p class="cap-substep-label" data-i18n="investigateLabel">Step 1 — Choose your next action:</p>
+        <div class="choice-row" id="l6-actions">
+          <div class="choice-btn" data-cost="4" data-kind="ok" data-evidence="l6EvA"><span data-i18n="l6ActionA">A. Check the battery interlock connector (4 min)</span></div>
+          <div class="choice-btn" data-cost="4" data-kind="ok" data-evidence="l6EvB"><span data-i18n="l6ActionB">B. Check lift/crane rated load capacity (4 min)</span></div>
+          <div class="choice-btn danger" data-cost="0" data-kind="shortcut"><span data-i18n="l6ActionC">C. Skip checks, remove the pack immediately</span></div>
+        </div>
+        <div class="cap-evidence" id="l6-evidence"></div>
+        <div class="cap-step" id="l6-step-final" style="display:none;">
+          <p class="cap-substep-label" data-i18n="finalLabel">Step 2 — What is the correct procedure?</p>
+          <div class="choice-row" id="l6-final">
+            <div class="choice-btn" data-bad="1" data-i18n="l6OptA">A. Confirm interlock + load capacity, then remove under LOTO</div>
+            <div class="choice-btn" data-bad="0" data-wrongkey="l6BadB" data-i18n="l6OptB">B. Remove quickly while the system is still powered</div>
+            <div class="choice-btn" data-bad="0" data-wrongkey="l6BadC" data-i18n="l6OptC">C. This is a Cell-to-Pack design — just detach the faulty module and lift that alone, it's lighter</div>
+          </div>
+        </div>
+        <div class="quiz-feedback" id="l6-fb" data-i18n="investDefault">Choose an action to begin.</div>
+      </div>
+
+      <div class="card" id="card-l7" data-viz="hvil">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><linearGradient id="ic-l7" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffcf5c"/><stop offset="100%" stop-color="#c9860f"/></linearGradient></defs><rect x="5" y="11" width="14" height="9.4" rx="1.6" fill="url(#ic-l7)" stroke="#8a5c08" stroke-width=".5"/><path d="M8 11V7.2a4 4 0 0 1 8 0V11" fill="none" stroke="#9aa1ac" stroke-width="1.8"/><circle cx="12" cy="15.2" r="1.4" fill="#5b3f05"/><rect x="11.4" y="15.4" width="1.2" height="2.4" rx=".4" fill="#5b3f05"/></svg></div><div class="card-head-text"><h3><span class="step-badge">7</span> <span data-i18n="lotoTitle">Lock-Out / Tag-Out Procedure</span></h3>
+        <p class="desc" data-i18n="lotoDesc">Perform the standard 5-step procedure in order. Skipping or reordering a step risks arc-flash or shock injury — there is no partial credit in the field.</p></div></div>
+        <div class="sense-badge" data-i18n="senseL7">✋ Sense covered: Tactile sequence only — the physical resistance of a lock engaging must be practiced on real hardware</div>
+        <div class="loto-list" id="loto-list">
+          <div class="loto-step" data-order="1"><div class="num">•</div><div class="txt" data-i18n="loto0">Notify affected personnel</div></div>
+          <div class="loto-step" data-order="2"><div class="num">•</div><div class="txt" data-i18n="loto1">Shut down the system</div></div>
+          <div class="loto-step" data-order="3"><div class="num">•</div><div class="txt" data-i18n="loto2">Isolate / disconnect energy source</div></div>
+          <div class="loto-step" data-order="4"><div class="num">•</div><div class="txt" data-i18n="loto3">Apply lock & tag</div></div>
+          <div class="loto-step" data-order="5"><div class="num">•</div><div class="txt" data-i18n="loto4">Verify zero energy state</div></div>
+        </div>
+        <div class="quiz-feedback" id="loto-fb" data-i18n="lotoDefault">Click starting from step 1, in order.</div>
+      </div>
+
+      <div class="card" id="card-l8" data-viz="none">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><linearGradient id="ic-l8" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7fd4ff"/><stop offset="100%" stop-color="#1c7fa8"/></linearGradient></defs><path d="M12 2.6s6.4 7.3 6.4 11.4a6.4 6.4 0 0 1-12.8 0c0-4.1 6.4-11.4 6.4-11.4z" fill="url(#ic-l8)" stroke="#0f5c7d" stroke-width=".5"/><ellipse cx="9.6" cy="12.5" rx="1.3" ry="2" fill="#fff" opacity=".4"/></svg></div><div class="card-head-text"><h3><span class="step-badge">8</span> <span data-i18n="l8Title">Coolant & Brake Fluid Service (Air Bleeding)</span></h3>
+        <p class="desc" data-i18n="l8Desc">Job order: replace coolant and brake fluid with the air-bleeding procedure. Verify specs before you touch the system.</p></div></div>
+        <div class="sense-badge" data-i18n="senseL8">👃 Sense required in real case: Smell (burnt/contaminated fluid) & color — not simulatable, hands-on required</div>
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="l8-cost">0</span> <span data-i18n="minUnit">min</span></div>
+        <p class="cap-substep-label" data-i18n="investigateLabel">Step 1 — Choose your next action:</p>
+        <div class="choice-row" id="l8-actions">
+          <div class="choice-btn" data-cost="3" data-kind="ok" data-evidence="l8EvA"><span data-i18n="l8ActionA">A. Check coolant system pressure/leaks (3 min)</span></div>
+          <div class="choice-btn" data-cost="2" data-kind="ok" data-evidence="l8EvB"><span data-i18n="l8ActionB">B. Check required brake fluid spec (DOT rating) (2 min)</span></div>
+          <div class="choice-btn danger" data-cost="0" data-kind="shortcut"><span data-i18n="l8ActionC">C. Skip checks, top up with whatever fluid is on hand</span></div>
+        </div>
+        <div class="cap-evidence" id="l8-evidence"></div>
+        <div class="cap-step" id="l8-step-final" style="display:none;">
+          <p class="cap-substep-label" data-i18n="finalLabel">Step 2 — What is the correct procedure?</p>
+          <div class="choice-row" id="l8-final">
+            <div class="choice-btn" data-bad="0" data-i18n="l8OptA">A. Mix a different fluid spec if it's close enough</div>
+            <div class="choice-btn" data-bad="0" data-wrongkey="l8BadB" data-i18n="l8OptB">B. Confirm spec, bleed the one coolant loop you found — that covers the whole cooling system</div>
+            <div class="choice-btn" data-bad="1" data-i18n="l8OptC">C. Confirm spec, then check for and service every independent coolant loop the vehicle has (battery, motor/inverter, cabin) individually</div>
+          </div>
+        </div>
+        <div class="quiz-feedback" id="l8-fb" data-i18n="investDefault">Choose an action to begin.</div>
+      </div>
+    </section>
+
+    <!-- ================= RED MODULE ================= -->
+    <section id="red-module" class="module">
+      <div class="module-head">
+        <div>
+          <h2 data-i18n="redHead">Red — EV Powertrain Diagnosis</h2>
+          <p class="sub" data-i18n="redSub">Battery pack · Motor · Inverter fault diagnosis, plus a cross-system capstone scenario</p>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-track"><div class="progress-fill" id="red-fill"></div></div>
+          <div class="progress-label" id="red-label">0 / 4</div>
+        </div>
+      </div>
+
+      <div class="card" id="card-battery" data-viz="battery">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><linearGradient id="ic-bat" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff8b93"/><stop offset="100%" stop-color="#c22334"/></linearGradient></defs><rect x="2.6" y="4.6" width="7.4" height="14.8" rx="1.1" fill="url(#ic-bat)" stroke="#8a1420" stroke-width=".5"/><rect x="13.9" y="4.6" width="7.4" height="14.8" rx="1.1" fill="url(#ic-bat)" stroke="#8a1420" stroke-width=".5"/><rect x="6" y="3" width=".8" height="1.9" fill="#8a1420"/><rect x="17.3" y="3" width=".8" height="1.9" fill="#8a1420"/><path d="M9.9 12h4.2" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/></svg></div><div class="card-head-text"><h3><span class="step-badge">1</span> <span data-i18n="battTitle">Battery Pack Diagnosis</span></h3>
+        <p class="desc" data-i18n="battDesc">The BMS reports a cell voltage imbalance warning. Click the cell with the abnormal reading.</p></div></div>
+        <div class="sense-badge" data-i18n="senseVisual">👁 Sense covered: Visual only</div>
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="battery-cost">0</span> <span data-i18n="minUnit">min</span></div>
+        <div class="cell-grid" id="cell-grid">
+          <div class="cell" data-bad="0"><div class="cv">3.71V</div><div class="cn">C1</div></div>
+          <div class="cell" data-bad="0"><div class="cv">3.69V</div><div class="cn">C2</div></div>
+          <div class="cell" data-bad="1"><div class="cv">3.12V</div><div class="cn">C3</div></div>
+          <div class="cell" data-bad="0"><div class="cv">3.70V</div><div class="cn">C4</div></div>
+          <div class="cell" data-bad="0"><div class="cv">3.68V</div><div class="cn">C5</div></div>
+          <div class="cell" data-bad="0"><div class="cv">3.71V</div><div class="cn">C6</div></div>
+          <div class="cell" data-bad="0"><div class="cv">3.69V</div><div class="cn">C7</div></div>
+          <div class="cell" data-bad="0"><div class="cv">3.70V</div><div class="cn">C8</div></div>
+        </div>
+        <div class="quiz-feedback" id="batt-fb" data-i18n="battDefault">Click the cell with the abnormal voltage.</div>
+        <div class="cap-step" id="batt-step-final" style="display:none;">
+          <p class="cap-substep-label" data-i18n="finalLabel">Step 2 — What is the correct action?</p>
+          <div class="choice-row" id="batt-final">
+            <div class="choice-btn" data-bad="0" data-wrongkey="battBadA" data-i18n="battOptA">A. This is Cell-to-Pack — remove and replace only cell C3</div>
+            <div class="choice-btn" data-bad="1" data-i18n="battOptB">B. Pull the BMS balancing history and cell temperature log to determine whether this is temporary drift or real degradation, then follow the manufacturer's pack-level procedure</div>
+            <div class="choice-btn" data-bad="0" data-i18n="battOptC">C. The voltage gap is small — ignore it and keep using the pack</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-motor" data-viz="motor">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><radialGradient id="ic-mot" cx="42%" cy="38%" r="68%"><stop offset="0%" stop-color="#ff8b93"/><stop offset="60%" stop-color="#e5384a"/><stop offset="100%" stop-color="#96131f"/></radialGradient></defs><circle cx="12" cy="12" r="7.4" fill="url(#ic-mot)" stroke="#7a0f19" stroke-width=".5"/><path d="M12 4.8v2.3M12 16.9v2.3M19.2 12h-2.3M7.1 12H4.8M17.1 6.9l-1.6 1.6M8.5 15.5l-1.6 1.6M17.1 17.1l-1.6-1.6M8.5 8.5L6.9 6.9" stroke="#fff" stroke-width="1.1" stroke-linecap="round" opacity=".85"/><circle cx="12" cy="12" r="2.3" fill="#2b2f38" stroke="#fff" stroke-width=".4"/></svg></div><div class="card-head-text"><h3><span class="step-badge">2</span> <span data-i18n="motorTitle">Motor Diagnosis — Listening Test</span></h3>
+        <p class="desc" data-i18n="motorDesc">Play both sounds and click the one that indicates a bearing fault.</p></div></div>
+        <div class="sense-badge" data-i18n="senseAudio">👂 Sense covered: Visual + Auditory</div>
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="motor-cost">0</span> <span data-i18n="minUnit">min</span></div>
+        <div class="listen-row">
+          <div class="listen-btn" id="listen-a" data-bad="0">
+            <div class="ic">▶️</div>
+            <div class="lb" data-i18n="listenA">Sound A — Listen</div>
+          </div>
+          <div class="listen-btn" id="listen-b" data-bad="1">
+            <div class="ic">▶️</div>
+            <div class="lb" data-i18n="listenB">Sound B — Listen</div>
+          </div>
+        </div>
+        <div class="quiz-feedback" id="motor-fb" data-i18n="motorDefault">Play each sound, then click the faulty one.</div>
+        <div class="cap-step" id="motor-step-final" style="display:none;">
+          <p class="cap-substep-label" data-i18n="finalLabel">Step 2 — What is the correct action?</p>
+          <div class="choice-row" id="motor-final">
+            <div class="choice-btn" data-bad="0" data-wrongkey="motorBadA" data-i18n="motorOptA">A. Replace the worn brushes causing poor contact</div>
+            <div class="choice-btn" data-bad="1" data-i18n="motorOptB">B. Isolate the HV system (LOTO) before disassembly, then replace the bearing</div>
+            <div class="choice-btn" data-bad="0" data-wrongkey="motorBadC" data-i18n="motorOptC">C. Just add more grease and reassemble</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-inverter" data-viz="inverter">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><linearGradient id="ic-inv" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4a4f5b"/><stop offset="100%" stop-color="#1e2126"/></linearGradient></defs><rect x="6" y="6" width="12" height="12" rx="1.6" fill="url(#ic-inv)" stroke="#ff8b93" stroke-width="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3" stroke="#8b909a" stroke-width="1.3" stroke-linecap="round"/><rect x="9" y="9" width="6" height="6" rx=".8" fill="#c22334" opacity=".8"/></svg></div><div class="card-head-text"><h3><span class="step-badge">3</span> <span data-i18n="invTitle">Inverter Diagnosis — Thermal Map</span></h3>
+        <p class="desc" data-i18n="invDesc">Click the overheated zone on the thermal image of the inverter module.</p></div></div>
+        <div class="sense-badge" data-i18n="senseVisual2">👁 Sense covered: Visual only (real thermal camera required on-site)</div>
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="inverter-cost">0</span> <span data-i18n="minUnit">min</span></div>
+        <div class="thermal-wrap">
+          <svg viewBox="0 0 360 130" width="100%" style="display:block;">
+            <defs>
+              <linearGradient id="coolg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#274b6b"/><stop offset="100%" stop-color="#16324a"/>
+              </linearGradient>
+              <radialGradient id="hotg" cx="50%" cy="50%" r="60%">
+                <stop offset="0%" stop-color="#fff4d6"/><stop offset="45%" stop-color="#ff7a1a"/><stop offset="100%" stop-color="#7a1d0a"/>
+              </radialGradient>
+            </defs>
+            <rect x="0" y="0" width="360" height="130" fill="#0f1116"/>
+            <rect x="20" y="15" width="320" height="100" rx="8" fill="url(#coolg)"/>
+            <rect x="45" y="35" width="70" height="60" rx="6" fill="url(#coolg)" stroke="#2fb7e0" stroke-width="1" opacity=".7"/>
+            <rect x="145" y="35" width="70" height="60" rx="30" fill="url(#hotg)"/>
+            <rect x="255" y="35" width="70" height="60" rx="6" fill="url(#coolg)" stroke="#2fb7e0" stroke-width="1" opacity=".7"/>
+            <text x="80" y="108" text-anchor="middle" fill="#8fb8d6" font-size="8" font-family="monospace">GATE DRIVER</text>
+            <text x="180" y="108" text-anchor="middle" fill="#ffcf9e" font-size="8" font-family="monospace">IGBT MODULE</text>
+            <text x="290" y="108" text-anchor="middle" fill="#8fb8d6" font-size="8" font-family="monospace">DC LINK CAP</text>
+          </svg>
+          <div class="hot-zone" id="hot-igbt" data-bad="1" style="left:40.3%;top:27%;width:19.4%;height:46%;"></div>
+          <div class="hot-zone" id="hot-a" data-bad="0" style="left:12.5%;top:27%;width:19.4%;height:46%;"></div>
+          <div class="hot-zone" id="hot-c" data-bad="0" style="left:70.8%;top:27%;width:19.4%;height:46%;"></div>
+        </div>
+        <div class="quiz-feedback" id="inv-fb" data-i18n="invDefault">Click the zone that looks overheated.</div>
+        <div class="cap-step" id="inv-step-final" style="display:none;">
+          <p class="cap-substep-label" data-i18n="finalLabel">Step 2 — What is the correct action?</p>
+          <div class="choice-row" id="inv-final">
+            <div class="choice-btn" data-bad="0" data-wrongkey="invBadA" data-i18n="invOptA">A. SiC devices are more efficient than Si IGBT and barely generate heat — no further action needed</div>
+            <div class="choice-btn" data-bad="1" data-i18n="invOptB">B. Inspect the cooling system (coolant flow, thermal paste contact) and limit high-power operation until the cause is found</div>
+            <div class="choice-btn" data-bad="0" data-wrongkey="invBadC" data-i18n="invOptC">C. This heat is within normal operating range — ignore it and hand the vehicle back</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-capstone" data-viz="overview">
+        <div class="card-head"><div class="zone-icon"><svg viewBox="0 0 24 24"><defs><radialGradient id="ic-cap" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#fff6d8"/><stop offset="70%" stop-color="#bfe6f5"/><stop offset="100%" stop-color="#6bb7d6"/></radialGradient></defs><circle cx="10.5" cy="10.5" r="6.7" fill="url(#ic-cap)" stroke="#3a7c94" stroke-width="1.3"/><path d="M15.6 15.6L21.2 21.2" stroke="#5b6270" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="8.5" cy="8" rx="1.8" ry="1" fill="#fff" opacity=".6"/></svg></div><div class="card-head-text"><h3><span class="step-badge">4</span> <span data-i18n="capTitle">Capstone — Cross-System Triangulation</span></h3>
+        <p class="desc" data-i18n="capDesc">Given the symptoms below, investigate before you diagnose — every action has a time cost.</p></div></div>
+        <ul class="symptom-list" id="symptom-list">
+          <li data-i18n="symp1">⚠ Dashboard shows reduced power warning</li>
+          <li data-i18n="symp2">⚠ Slight burning smell reported by driver (cannot be verified in simulation)</li>
+          <li data-i18n="symp3">⚠ Intermittent CAN communication error logged</li>
+        </ul>
+        <div class="sense-badge" data-i18n="senseNone">👃 Sense required in real case: Olfactory (not simulatable) — physical/on-vehicle training required</div>
+
+        <div class="cap-budget"><span data-i18n="costLabel">Diagnostic time spent</span>: <span id="cap-cost">0</span> <span data-i18n="minUnit">min</span></div>
+
+        <p class="cap-substep-label" data-i18n="capInvestigateLabel">Step 1 — Choose your next diagnostic action (you may choose more than one):</p>
+        <div class="choice-row" id="cap-actions">
+          <div class="choice-btn" data-action="battery" data-cost="5"><span data-i18n="capActionBattery">A. Re-check battery cell voltages (5 min)</span></div>
+          <div class="choice-btn" data-action="inverter" data-cost="5"><span data-i18n="capActionInverter">B. Check inverter temperature log (5 min)</span></div>
+          <div class="choice-btn" data-action="can" data-cost="8"><span data-i18n="capActionCan">C. Analyze detailed CAN bus log (8 min)</span></div>
+          <div class="choice-btn danger" data-action="shortcut" data-cost="45"><span data-i18n="capActionShortcut">D. Skip investigation, replace the inverter now (45 min + parts cost)</span></div>
+        </div>
+        <div class="cap-evidence" id="cap-evidence"></div>
+
+        <div class="cap-step" id="cap-step-diagnose" style="display:none;">
+          <p class="cap-substep-label" data-i18n="capDiagnoseLabel">Step 2 — Based on the evidence, select the root cause:</p>
+          <div class="choice-row" id="cap-choices">
+            <div class="choice-btn" data-bad="0" data-i18n="capOptA">A. Battery pack cell imbalance</div>
+            <div class="choice-btn" data-bad="1" data-i18n="capOptB">B. Inverter IGBT overheating</div>
+            <div class="choice-btn" data-bad="0" data-i18n="capOptC">C. Motor bearing wear</div>
+          </div>
+        </div>
+        <button class="cap-blind-link" id="cap-blind-btn" data-i18n="capBlindLink">Or skip straight to diagnosis without any evidence (not recommended)</button>
+
+        <div class="quiz-feedback" id="cap-fb" data-i18n="capDefault">Choose an action to begin your investigation.</div>
+      </div>
+    </section>
+
+    <!-- ================= GLOSSARY MODULE ================= -->
+    <section id="glossary-module" class="module">
+      <div class="module-head">
+        <div>
+          <h2>📘 Glossary for some abbreviations</h2>
+          <p class="sub">Key terms and acronyms used throughout this training module</p>
+        </div>
+      </div>
+
+      <div class="card" id="glossary-card">
+        <div class="glossary-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px 20px;">
+          <div><b>EV:</b> Electric Vehicle</div>
+          <div><b>HV:</b> High Voltage</div>
+          <div><b>VIN:</b> Vehicle Identification Number</div>
+          <div><b>HEV:</b> Hybrid Electric Vehicle</div>
+          <div><b>Voltage Drop:</b> The decrease in electrical energy that happens as electricity flows through a circuit.</div>
+          <div><b>CPR:</b> Cardiopulmonary Resuscitation</div>
+          <div><b>BMS:</b> Battery Management System</div>
+          <div><b>LFP:</b> Lithium Ferro Phosphate</div>
+          <div><b>DTC:</b> Diagnostic Trouble Code</div>
+          <div><b>NMC:</b> Nickel Manganese Cobalt</div>
+          <div><b>DC-DC Converter:</b> Converts the level of DC voltage</div>
+          <div><b>PDU:</b> Power Distribution Unit</div>
+          <div><b>LOTO:</b> Lock Out Tag Out</div>
+          <div><b>DOT:</b> Department of Transportation</div>
+          <div><b>HVAC:</b> Heating Ventilation and Air Conditioning</div>
+          <div><b>IGBT:</b> Insulated-Gate Bipolar Transistor</div>
+          <div><b>CAN:</b> Controller Area Network</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+  <aside class="gilbert" id="aziz-panel">
+    <div class="g-bar" id="g-bar">
+      <svg class="g-avatar" viewBox="0 0 100 100">
+        <defs>
+          <radialGradient id="gface" cx="35%" cy="30%" r="75%">
+            <stop offset="0%" stop-color="#3fd0ff"/><stop offset="100%" stop-color="#1c7fa8"/>
+          </radialGradient>
+        </defs>
+        <circle cx="50" cy="50" r="46" fill="url(#gface)" stroke="#0d1b22" stroke-width="3"/>
+        <circle cx="36" cy="46" r="7" fill="#0d1b22"/>
+        <circle cx="64" cy="46" r="7" fill="#0d1b22"/>
+        <circle cx="38" cy="44" r="2" fill="#fff"/>
+        <circle cx="66" cy="44" r="2" fill="#fff"/>
+        <path d="M32,64 Q50,78 68,64" stroke="#0d1b22" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <rect x="42" y="6" width="16" height="10" rx="2" fill="#ff7a1a"/>
+      </svg>
+      <div class="g-bar-text">
+        <div class="g-name">AZIZ</div>
+        <div class="g-msg" id="g-text">Hi! I'm Aziz.</div>
+      </div>
+      <div class="g-chevron">▲</div>
+    </div>
+    <div class="g-expand-panel">
+      <div class="g-score">
+        <div><div class="lbl" data-i18n="scoreLbl">Total Steps Completed / 6</div></div>
+        <div class="num" id="g-score-num">0</div>
+      </div>
+      <button class="sound-toggle" id="sound-btn" data-i18n="soundOn">🔊 Sound On</button>
+    </div>
+  </aside>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ================= VIZ PANEL (persistent 3D powertrain reference) ================= */
+let vizScene, vizCamera, vizRenderer, vizGroup;
+let vizBattery, vizInverter, vizMotor, vizJunction, vizCharger, vizWheels=[], vizLoopSegs=[];
+let vizTheta=0.75, vizPhi=1.05, vizRadius=8.5;
+let vizEnabled = true;
+
+function disableViz(reason){
+  vizEnabled = false;
+  if(reason) console.warn('3D reference panel disabled:', reason);
+  const panel = document.getElementById('viz-panel');
+  if(panel) panel.style.display = 'none';
+  // The "Know Your Simulator" intro relies on the 3D panel — skip it gracefully
+  // instead of leaving the user stuck on a broken tap challenge.
+  if(typeof introActive !== 'undefined' && introActive && typeof finishIntro === 'function'){
+    try{ finishIntro(); }catch(e){ /* no-op */ }
+  }
+}
+
+function initViz(){
+  const wrap = document.getElementById('viz-canvas-wrap');
+  if(!wrap){ disableViz('viz-canvas-wrap element not found'); return; }
+  if(typeof THREE === 'undefined'){ disableViz('THREE.js failed to load'); return; }
+
+  try{
+    vizScene = new THREE.Scene();
+    vizCamera = new THREE.PerspectiveCamera(45, wrap.clientWidth/wrap.clientHeight, 0.1, 100);
+    vizRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+    vizRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    wrap.appendChild(vizRenderer.domElement);
+
+    vizScene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    const key = new THREE.DirectionalLight(0xffffff, 0.9); key.position.set(6,9,5); vizScene.add(key);
+    const rim = new THREE.DirectionalLight(0x3fd0ff, 0.5); rim.position.set(-6,4,-5); vizScene.add(rim);
+
+    vizGroup = new THREE.Group();
+    vizScene.add(vizGroup);
+    buildVizVehicle();
+    updateVizCamera();
+    vizResize();
+
+    let dragging=false, px=0, py=0, downX=0, downY=0, moved=false;
+    wrap.addEventListener('mousedown', e=>{dragging=true;px=e.clientX;py=e.clientY;downX=e.clientX;downY=e.clientY;moved=false;});
+    window.addEventListener('mouseup', e=>{
+      if(dragging && !moved) handleVizClick(e.clientX, e.clientY);
+      dragging=false;
+    });
+    window.addEventListener('mousemove', e=>{
+      if(!dragging) return;
+      if(Math.abs(e.clientX-downX)>4 || Math.abs(e.clientY-downY)>4) moved=true;
+      vizTheta -= (e.clientX-px)*0.008; vizPhi -= (e.clientY-py)*0.008;
+      vizPhi = Math.max(0.4, Math.min(1.4, vizPhi));
+      px=e.clientX; py=e.clientY; updateVizCamera();
+    });
+    wrap.addEventListener('touchstart', e=>{
+      dragging=true; px=e.touches[0].clientX; py=e.touches[0].clientY;
+      downX=px; downY=py; moved=false;
+    }, {passive:true});
+    wrap.addEventListener('touchmove', e=>{
+      if(!dragging) return;
+      if(Math.abs(e.touches[0].clientX-downX)>4 || Math.abs(e.touches[0].clientY-downY)>4) moved=true;
+      vizTheta -= (e.touches[0].clientX-px)*0.008; vizPhi -= (e.touches[0].clientY-py)*0.008;
+      vizPhi = Math.max(0.4, Math.min(1.4, vizPhi));
+      px=e.touches[0].clientX; py=e.touches[0].clientY; updateVizCamera();
+    }, {passive:true});
+    wrap.addEventListener('touchend', e=>{
+      if(dragging && !moved && e.changedTouches && e.changedTouches[0]){
+        handleVizClick(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+      }
+      dragging=false;
+    });
+    wrap.addEventListener('wheel', e=>{
+      vizRadius += e.deltaY*0.005; vizRadius = Math.max(4, Math.min(14, vizRadius));
+      updateVizCamera(); e.preventDefault();
+    }, {passive:false});
+    window.addEventListener('resize', vizResize);
+
+    requestAnimationFrame(vizAnimate);
+  } catch(err){
+    disableViz(err && err.message ? err.message : err);
+  }
+}
+function updateVizCamera(){
+  vizCamera.position.x = vizRadius*Math.sin(vizPhi)*Math.sin(vizTheta);
+  vizCamera.position.z = vizRadius*Math.sin(vizPhi)*Math.cos(vizTheta);
+  vizCamera.position.y = vizRadius*Math.cos(vizPhi);
+  vizCamera.lookAt(0,0.4,0);
+}
+function vizResize(){
+  if(!vizEnabled) return;
+  const wrap = document.getElementById('viz-canvas-wrap');
+  if(!wrap) return;
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  if(w<10||h<10) return;
+  vizCamera.aspect = w/h; vizCamera.updateProjectionMatrix();
+  vizRenderer.setSize(w,h);
+}
+function vizAnimate(){
+  if(!vizEnabled) return;
+  requestAnimationFrame(vizAnimate);
+  const t = performance.now()*0.0018;
+  vizLoopSegs.forEach((seg,i)=>{
+    seg.material.emissiveIntensity = seg.userData.hot ? (0.6+Math.sin(t*2+i)*0.3) : 0.15;
+  });
+  vizRenderer.render(vizScene, vizCamera);
+}
+function buildVizVehicle(){
+  const chassis = new THREE.Mesh(new THREE.BoxGeometry(5.0,0.16,2.4), new THREE.MeshStandardMaterial({color:0x2a2f36, roughness:0.6, metalness:0.3}));
+  chassis.position.set(0,0.5,0);
+  vizGroup.add(chassis);
+
+  const wheelGeo = new THREE.CylinderGeometry(0.38,0.38,0.3,18);
+  const wheelMat = ()=> new THREE.MeshStandardMaterial({color:0x14171c, roughness:0.9});
+  [[1.8,1.2],[1.8,-1.2],[-1.8,1.2],[-1.8,-1.2]].forEach(([x,z])=>{
+    const w = new THREE.Mesh(wheelGeo, wheelMat());
+    w.rotation.z = Math.PI/2; w.position.set(x,0.38,z);
+    w.userData = {id:'wheel'};
+    vizGroup.add(w); vizWheels.push(w);
+  });
+
+  vizBattery = new THREE.Mesh(new THREE.BoxGeometry(2.8,0.4,2.1), new THREE.MeshStandardMaterial({color:0x394452, roughness:0.5, metalness:0.4}));
+  vizBattery.position.set(-0.3,0.26,0);
+  vizBattery.userData = {id:'battery'};
+  vizGroup.add(vizBattery);
+
+  vizInverter = new THREE.Mesh(new THREE.BoxGeometry(0.55,0.5,0.55), new THREE.MeshStandardMaterial({color:0x3d4552, roughness:0.5, metalness:0.5}));
+  vizInverter.position.set(1.6,0.7,0.85);
+  vizInverter.userData = {id:'inverter'};
+  vizGroup.add(vizInverter);
+
+  vizMotor = new THREE.Mesh(new THREE.CylinderGeometry(0.38,0.38,0.65,20), new THREE.MeshStandardMaterial({color:0x555f6d, roughness:0.4, metalness:0.6}));
+  vizMotor.rotation.z = Math.PI/2; vizMotor.position.set(1.8,0.6,0);
+  vizMotor.userData = {id:'motor'};
+  vizGroup.add(vizMotor);
+
+  vizJunction = new THREE.Mesh(new THREE.BoxGeometry(0.46,0.32,0.36), new THREE.MeshStandardMaterial({color:0x333a44, roughness:0.5}));
+  vizJunction.position.set(-1.8,0.64,0.85);
+  vizJunction.userData = {id:'junctionBox'};
+  vizGroup.add(vizJunction);
+
+  vizCharger = new THREE.Mesh(new THREE.BoxGeometry(0.36,0.28,0.36), new THREE.MeshStandardMaterial({color:0x2f6fb0, roughness:0.4}));
+  vizCharger.position.set(-1.8,0.64,-0.85);
+  vizCharger.userData = {id:'charger'};
+  vizGroup.add(vizCharger);
+
+  const cableMat = new THREE.MeshStandardMaterial({color:0xff8a2a, roughness:0.4});
+  [[vizBattery.position.clone().setY(0.5), vizJunction.position],
+   [vizJunction.position, vizInverter.position.clone().setY(0.46)],
+   [vizInverter.position, vizMotor.position],
+   [vizBattery.position.clone().setY(0.5), vizCharger.position]
+  ].forEach(([a,b])=>{
+    const dir = new THREE.Vector3().subVectors(b,a); const len = dir.length();
+    const cyl = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,len,8), cableMat);
+    cyl.position.copy(new THREE.Vector3().addVectors(a,b).multiplyScalar(0.5));
+    cyl.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir.clone().normalize());
+    vizGroup.add(cyl);
+  });
+
+  const pts = [
+    vizBattery.position.clone().add(new THREE.Vector3(0,0.32,0.35)),
+    vizJunction.position.clone().add(new THREE.Vector3(0,0.32,0)),
+    vizInverter.position.clone().add(new THREE.Vector3(0,0.45,0)),
+    vizMotor.position.clone().add(new THREE.Vector3(0,0.5,0)),
+    vizBattery.position.clone().add(new THREE.Vector3(0,0.32,-0.35)),
+  ];
+  for(let i=0;i<4;i++){
+    const a=pts[i], b=pts[i+1]||pts[0];
+    const dir = new THREE.Vector3().subVectors(b,a); const len = dir.length();
+    const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,len,8), new THREE.MeshStandardMaterial({color:0x2fb7e0, emissive:0x2fb7e0, emissiveIntensity:0.15}));
+    seg.position.copy(new THREE.Vector3().addVectors(a,b).multiplyScalar(0.5));
+    seg.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir.clone().normalize());
+    seg.userData={hot:false};
+    vizGroup.add(seg); vizLoopSegs.push(seg);
+  }
+}
+function vizReset(){
+  if(!vizEnabled) return;
+  [vizBattery,vizInverter,vizMotor,vizJunction,vizCharger,...vizWheels].forEach(m=>{
+    m.material.emissive = new THREE.Color(0x000000); m.material.emissiveIntensity = 0;
+  });
+  vizLoopSegs.forEach(s=> s.userData.hot=false);
+}
+function vizGlow(mesh){
+  mesh.material.emissive = new THREE.Color(0xffd84d);
+  mesh.material.emissiveIntensity = 0.85;
+}
+const VIZ_LABELS = {
+  battery:'Traction Battery Pack', inverter:'Motor & Inverter Unit', motor:'Traction Motor',
+  junctionBox:'DC-DC Converter / PDU', charger:'Onboard Charger Unit',
+  deenergized:'De-energized Work Zone', hvil:'HV Interlock Loop (HVIL)',
+  wheel:'Wheel · Brake · Suspension', overview:'EV Powertrain Overview', none:'EV Powertrain Reference',
+};
+function vizHighlight(key){
+  key = key || 'none';
+  const labelEl = document.getElementById('viz-label');
+  if(labelEl) labelEl.textContent = VIZ_LABELS[key] || VIZ_LABELS.none;
+  if(!vizEnabled) return;
+  vizReset();
+  if(key==='battery') vizGlow(vizBattery);
+  else if(key==='inverter') vizGlow(vizInverter);
+  else if(key==='motor') vizGlow(vizMotor);
+  else if(key==='junctionBox') vizGlow(vizJunction);
+  else if(key==='charger') vizGlow(vizCharger);
+  else if(key==='deenergized'){ vizGlow(vizJunction); vizGlow(vizInverter); vizGlow(vizCharger); }
+  else if(key==='hvil'){ vizLoopSegs.forEach(s=> s.userData.hot=true); }
+  else if(key==='wheel'){ vizWheels.forEach(vizGlow); }
+}
+let vizObserver;
+function initVizObserver(){
+  vizObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting && entry.intersectionRatio > 0.35){
+        vizHighlight(entry.target.dataset.viz);
+      }
+    });
+  }, {threshold:[0.35], rootMargin:'-15% 0px -35% 0px'});
+  document.querySelectorAll('.card[data-viz]').forEach(el=> vizObserver.observe(el));
+}
+
+/* ================= INTRO: Know Your Simulator (part ID exercise) ================= */
+const vizRaycaster = (typeof THREE !== 'undefined') ? new THREE.Raycaster() : null;
+const vizMouse = (typeof THREE !== 'undefined') ? new THREE.Vector2() : null;
+let introActive = true;
+let introIdx = 0;
+const INTRO_TARGETS = [
+  {id:'battery', label:()=>t('introBattery'), hint:()=>t('introHintBattery')},
+  {id:'junctionBox', label:()=>t('introJunction'), hint:()=>t('introHintJunction')},
+  {id:'inverter', label:()=>t('introInverter'), hint:()=>t('introHintInverter')},
+  {id:'motor', label:()=>t('introMotor'), hint:()=>t('introHintMotor')},
+  {id:'charger', label:()=>t('introCharger'), hint:()=>t('introHintCharger')},
+];
+function handleVizClick(clientX, clientY){
+  if(!introActive || !vizEnabled) return;
+  const wrap = document.getElementById('viz-canvas-wrap');
+  if(!wrap) return;
+  const rect = wrap.getBoundingClientRect();
+  vizMouse.x = ((clientX-rect.left)/rect.width)*2-1;
+  vizMouse.y = -((clientY-rect.top)/rect.height)*2+1;
+  vizRaycaster.setFromCamera(vizMouse, vizCamera);
+  const hit = vizRaycaster.intersectObjects(vizGroup.children)[0];
+  if(!hit) return;
+  handleIntroClick(hit.object);
+}
+function updateIntroUI(){
+  const tgt = INTRO_TARGETS[introIdx];
+  const label = document.getElementById('intro-target-label');
+  const fill = document.getElementById('intro-fill');
+  const prog = document.getElementById('intro-progress-label');
+  if(!tgt){ return; }
+  label.innerHTML = t('introTapPrefix')+' <b>'+tgt.label()+'</b>';
+  fill.style.width = (introIdx/INTRO_TARGETS.length*100)+'%';
+  prog.textContent = introIdx+' / '+INTRO_TARGETS.length;
+}
+function flashVizWrong(obj){
+  if(!obj.material) return;
+  const origHex = obj.material.emissive ? obj.material.emissive.getHex() : 0;
+  const origInt = obj.material.emissiveIntensity || 0;
+  obj.material.emissive = new THREE.Color(0xff5c68);
+  obj.material.emissiveIntensity = 0.85;
+  setTimeout(()=>{ obj.material.emissive.setHex(origHex); obj.material.emissiveIntensity = origInt; }, 550);
+}
+function handleIntroClick(obj){
+  const tgt = INTRO_TARGETS[introIdx];
+  if(!tgt) return;
+  if(obj.userData && obj.userData.id === tgt.id){
+    obj.material.emissive = new THREE.Color(0x3ddc8a);
+    obj.material.emissiveIntensity = 0.9;
+    playSuccess();
+    say(t('introCorrect')(tgt.label()));
+    introIdx++;
+    if(introIdx >= INTRO_TARGETS.length){
+      setTimeout(finishIntro, 500);
+    } else {
+      updateIntroUI();
+    }
+  } else {
+    playError();
+    trackWrongAttempt();
+    flashVizWrong(obj);
+    say(tgt.hint());
+    document.getElementById('intro-target-label').classList.add('shake');
+    setTimeout(()=> document.getElementById('intro-target-label').classList.remove('shake'), 400);
+  }
+}
+function finishIntro(){
+  introActive = false;
+  const overlay = document.getElementById('intro-overlay');
+  if(overlay) overlay.style.display='none';
+  vizReset();
+  vizHighlight('overview');
+  initVizObserver();
+  say(t('introDoneMsg'));
+}
+</script>
+<script>
+/* Suppress console output (warnings/errors from WebGL/Three.js and runtime) for a clean classroom demo */
+try{
+  window.console.warn = function(){};
+  window.console.error = function(){};
+  window.onerror = function(){ return true; };
+}catch(e){}
+</script>
+<script>
+/* ================= I18N ================= */
+const I18N = {
+  en: {
+    brandTitle:"IEG EV Bridge Module", brandSub:"ICE → EV Diagnostic Bridge · SMK Training Program",
+    tabBlue:"🔵 Blue", tabOrange:"🟠 Orange",
+    blueHead:"Blue — Electrical Basics Applied to Real Scenarios", blueSub:"Apply fundamental electrical concepts to real shop-floor situations — designed to align with TÜV SÜD Level 1 (non-expert HV awareness) international standard — investigate before you decide",
+    compareTitle:"Low Voltage vs High Voltage — Click to Compare", compareDesc:"Compare the ICE battery (12V) with the EV high-voltage battery pack. Click each box for details.",
+    lvTitle:"Internal Combustion Engine (ICE) Battery", lvVolt:"12V DC",
+    lvReveal:["· Uses black/red cables","· Low shock risk — standard service procedures apply","· Powers starter, lighting, ECU"],
+    hvTitle:"EV High-Voltage Battery Pack", hvVolt:"200–800V DC",
+    hvReveal:["· Identified by orange cables","· Shock & arc-flash risk — HV certification required","· Powers the motor and inverter"],
+    ohmTitle:"Ohm's Law Interactive", ohmDesc:"Adjust voltage (V) and resistance (R) to see how current (I) and circuit brightness change. V = I × R",
+    vLabel:"Voltage (V)", rLabel:"Resistance (R)", iLabel:"Current (A) — I = V ÷ R",
+    quizTitle:"Wire Identification Quiz", quizDesc:"In the engine-bay wiring diagram, click the high-voltage (orange) cable.",
+    quizDefault:"Click a wire to try.", quizOk:"Correct! The orange cable is the high-voltage (HV) wire.",
+    quizBad:"Incorrect — this is a low-voltage (LV) wire. Find the orange cable.",
+    orangeHead:"Orange — Lessons 5–8 (Intermediate Level Certification)", orangeSub:"Based on the official EV Specialist Orange-grade competency spec (Indonesia SMK program) — de-energized electrical work, traction battery R&I, LOTO, fluid service",
+    ppeTitle:"PPE Donning Sequence", ppeDesc:"Click the protective equipment below in the correct order: glove inspection → insulated gloves → insulated boots → face shield",
+    ppeItem0:"Inspect glove insulation", ppeItem1:"Don insulated gloves", ppeItem2:"Don insulated boots", ppeItem3:"Don face shield",
+    ppeDefault:"Click in order (1→4)", ppeBad:"Wrong order. Start again from step 1 (glove inspection).",
+    ppeOkStep:n=>`Step ${n} complete. Click the next item.`, ppeOkDone:"PPE donned! Probe use is now enabled.",
+    lotoTitle:"Lock-Out / Tag-Out Procedure", lotoDesc:"Perform the standard 5-step procedure in order before working on the high-voltage system.",
+    loto0:"Notify affected personnel", loto1:"Shut down the system", loto2:"Isolate / disconnect energy source", loto3:"Apply lock & tag", loto4:"Verify zero energy state",
+    lotoDefault:"Click starting from step 1, in order.", lotoBad:"Wrong order. Start again from step 1.",
+    lotoOkStep:n=>`Step ${n} complete. Click the next step.`, lotoOkDone:"All 5 LOTO steps complete! Zero energy state verified.",
+    megTitle:"Insulation Resistance Test (Megger Test)", megDesc:"Only available after PPE is donned. Touch the probes to the battery pack terminals to measure insulation resistance.",
+    megWarn:"⚠ Complete the PPE module (step 1) first to enable the probe.", probeBtn:"Apply Probe / TEST",
+    megOk:"Insulation resistance normal (PASS) — safe to begin service work.",
+    gilbertDefault:"Hi! I'm Aziz. Click the cards on the left one by one to proceed. Let's start with low voltage.",
+    switchBlue:"This is the Blue module. Apply the basics across 3 real maintenance scenarios — build the habit of investigating before you decide.",
+    b1Title:"Scenario: Unknown Vehicle Intake", b1Desc:"A vehicle arrives with no model info on the work order. Before touching anything, determine whether this is an ICE or EV vehicle — every check has a time cost.",
+    b1ActionA:"A. Check the VIN / service label (1 min)", b1ActionB:"B. Open the hood and check cable colors (2 min)", b1ActionC:"C. Skip checks, start standard ICE service",
+    b1EvA:"VIN label shows 'EV' marking — this is an electric vehicle.", b1EvB:"Multiple orange high-voltage cables found — high-voltage system onboard.",
+    b1OptA:"A. Proceed with standard ICE service procedure", b1OptB:"B. Regardless of HEV or full EV, start HV safety procedures if the label shows any HV system present", b1OptC:"C. The label shows \"HEV\" (hybrid) — small battery, so standard ICE procedure is fine",
+    b1OkGood:min=>`Correct! You confirmed the vehicle type first, then followed the right procedure — total ${min} min.`,
+    b1OkShortcut:min=>`You got the right answer, but starting standard service without checking can cause a serious shock injury if the vehicle turns out to be an EV (${min} min).`,
+    b1Bad:"Think again — what could go wrong if you start service without knowing the vehicle type?",
+    b1BadC:"Incorrect — this is the trap. HEV still carries a full HV system (traction battery, inverter, motor) alongside the engine. Battery size doesn't change the fact that HV safety procedures are still mandatory.",
+    b1DoneMsg:"Scenario 1 complete! You understand why identifying the vehicle type is the starting point for every job.",
+    b2Title:"Scenario: Headlight Circuit Fault (Ohm's Law)", b2Desc:"A customer reports the headlight doesn't turn on. Apply Ohm's Law (V = I × R) to find the real cause before replacing anything.",
+    b2ActionA:"A. Measure battery voltage (2 min)", b2ActionB:"B. Measure headlight circuit resistance (2 min)", b2ActionC:"C. Skip checks, replace the bulb right away",
+    b2EvA:"Battery voltage 12.6V — normal.", b2EvB:"Resistance reads infinite (∞) — the circuit is open (broken wire).",
+    b2OptA:"A. Infinite resistance means the bulb filament is definitely burnt out", b2OptB:"B. The battery must be dead", b2OptC:"C. Run a voltage-drop test across each connector and ground point to pinpoint the exact break location",
+    b2OkGood:min=>`Correct! You measured both voltage and resistance and logically found the break — total ${min} min. This is how Ohm's Law applies on the job.`,
+    b2OkShortcut:min=>`Replacing the bulb might work, but swapping parts without measuring is a guess — the real fault could have been the open circuit (${min} min).`,
+    b2Bad:"Think again — if voltage is normal but resistance is infinite, what does that mean?",
+    b2BadA:"Incorrect — this is the trap. The resistance was measured across the harness/connector, not directly across the bulb filament. Infinite resistance there points to a break in the wiring path, not necessarily the bulb itself — you can't conclude \"bulb burnt out\" from this measurement alone.",
+    b2DoneMsg:"Scenario 2 complete! You've learned to diagnose a circuit fault logically using Ohm's Law.",
+    b3Title:"Scenario: Cable Routing Safety Check", b3Desc:"You need to reroute a new cable near the engine bay. Identify which existing cable is safe to work near before doing anything.",
+    b3ActionA:"A. Check the wiring diagram manual (2 min)", b3ActionB:"B. Visually check cable jacket color (1 min)", b3ActionC:"C. Skip checks, cut whichever cable is in the way",
+    b3EvA:"Wiring diagram shows orange cable = high-voltage system (motor-inverter link).", b3EvB:"Visually confirmed the cable jacket in this section is orange.",
+    b3OptA:"A. The orange cable", b3OptB:"B. It's black/red, so it's definitely low-voltage — no need to cross-check the diagram", b3OptC:"C. It's black/red, but confirm against the wiring diagram before cutting, since color alone isn't proof",
+    b3OkGood:min=>`Correct! You checked the diagram and visually confirmed before identifying the safe cable — total ${min} min.`,
+    b3OkShortcut:min=>`You got the right answer, but cutting a cable without checking first could be fatal if it turns out to be high-voltage (${min} min).`,
+    b3Bad:"Think again — what happens if you cut the orange cable without checking first?",
+    b3BadB:"Incorrect — this is the trap. Color alone isn't sufficient proof: damaged/faded sheathing or a past incorrect repair can mislead you. Always cross-check the wiring diagram before cutting, even when the color looks like low-voltage.",
+    b3DoneMsg:"Scenario 3 complete! You can now identify a hazardous circuit instantly by cable color alone.",
+    senseB1:"👁 Sense covered: Visual only (VIN plate, cable color)",
+    senseB2:"🔧 Sense covered: Instrument reading only (multimeter) — the physical feel of a live shock risk is covered in OJT, not here",
+    senseB3:"👁 Sense covered: Visual only (cable jacket color, diagram cross-check)",
+    senseB6:"✋ Sense covered: Visual + tactile (gauge reading, fluid level) — real hand-feel of grip/wear is covered during OJT",
+    senseB7:"✋ Sense covered: Visual + tactile (pad thickness gauge, bushing play by hand) — real wear feel is covered during OJT",
+    senseL5:"🔧 Sense covered: Instrument reading only (meter, lock/tag check) — real arc-flash risk awareness is built during OJT, under supervision",
+    senseL6:"✋ Sense covered: Visual + tactile (connector fit, load rating) — real pack weight/balance is covered during OJT",
+    senseL7:"✋ Sense covered: Tactile sequence only — the physical click/resistance of a lock engaging is practiced on real hardware during OJT",
+    senseL8:"👃 Sense required in real case: Smell (burnt/contaminated coolant or brake fluid) & true fluid color — this is exactly what OJT covers, since a phone can't simulate smell",
+    senseFirstAid:"🚑 This scenario covers hazard identification + CPR/First Aid awareness (EV_Specialist 1.2)",
+    b4Title:"Scenario: Electrical Accident Response (Safety + First Aid)", b4Desc:"A coworker is found collapsed near a high-voltage vehicle. Rushing in can make you a second victim — respond in the correct order.",
+    b4ActionA:"A. Check whether the power/breaker is off (LOTO status) (2 min)", b4ActionB:"B. Keep a safe distance and assess the scene (1 min)", b4ActionC:"C. Rush in immediately and grab the coworker",
+    b4EvA:"The breaker is still ON — power is confirmed live.", b4EvB:"The coworker is down near the battery pack cables; physical contact status is unclear.",
+    b4OptA:"A. Grab and shake the coworker immediately to wake them", b4OptB:"B. Confirm power is off, then approach safely, call for emergency help, and give CPR if needed", b4OptC:"C. Cardiac arrest risk is high — start CPR immediately, regardless of whether the power is confirmed off",
+    b4OkGood:min=>`Correct! You confirmed the power was off first to avoid becoming a second victim, then called for help and responded with CPR in the right order — total ${min} min. This is the standard response to an electrical accident.`,
+    b4OkShortcut:min=>`You got the right answer, but grabbing the coworker without checking first is extremely dangerous — if the power is still live, the rescuer gets shocked too (${min} min).`,
+    b4Bad:"Think again — what risk does the rescuer face by touching someone down while the power is still live?",
+    b4BadC:"Incorrect — this is the trap. CPR urgency is real, but scene safety always comes first in an electrical accident: if the power is still live, starting compressions means the rescuer gets shocked too, and now there are two victims instead of one.",
+    b4DoneMsg:"Scenario 4 complete! You've learned the order: secure your own safety → call for help → first aid. Actual CPR technique must be practiced through certified first-aid training.",
+    factBadge:"📋 Based on published BYD Blade Battery / BMS technical facts (LFP Cell-to-Pack, thermal-runaway threshold, active/passive cell balancing)",
+    b5Title:"Scenario: The BMS Trust Trap", b5Desc:"During service, a battery pack over-temperature warning flashed briefly, then cleared on its own — the BMS limited current and activated cooling. Is \"the warning is gone\" the same as \"the problem is solved\"? Investigate before you decide.",
+    b5ActionA:"A. Pull the warning history (DTC log) from the diagnostic tool (4 min)", b5ActionB:"B. Inspect the cooling system condition (5 min)", b5ActionC:"C. Check the cell-balancing history (3 min)", b5ActionD:"D. Warning is gone — call it normal and hand the vehicle back",
+    b5EvA:"The same warning repeated 3 times in the last 10 minutes — the BMS has been repeatedly limiting current to suppress it.",
+    b5EvB:"Coolant flow rate is about 60% of normal — degraded cooling performance suspected.",
+    b5EvC:"Passive balancing (dissipating excess charge) has repeated on a specific cell group — possible ongoing cell imbalance.",
+    b5OptA:"A. LFP's thermal-runaway threshold (~270°C) is higher than NMC's (~210°C), so a cleared warning means it's fine to drive normally", b5OptB:"B. A cleared warning only means the BMS is suppressing the symptom — don't return the vehicle to normal service until the root cause is found", b5OptC:"C. This is a Cell-to-Pack design — since cells are integrated into the pack without modules, an individual cell fault is safe",
+    b5OkGood:min=>`Correct! The BMS's mitigation logic (current limiting, cooling, cell isolation) only suppresses the symptom — it doesn't fix the root cause — total ${min} min. LFP's higher thermal-runaway threshold than NMC (~270°C vs ~210°C) is a safety margin, not a safety guarantee.`,
+    b5OkShortcut:min=>`You may have avoided the risk this time, but returning the vehicle without checking the warning history, cooling system, and balancing history is a dangerous habit that misses recurring root causes (${min} min).`,
+    b5Bad:"Think again — does the BMS being able to suppress a warning mean the underlying problem is gone?",
+    b5BadA:"Incorrect — a higher thermal-runaway threshold is a safety margin, not a guarantee of safety under all conditions. Even LFP is dangerous if there's a recurring root cause the BMS keeps suppressing.",
+    b5BadC:"Incorrect — this is the trap. Cell-to-Pack actually means there's no module-level physical isolation between cells, so an individual cell fault can propagate through the pack faster, not slower. You had it backwards.",
+    b5DoneMsg:"Scenario 5 complete! You now understand that \"the safety system is working\" and \"the vehicle is safe\" are not the same thing — a BMS manages risk, it doesn't eliminate it.",
+    b6Title:"Scenario: Routine Inspection & Maintenance", b6Desc:"A customer brings the EV in for routine service. Check the basics before you sign off — every check has a time cost.",
+    b6ActionA:"A. Measure tire pressure on all four tires (2 min)", b6ActionB:"B. Check washer fluid level (1 min)", b6ActionC:"C. Skip checks, go straight to tire rotation",
+    b6EvA:"All four tires read 28psi — below the recommended 33psi.", b6EvB:"Washer fluid level normal.",
+    b6OptA:"A. Ignore the pressure and proceed straight to rotation", b6OptB:"B. Inflate to the recommended pressure, then perform a standard cross (X-pattern) rotation", b6OptC:"C. Inflate to the recommended pressure, then check whether front/rear tire sizes match before choosing the rotation pattern",
+    b6OkGood:min=>`Correct! You caught the low pressure, corrected it, then proceeded — total ${min} min.`,
+    b6OkShortcut:min=>`Nothing went wrong this time, but skipping checks and going straight to service can accelerate tire wear or affect safety while pressure stays low (${min} min).`,
+    b6Bad:"Think again — what happens to the customer if you finish the service while tire pressure is still low?",
+    b6BadB:"Incorrect — this is the trap. Many EVs use staggered fitment (different front/rear tire sizes), especially performance trims. A standard cross rotation isn't even physically possible on a staggered setup — always confirm the sizes match before choosing a rotation pattern.",
+    b6DoneMsg:"Scenario 6 complete! You've built the habit of checking every basic item, not just the obvious ones.",
+    b7Title:"Scenario: Mechanical Wear Check", b7Desc:"During a routine check, verify the brake and suspension components before closing out the service — every check has a time cost.",
+    b7ActionA:"A. Measure brake pad thickness (3 min)", b7ActionB:"B. Visually inspect suspension bushings (2 min)", b7ActionC:"C. Skip measuring, it looks fine — sign off as complete",
+    b7EvA:"Pad thickness reads 2mm — below the 3mm replacement spec.", b7EvB:"No cracks in the bushings — normal.",
+    b7OptA:"A. Leave it for the next service visit", b7OptB:"B. Below spec, so just replace the pads and close out the service", b7OptC:"C. Replace the pads, and also check why they wore this fast — EVs rely on regen braking, so friction pads should normally last longer",
+    b7OkGood:min=>`Correct! You confirmed the pad thickness was below spec and replaced it immediately — total ${min} min. Brakes should be judged by measurement, not by whether they're noisy.`,
+    b7OkShortcut:min=>`You might get away with it, but signing off as "looks fine" without measuring risks missing brakes that are already past their wear limit (${min} min).`,
+    b7Bad:"Think again — what's the risk of leaving brake pads below spec just because there's no noise?",
+    b7BadB:"Incorrect — this is the trap. Replacing the pad isn't wrong, but it's incomplete. EVs rely heavily on regenerative braking, so friction pads normally wear much slower than on an ICE vehicle. Unusually fast wear can signal a deeper issue (regen system fault, caliper sticking) that a simple pad swap won't fix.",
+    b7DoneMsg:"Scenario 7 complete! You've learned to judge mechanical wear by measurement, not by sight or sound alone. You've now completed all of Blue 1.1–1.4.",
+    compTitle:"🎓 All 15 Steps Complete!",
+    compSummary:(cost,shortcuts,total,wrong)=>`${total} scenarios completed · ${cost} min total diagnostic time · ${shortcuts} risky shortcut(s) · ${wrong} wrong attempt(s)`,
+    compRetryWarn:(wrong)=>`⚠ ${wrong} wrong attempts — re-study is recommended`,
+    compNote:"Congratulations — you've completed Blue (basics & safety awareness), Orange (Lessons 5–8 intermediate certification), and Red (powertrain diagnosis). Remember: this app builds your judgment and procedure knowledge. Touch, smell, and real physical feel (like coolant/brake fluid odor, lock resistance, pack weight) can't be simulated on a phone — that's exactly what OJT (on-the-job training) with real equipment is for, and it's still required before actual certification.",
+    cbClose:"✕ Close",
+    introKicker:"STEP 0 — KNOW YOUR SIMULATOR",
+    introTitle:"Learn the powertrain layout first",
+    introBody:"Before starting Blue Level, tap each part in the 3D reference panel when its name is called below. This builds real spatial memory of the actual components — not just quiz answers.",
+    introSkip:"Skip for now",
+    introTapPrefix:"Tap:",
+    introBattery:"Traction Battery Pack", introJunction:"DC-DC Converter / PDU", introInverter:"Motor & Inverter Unit",
+    introMotor:"Traction Motor", introCharger:"Onboard Charger Unit",
+    introHintBattery:"Not quite — the battery pack is the wide, flat unit running along the underside of the vehicle floor, between the wheels. Look low and long, not boxy.",
+    introHintJunction:"Not quite — the DC-DC Converter/PDU is the small dark box on the rear-left, separate from the motor and charger. Look near the back corner.",
+    introHintInverter:"Not quite — the Motor & Inverter Unit sits just above the motor on the right side, a compact box near the rear wheel.",
+    introHintMotor:"Not quite — the Traction Motor is the cylindrical part on the right side, directly connected to the wheels.",
+    introHintCharger:"Not quite — the Onboard Charger Unit is the blue box on the front-left, opposite the DC-DC converter.",
+    introCorrect:(name)=>`Correct — that's the ${name}. Remember where it is.`,
+    introDoneMsg:"You now know where every major part sits. Let's start Blue Level.",
+    compAziz:"You've completed the whole program! Great work. You're ready to move on to hands-on equipment now.",
+    switchOrange:"This is the Orange module — Lessons 5–8, the official Indonesian EV_Specialist competency spec. Build the habit of investigating before you decide.",
+    compareDone:"Great! You've seen the difference between low and high voltage. Now try Ohm's Law.",
+    ohmDone:"Current (I) is voltage divided by resistance. Ready for the wire-ID quiz?",
+    quizDoneMsg:"Correct! Orange = high voltage. Next, let's learn safety procedures in the Orange module.",
+    ppeDoneMsg:"PPE donning complete! Now perform the LOTO procedure step by step.",
+    lotoDoneMsg:"You completed the LOTO procedure perfectly. Last step: insulation resistance test.",
+    megDoneMsg:"Congratulations! You've completed both Blue and Orange bridge modules. Next up: EV powertrain diagnostics.",
+    tabRed:"🔴 Red",
+    redHead:"Red — EV Powertrain Diagnosis", redSub:"Battery pack · Motor · Inverter fault diagnosis, plus a cross-system capstone scenario",
+    battTitle:"Battery Pack Diagnosis", battDesc:"The BMS reports a cell voltage imbalance warning. Click the cell with the abnormal reading.",
+    senseVisual:"👁 Sense covered: Visual only", battDefault:"Click the cell with the abnormal voltage.",
+    battEvidence:"BMS diagnostic tool: full pack cell-voltage scan complete.",
+    motorEvidence:"Auditory inspection logged — sound signature compared against baseline bearing profile.",
+    invEvidence:"Thermal camera scan performed across gate driver / IGBT / DC-link zones.",
+    motorTitle:"Motor Diagnosis — Listening Test", motorDesc:"Play both sounds and click the one that indicates a bearing fault.",
+    senseAudio:"👂 Sense covered: Visual + Auditory", listenA:"Sound A — Listen", listenB:"Sound B — Listen",
+    motorDefault:"Play each sound, then click the faulty one.",
+    invTitle:"Inverter Diagnosis — Thermal Map", invDesc:"Click the overheated zone on the thermal image of the inverter module.",
+    senseVisual2:"👁 Sense covered: Visual only (real thermal camera required on-site)", invDefault:"Click the zone that looks overheated.",
+    capTitle:"Capstone — Cross-System Triangulation", capDesc:"Investigate before you diagnose the symptoms below — every action has a time cost.",
+    symp1:"⚠ Dashboard shows reduced power warning", symp2:"⚠ Slight burning smell reported by driver (cannot be verified in simulation)", symp3:"⚠ Intermittent CAN communication error logged",
+    senseNone:"👃 Sense required in real case: Olfactory (burning smell) — not simulatable on a phone, this is covered during OJT on the actual vehicle",
+    capOptA:"A. Battery pack cell imbalance", capOptB:"B. Inverter IGBT overheating", capOptC:"C. Motor bearing wear",
+    capDefault:"Choose an action to begin your investigation.",
+    capInvestigateLabel:"Step 1 — Choose your next diagnostic action (you may choose more than one):",
+    capActionBattery:"A. Re-check battery cell voltages (5 min)", capActionInverter:"B. Check inverter temperature log (5 min)",
+    capActionCan:"C. Analyze detailed CAN bus log (8 min)", capActionShortcut:"D. Skip investigation, replace the inverter now (45 min + parts cost)",
+    capBlindLink:"Or skip straight to diagnosis without any evidence (not recommended)",
+    evidenceBattery:"Cell voltage deviation 0.02V — within normal range. Battery is not the cause.",
+    evidenceInverter:"IGBT temperature reads 92°C — exceeds normal range (75°C). Overheating indicated.",
+    evidenceCan:"Intermittent CAN timeout detected at the inverter node — communication fault, strongly linked to the inverter.",
+    capDiagnoseLabel:"Step 2 — Based on the evidence so far, select the root cause:",
+    capInvestigateMore:"You can gather more evidence, or diagnose now.",
+    costLabel:"Diagnostic time spent", minUnit:"min",
+    investDefault:"Choose an action to begin.", investMore:"You can gather more evidence, or move to the next step.",
+    investigateLabel:"Step 1 — Choose your next action:", finalLabel:"Step 2 — What is the correct procedure?",
+    l5Title:"De-Energized Electrical Component Work (Lesson 5)", l5Desc:"Job order: service the DC-DC converter/PDU, motor & inverter, or charger unit. Confirm the de-energized state before touching anything — every check has a time cost.",
+    l5ActionA:"A. Re-verify LOTO lock/tag is applied (3 min)", l5ActionB:"B. Measure voltage directly with a meter (5 min)", l5ActionC:"C. Skip checks, start work immediately",
+    l5EvA:"LOTO lock and tag confirmed properly applied.", l5EvB:"Measured 0.0V — de-energized state confirmed.",
+    l5OptA:"A. If it looks fine visually, start work", l5OptB:"B. Measured 0V immediately after power-off, so it's safe to start work right away", l5OptC:"C. Apply LOTO, wait the manufacturer-specified discharge time for the DC-link capacitor, then re-verify 0V before starting work",
+    l5OkGood:min=>`Correct! You confirmed both LOTO and actual voltage before starting — total ${min} min. This is the standard procedure.`,
+    l5OkShortcut:min=>`You got the right answer, but starting work without any check is a habit that can lead to a real electric shock incident (${min} min).`,
+    l5Bad:"Think again — what could go wrong if you work without confirming the de-energized state?",
+    l5BadB:"Incorrect — this is the trap. DC-link capacitors can retain a lethal charge for a period after shutdown. An instant reading right after power-off isn't enough — you need to wait the manufacturer-specified discharge time, then re-verify 0V.",
+    l5DoneMsg:"Lesson 5 complete! You've learned the de-energized verification procedure for DC-DC converter, motor, and charger work.",
+    l6Title:"Traction Battery Assembly R&I (Lesson 6)", l6Desc:"Job order: remove and install the traction battery pack. Check before you lift — every check has a time cost.",
+    l6ActionA:"A. Check the battery interlock connector (4 min)", l6ActionB:"B. Check lift/crane rated load capacity (4 min)", l6ActionC:"C. Skip checks, remove the pack immediately",
+    l6EvA:"Interlock confirmed normal — safety circuit connection verified.", l6EvB:"Rated load capacity confirmed sufficient for the battery pack weight.",
+    l6OptA:"A. Confirm interlock + load capacity, then remove under LOTO", l6OptB:"B. Remove quickly while the system is still powered", l6OptC:"C. This is a Cell-to-Pack design — just detach the faulty module and lift that alone, it's lighter",
+    l6OkGood:min=>`Correct! You confirmed interlock and load capacity, then removed the pack safely under LOTO — total ${min} min.`,
+    l6OkShortcut:min=>`You got the right answer, but removing the pack without any check risks the pack falling or an electric shock — a serious incident (${min} min).`,
+    l6Bad:"Think again — when handling a battery pack that weighs hundreds of kilograms, what should you check first?",
+    l6BadB:"Incorrect — removing it while powered risks an arc or shock the instant the interlock breaks. Only remove it under a confirmed LOTO state.",
+    l6BadC:"Incorrect — this is the trap. Cell-to-Pack integrates the cells directly into the pack with no modules, so \"just detach the faulty module\" isn't physically possible. A Blade Battery pack has to be removed as one whole unit.",
+    l6DoneMsg:"Lesson 6 complete! You've learned the safety-check procedure for traction battery removal and installation.",
+    l8Title:"Coolant & Brake Fluid Service (Lesson 8)", l8Desc:"Job order: replace coolant and brake fluid with the air-bleeding procedure. Verify specs before you touch the system.",
+    l8ActionA:"A. Check coolant system pressure/leaks (3 min)", l8ActionB:"B. Check required brake fluid spec (DOT rating) (2 min)", l8ActionC:"C. Skip checks, top up with whatever fluid is on hand",
+    l8EvA:"Coolant system pressure normal, no leaks detected.", l8EvB:"Confirmed DOT4 brake fluid per vehicle spec sheet.",
+    l8OptA:"A. Mix a different fluid spec if it's close enough", l8OptB:"B. Confirm spec, bleed the one coolant loop you found — that covers the whole cooling system", l8OptC:"C. Confirm spec, then check for and service every independent coolant loop the vehicle has (battery, motor/inverter, cabin) individually",
+    l8OkGood:min=>`Correct! You confirmed the spec, then bled the air out in the correct sequence — total ${min} min.`,
+    l8OkShortcut:min=>`You got the right answer, but topping up with the wrong fluid without checking the spec can cause serious brake failure (${min} min).`,
+    l8Bad:"Think again — what problems can happen if the brake fluid spec is wrong?",
+    l8BadB:"Incorrect — this is the trap. Many EVs have separate independent coolant loops (battery pack, motor/inverter, cabin). Servicing just the loop you happened to find doesn't mean the whole cooling system is covered — each loop needs to be identified and serviced individually.",
+    l8DoneMsg:"Lesson 8 complete! You've learned the coolant and brake fluid replacement / air-bleeding procedure.",
+    capOkGood:min=>`Correct! You reached this conclusion through systematic evidence-gathering — total time ${min} min. This is the ideal diagnostic approach in the field.`,
+    capOkShortcut:min=>`You got the right answer, but replacing the part without investigation cost ${min} min plus an unnecessary part. Repeating this pattern in the field erodes both trust and budget.`,
+    capOkBlind:"Correct, but you guessed without checking any evidence — you got lucky. This is a risky approach in real practice.",
+    battOk:"Correct! Cell C3 reads 3.12V, an abnormal low voltage — suspect cell imbalance.", battBad:"Incorrect. Look again for a cell outside the normal range (3.68–3.71V).",
+    battOptA:"A. This is Cell-to-Pack — remove and replace only cell C3", battOptB:"B. Pull the BMS balancing history and cell temperature log to determine whether this is temporary drift or real degradation, then follow the manufacturer's pack-level procedure", battOptC:"C. The voltage gap is small — ignore it and keep using the pack",
+    battBadA:"Incorrect — this is the trap. The Blade Battery's Cell-to-Pack design makes individual cell removal/replacement physically impossible in the field. Any real fix has to happen at the pack level.",
+    battFinalOk:"Correct! This reflects both that CTP rules out individual cell replacement, and that balancing history and temperature data need to be checked first to determine the real cause.",
+    motorOk:"Correct! This irregular high-frequency friction sound indicates bearing wear.", motorBad:"This is the normal drive sound. Try listening to the other one.",
+    invOk:"Correct! The center zone (IGBT module) is overheated — check cooling or the gate driver.", invBad:"This zone reads normal temperature. Look again.",
+    capOk:"Correct! When a burning smell (an olfactory clue simulation can't capture) appears together with CAN errors, inverter IGBT overheating is the most likely cause. In the field, smell is often the decisive clue.",
+    capBad:"Think again — considering all three symptoms together, which system is most likely?",
+    battDoneMsg:"Battery diagnosis complete! Now listen to the motor sounds.", motorDoneMsg:"Motor diagnosis complete! Let's check the inverter thermal map.",
+    invDoneMsg:"Inverter diagnosis complete! Now try the capstone scenario.",
+    motorOptA:"A. Replace the worn brushes causing poor contact", motorOptB:"B. Isolate the HV system (LOTO) before disassembly, then replace the bearing", motorOptC:"C. Just add more grease and reassemble",
+    motorBadA:"Incorrect — this is the trap. Most EV drive motors are brushless (PMSM), so there's no brush to begin with. Brush wear is a diagnosis for older DC motors and generators, not EV traction motors.",
+    motorBadC:"Incorrect — a bearing that's already worn can't be fixed by adding grease. It needs to be replaced, and the HV system must be isolated (LOTO) before any disassembly.",
+    motorFinalOk:"Correct! This action correctly reflects that EV drive motors are brushless, and that LOTO is mandatory before disassembling any HV-adjacent component.",
+    invOptA:"A. SiC devices are more efficient than Si IGBT and barely generate heat — no further action needed", invOptB:"B. Inspect the cooling system (coolant flow, thermal paste contact) and limit high-power operation until the cause is found", invOptC:"C. This heat is within normal operating range — ignore it and hand the vehicle back",
+    invBadA:"Incorrect — this is the trap. SiC devices do have lower switching losses and higher efficiency than Si IGBT, but \"more efficient\" doesn't mean \"no cooling needed.\" SiC inverters still require a working cooling system.",
+    invBadC:"Incorrect — the localized overheating confirmed by the thermal image is not within normal range. Returning the vehicle without finding the cause risks component damage or fire.",
+    invFinalOk:"Correct! Regardless of SiC vs Si, overheating confirmed by an actual thermal reading means checking the cooling system and limiting output comes first.",
+    capDoneMsg:"Congratulations! You've completed the Red module. Remember: smell and touch can't be simulated, so hands-on training with real equipment is still essential.",
+    switchRed:"This is the Red module. Sight and hearing can be trained in simulation, but smell and touch still require hands-on practice.",
+    scoreLbl:"Total Steps Completed / 15", soundOn:"🔊 Sound On", soundOff:"🔇 Sound Off",
+  },
+};
+let currentLang = 'en';
+
+function t(key){ return I18N[currentLang][key]; }
+
+function applyStaticText(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(I18N[currentLang][key] !== undefined) el.textContent = I18N[currentLang][key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-html');
+    const lines = I18N[currentLang][key];
+    if(lines) el.innerHTML = lines.join('<br>');
+  });
+  document.getElementById('sound-btn').textContent = soundOn ? t('soundOn') : t('soundOff');
+  document.getElementById('sound-btn').classList.toggle('off', !soundOn);
+  updateBlueProgress(); updateOrangeProgress(); updateRedProgress();
+}
+
+function setLang(lang){
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active', b.dataset.lang===lang));
+  applyStaticText();
+  // reset default feedback text to new language for any not-yet-answered invest lessons
+  ['b1','b2','b3','b4','b5','b6','b7','l5','l6','l8'].forEach(id=>{
+    const st = investState[id];
+    if(st && !st.answered && !st.any){
+      const fb = document.getElementById(id+'-fb');
+      if(fb) fb.textContent = t('investDefault');
+    }
+  });
+  if(lotoNext===1) document.getElementById('loto-fb').textContent = t('lotoDefault');
+  if(document.getElementById('completion-banner').dataset.shown==='1'){
+    let totalCost=0, shortcutCount=0, lessonCount=0;
+    Object.keys(investState).forEach(id=>{
+      totalCost += investState[id].cost;
+      if(investState[id].shortcut && !investState[id].real) shortcutCount++;
+      lessonCount++;
+    });
+    totalCost += capCost + lotoCost;
+    lessonCount += 2;
+    document.getElementById('comp-summary').textContent = t('compSummary')(totalCost, shortcutCount, lessonCount, wrongAttempts);
+    if(wrongAttempts > 5) document.getElementById('comp-retry-flag').textContent = t('compRetryWarn')(wrongAttempts);
+  }
+  say(t('gilbertDefault'));
+  playClick();
+}
+
+/* ================= AUDIO ================= */
+let audioCtx = null;
+let soundOn = true;
+function ensureAudio(){
+  try{
+    if(!audioCtx){ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+    if(audioCtx.state === 'suspended'){ audioCtx.resume(); }
+  }catch(e){ /* Web Audio unavailable in this environment — fail silently, never break the caller */ }
+}
+function tone(freq, dur, type='sine', gain=.08, delay=0){
+  if(!soundOn) return;
+  try{
+    ensureAudio();
+    if(!audioCtx) return;
+    const t0 = audioCtx.currentTime + delay;
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(gain, t0+0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+    osc.connect(g); g.connect(audioCtx.destination);
+    osc.start(t0); osc.stop(t0+dur+0.02);
+  }catch(e){ /* never let a sound failure break the calling click handler */ }
+}
+function playSuccess(){ tone(523.25,.14,'triangle',.09,0); tone(659.25,.16,'triangle',.09,.09); tone(783.99,.22,'triangle',.1,.18); }
+function playError(){ tone(160,.25,'sawtooth',.08,0); tone(120,.3,'sawtooth',.07,.05); }
+function playClick(){ tone(880,.05,'square',.03,0); }
+function playHVWarn(){ tone(300,.12,'square',.06,0); tone(300,.12,'square',.06,.16); tone(300,.12,'square',.06,.32); }
+function playTrap(){ tone(392,.14,'sawtooth',.08,0); tone(330,.14,'sawtooth',.08,.11); tone(261.6,.28,'sawtooth',.09,.22); }
+function toggleSound(ev){
+  if(ev) ev.stopPropagation();
+  soundOn = !soundOn;
+  const b = document.getElementById('sound-btn');
+  b.textContent = soundOn ? t('soundOn') : t('soundOff');
+  b.classList.toggle('off', !soundOn);
+  if(soundOn){ tone(600,.08,'sine',.05,0); }
+}
+
+/* ================= AZIZ bottom-sheet toggle ================= */
+function toggleAziz(){
+  document.getElementById('aziz-panel').classList.toggle('expanded');
+}
+
+/* ================= AZIZ (avatar) ================= */
+let totalSteps = 0;
+let wrongAttempts = 0;
+function trackWrongAttempt(){ wrongAttempts++; }
+const MAX_STEPS = 15;
+function say(msg){ document.getElementById('g-text').textContent = msg; }
+function bumpScore(){
+  totalSteps = Math.min(MAX_STEPS, totalSteps+1);
+  document.getElementById('g-score-num').textContent = totalSteps;
+  checkCompletion();
+}
+function checkCompletion(){
+  if(totalSteps < MAX_STEPS) return;
+  const banner = document.getElementById('completion-banner');
+  if(banner.dataset.shown==='1') return;
+  banner.dataset.shown='1';
+  let totalCost=0, shortcutCount=0, lessonCount=0;
+  Object.keys(investState).forEach(id=>{
+    totalCost += investState[id].cost;
+    if(investState[id].shortcut && !investState[id].real) shortcutCount++;
+    lessonCount++;
+  });
+  totalCost += capCost + lotoCost;
+  lessonCount += 2;
+  document.getElementById('comp-summary').textContent = t('compSummary')(totalCost, shortcutCount, lessonCount, wrongAttempts);
+  const retryFlag = document.getElementById('comp-retry-flag');
+  if(wrongAttempts > 5){
+    retryFlag.textContent = t('compRetryWarn')(wrongAttempts);
+    retryFlag.style.display='inline-block';
+  } else {
+    retryFlag.style.display='none';
+  }
+  banner.style.display='block';
+  banner.scrollIntoView({behavior:'smooth', block:'center'});
+  setTimeout(()=> say(t('compAziz')), 60);
+  playSuccess();
+  setTimeout(playSuccess, 350);
+}
+
+/* ================= MODULE SWITCH ================= */
+function switchModule(mod){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.mod===mod));
+  document.getElementById('blue-module').classList.toggle('active', mod==='blue');
+  document.getElementById('orange-module').classList.toggle('active', mod==='orange');
+  document.getElementById('red-module').classList.toggle('active', mod==='red');
+  document.getElementById('glossary-module').classList.toggle('active', mod==='glossary');
+  playClick();
+  if(mod==='glossary'){
+    say('Glossary of key abbreviations.');
+  } else {
+    say(mod==='blue' ? t('switchBlue') : mod==='orange' ? t('switchOrange') : t('switchRed'));
+  }
+  const firstCard = document.querySelector('#'+mod+'-module .card[data-viz]');
+  if(firstCard && typeof vizHighlight === 'function') vizHighlight(firstCard.dataset.viz);
+  const mainEl = document.querySelector('main');
+  if(mainEl) mainEl.scrollTo({top:0, behavior:'instant'});
+}
+
+function completeCard(id){ document.getElementById(id).classList.add('done'); bumpScore(); }
+
+function updateBlueProgress(){
+  let n=0;
+  ['card-b1','card-b2','card-b3','card-b4','card-b5','card-b6','card-b7'].forEach(id=>{
+    if(document.getElementById(id).classList.contains('done')) n++;
+  });
+  document.getElementById('blue-fill').style.width = (n/7*100)+'%';
+  document.getElementById('blue-label').textContent = n+' / 7';
+}
+
+/* ================= ORANGE: generic investigate-then-decide engine (Lessons 5, 6, 8) ================= */
+const investState = {};
+function investInit(id){ investState[id] = {cost:0, real:false, shortcut:false, any:false, answered:false}; }
+function investAddCost(id, n){
+  const st = investState[id]; st.cost += n;
+  document.getElementById(id+'-cost').textContent = st.cost;
+}
+function investEvidence(id, text, warn){
+  const wrap = document.getElementById(id+'-evidence');
+  const line = document.createElement('div');
+  line.className = 'ev-line' + (warn ? ' warn' : '');
+  line.textContent = text;
+  wrap.appendChild(line);
+}
+function pickInvestAction(id, el){
+  const st = investState[id];
+  if(st.answered || el.classList.contains('used')) return;
+  el.classList.add('used');
+  st.any = true;
+  investAddCost(id, +el.dataset.cost);
+  playClick();
+  const kind = el.dataset.kind;
+  if(kind==='shortcut'){ st.shortcut = true; playHVWarn(); }
+  else { st.real = true; investEvidence(id, t(el.dataset.evidence), kind==='warn'); }
+  document.getElementById(id+'-step-final').style.display='block';
+  const fb = document.getElementById(id+'-fb');
+  fb.textContent = t('investMore'); fb.className='quiz-feedback';
+}
+function pickInvestFinal(id, el){
+  const st = investState[id];
+  if(st.answered) return;
+  const fb = document.getElementById(id+'-fb');
+  if(el.dataset.bad==='1'){
+    st.answered = true; el.classList.add('picked-ok');
+    let msg;
+    if(st.shortcut && !st.real) msg = t(id+'OkShortcut')(st.cost);
+    else msg = t(id+'OkGood')(st.cost);
+    fb.textContent = msg; fb.className='quiz-feedback ok';
+    playSuccess(); completeCard('card-'+id); say(t(id+'DoneMsg'));
+    if(id[0]==='b') updateBlueProgress(); else updateOrangeProgress();
+  } else {
+    el.classList.add('picked-bad');
+    const wrongKey = el.dataset.wrongkey;
+    const hasTrap = wrongKey && I18N[currentLang][wrongKey];
+    fb.textContent = hasTrap ? t(wrongKey) : t(id+'Bad');
+    fb.className='quiz-feedback bad';
+    hasTrap ? playTrap() : playError();
+    trackWrongAttempt();
+    setTimeout(()=>el.classList.remove('picked-bad'), 500);
+  }
+}
+
+/* ================= ORANGE / Lesson 7: LOTO ================= */
+let lotoNext=1;
+let lotoCost=0;
+function pickLOTO(el, order){
+  if(order!==lotoNext){
+    playError();
+    trackWrongAttempt();
+    document.getElementById('loto-fb').textContent = t('lotoBad');
+    document.getElementById('loto-fb').className='quiz-feedback bad';
+    document.querySelectorAll('.loto-step').forEach(s=>{ s.classList.remove('done'); s.querySelector('.num').textContent='•'; });
+    lotoNext=1;
+    return;
+  }
+  el.classList.add('done');
+  el.querySelector('.num').textContent = order;
+  playClick();
+  lotoNext++;
+  lotoCost += 2;
+  if(order<5){
+    document.getElementById('loto-fb').textContent = t('lotoOkStep')(order);
+    document.getElementById('loto-fb').className='quiz-feedback ok';
+  } else {
+    document.getElementById('loto-fb').textContent = t('lotoOkDone');
+    document.getElementById('loto-fb').className='quiz-feedback ok';
+    playSuccess(); completeCard('card-l7'); say(t('lotoDoneMsg')); updateOrangeProgress();
+  }
+}
+function shuffleLOTO(){
+  const list = document.getElementById('loto-list');
+  const items = Array.from(list.children);
+  for(let i=items.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [items[i],items[j]]=[items[j],items[i]];
+  }
+  items.forEach(it=>list.appendChild(it));
+}
+
+function updateOrangeProgress(){
+  let n=0;
+  ['card-l5','card-l6','card-l7','card-l8'].forEach(id=>{
+    if(document.getElementById(id).classList.contains('done')) n++;
+  });
+  document.getElementById('orange-fill').style.width = (n/4*100)+'%';
+  document.getElementById('orange-label').textContent = n+' / 4';
+}
+
+/* ================= RED: battery cell diagnosis ================= */
+let battAnswered=false;
+function pickCell(el){
+  if(battAnswered) return;
+  if(!investState['battery'].any){
+    investState['battery'].any = true;
+    investState['battery'].real = true;
+    investAddCost('battery', 3);
+    investEvidence('battery', t('battEvidence'));
+  }
+  const fb = document.getElementById('batt-fb');
+  if(el.dataset.bad==='1'){
+    battAnswered=true; el.classList.add('picked-ok');
+    fb.textContent = t('battOk'); fb.className='quiz-feedback ok';
+    playSuccess();
+    document.getElementById('batt-step-final').style.display='block';
+  } else {
+    el.classList.add('picked-bad');
+    fb.textContent = t('battBad'); fb.className='quiz-feedback bad';
+    playError();
+    trackWrongAttempt();
+    setTimeout(()=>el.classList.remove('picked-bad'), 500);
+  }
+}
+let battFinalAnswered=false;
+function pickBattFinal(el){
+  if(battFinalAnswered) return;
+  const fb = document.getElementById('batt-fb');
+  if(el.dataset.bad==='1'){
+    battFinalAnswered=true; el.classList.add('picked-ok');
+    fb.textContent = t('battFinalOk'); fb.className='quiz-feedback ok';
+    playSuccess(); completeCard('card-battery'); say(t('battDoneMsg')); updateRedProgress();
+  } else {
+    el.classList.add('picked-bad');
+    const wrongKey = el.dataset.wrongkey;
+    const hasTrap = wrongKey && I18N[currentLang][wrongKey];
+    fb.textContent = hasTrap ? t(wrongKey) : t('battBad');
+    fb.className='quiz-feedback bad';
+    hasTrap ? playTrap() : playError();
+    trackWrongAttempt();
+    setTimeout(()=>el.classList.remove('picked-bad'), 500);
+  }
+}
+
+/* ================= RED: motor listening test ================= */
+function playMotorNormal(){
+  if(!soundOn) return;
+  try{
+    ensureAudio();
+    if(!audioCtx) return;
+    const t0 = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
+    osc.type='sine'; osc.frequency.setValueAtTime(220, t0); osc.frequency.linearRampToValueAtTime(226, t0+0.6);
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.07, t0+0.05); g.gain.linearRampToValueAtTime(0.07, t0+0.55); g.gain.exponentialRampToValueAtTime(0.0001, t0+0.65);
+    osc.connect(g); g.connect(audioCtx.destination); osc.start(t0); osc.stop(t0+0.7);
+  }catch(e){ /* fail silently */ }
+}
+function playMotorFault(){
+  if(!soundOn) return;
+  try{
+    ensureAudio();
+    if(!audioCtx) return;
+    const t0 = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
+    osc.type='sawtooth'; osc.frequency.setValueAtTime(220, t0);
+    const lfo = audioCtx.createOscillator(); const lfoGain = audioCtx.createGain();
+    lfo.frequency.setValueAtTime(38, t0); lfoGain.gain.setValueAtTime(60, t0);
+    lfo.connect(lfoGain); lfoGain.connect(osc.frequency);
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.06, t0+0.05); g.gain.linearRampToValueAtTime(0.06, t0+0.55); g.gain.exponentialRampToValueAtTime(0.0001, t0+0.65);
+    osc.connect(g); g.connect(audioCtx.destination); osc.start(t0); lfo.start(t0); osc.stop(t0+0.7); lfo.stop(t0+0.7);
+  }catch(e){ /* fail silently */ }
+}
+let motorAnswered=false;
+function playListen(el){
+  playClick();
+  if(el.id==='listen-a') playMotorNormal(); else playMotorFault();
+}
+function pickMotor(el){
+  if(motorAnswered) return;
+  investAddCost('motor', 1);
+  if(!investState['motor'].any){
+    investState['motor'].any = true;
+    investState['motor'].real = true;
+    investEvidence('motor', t('motorEvidence'));
+  }
+  const fb = document.getElementById('motor-fb');
+  if(el.dataset.bad==='1'){
+    motorAnswered=true; el.classList.add('picked-ok');
+    fb.textContent = t('motorOk'); fb.className='quiz-feedback ok';
+    playSuccess();
+    document.getElementById('motor-step-final').style.display='block';
+  } else {
+    el.classList.add('picked-bad');
+    fb.textContent = t('motorBad'); fb.className='quiz-feedback bad';
+    playError();
+    trackWrongAttempt();
+    setTimeout(()=>el.classList.remove('picked-bad'), 500);
+  }
+}
+let motorFinalAnswered=false;
+function pickMotorFinal(el){
+  if(motorFinalAnswered) return;
+  const fb = document.getElementById('motor-fb');
+  if(el.dataset.bad==='1'){
+    motorFinalAnswered=true; el.classList.add('picked-ok');
+    fb.textContent = t('motorFinalOk'); fb.className='quiz-feedback ok';
+    playSuccess(); completeCard('card-motor'); say(t('motorDoneMsg')); updateRedProgress();
+  } else {
+    el.classList.add('picked-bad');
+    const wrongKey = el.dataset.wrongkey;
+    const hasTrap = wrongKey && I18N[currentLang][wrongKey];
+    fb.textContent = hasTrap ? t(wrongKey) : t('motorBad');
+    fb.className='quiz-feedback bad';
+    hasTrap ? playTrap() : playError();
+    trackWrongAttempt();
+    setTimeout(()=>el.classList.remove('picked-bad'), 500);
+  }
+}
+
+/* ================= RED: inverter thermal map ================= */
+let invAnswered=false;
+function pickHotZone(el){
+  if(invAnswered) return;
+  if(!investState['inverter'].any){
+    investState['inverter'].any = true;
+    investState['inverter'].real = true;
+    investAddCost('inverter', 4);
+    investEvidence('inverter', t('invEvidence'));
+  }
+  const fb = document.getElementById('inv-fb');
+  if(el.dataset.bad==='1'){
+    invAnswered=true;
+    fb.textContent = t('invOk'); fb.className='quiz-feedback ok';
+    playSuccess();
+    document.getElementById('inv-step-final').style.display='block';
+  } else {
+    fb.textContent = t('invBad'); fb.className='quiz-feedback bad'; playError();
+    trackWrongAttempt();
+  }
+}
+let invFinalAnswered=false;
+function pickInvFinal(el){
+  if(invFinalAnswered) return;
+  const fb = document.getElementById('inv-fb');
+  if(el.dataset.bad==='1'){
+    invFinalAnswered=true; el.classList.add('picked-ok');
+    fb.textContent = t('invFinalOk'); fb.className='quiz-feedback ok';
+    playSuccess(); completeCard('card-inverter'); say(t('invDoneMsg')); updateRedProgress();
+  } else {
+    el.classList.add('picked-bad');
+    const wrongKey = el.dataset.wrongkey;
+    const hasTrap = wrongKey && I18N[currentLang][wrongKey];
+    fb.textContent = hasTrap ? t(wrongKey) : t('invBad');
+    fb.className='quiz-feedback bad';
+    hasTrap ? playTrap() : playError();
+    trackWrongAttempt();
+    setTimeout(()=>el.classList.remove('picked-bad'), 500);
+  }
+}
+
+/* ================= RED: capstone (investigate -> diagnose) ================= */
+let capAnswered=false;
+let capCost=0;
+let capRealInvestigation=false;   // battery / inverter / can chosen
+let capShortcutUsed=false;        // "replace now" chosen
+let capAnyActionTaken=false;
+
+function capAddCost(n){
+  capCost += n;
+  document.getElementById('cap-cost').textContent = capCost;
+}
+function capRevealDiagnose(){
+  document.getElementById('cap-step-diagnose').style.display='block';
+}
+function capEvidence(text, warn){
+  const wrap = document.getElementById('cap-evidence');
+  const line = document.createElement('div');
+  line.className = 'ev-line' + (warn ? ' warn' : '');
+  line.textContent = text;
+  wrap.appendChild(line);
+}
+function pickCapAction(el){
+  if(capAnswered) return;
+  const action = el.dataset.action;
+  if(el.classList.contains('used')) return;
+  el.classList.add('used');
+  capAnyActionTaken = true;
+  capAddCost(+el.dataset.cost);
+  playClick();
+
+  if(action==='battery'){ capRealInvestigation=true; capEvidence(t('evidenceBattery'), false); }
+  else if(action==='inverter'){ capRealInvestigation=true; capEvidence(t('evidenceInverter'), true); }
+  else if(action==='can'){ capRealInvestigation=true; capEvidence(t('evidenceCan'), true); }
+  else if(action==='shortcut'){ capShortcutUsed=true; playHVWarn(); }
+
+  capRevealDiagnose();
+  const fb = document.getElementById('cap-fb');
+  fb.textContent = t('capInvestigateMore'); fb.className='quiz-feedback';
+}
+function capGoBlind(){
+  if(capAnswered || capAnyActionTaken) return;
+  capRevealDiagnose();
+  document.getElementById('cap-blind-btn').classList.add('used');
+  const fb = document.getElementById('cap-fb');
+  fb.textContent = t('capInvestigateMore'); fb.className='quiz-feedback';
+}
+function pickCapstone(el){
+  if(capAnswered) return;
+  const fb = document.getElementById('cap-fb');
+  if(el.dataset.bad==='1'){
+    capAnswered=true; el.classList.add('picked-ok');
+    let msg;
+    if(capShortcutUsed && !capRealInvestigation){ msg = t('capOkShortcut')(capCost); }
+    else if(!capAnyActionTaken){ msg = t('capOkBlind'); }
+    else { msg = t('capOkGood')(capCost); }
+    fb.textContent = msg; fb.className='quiz-feedback ok';
+    playSuccess(); completeCard('card-capstone'); say(t('capDoneMsg')); updateRedProgress();
+  } else {
+    el.classList.add('picked-bad');
+    fb.textContent = t('capBad'); fb.className='quiz-feedback bad';
+    playError();
+    trackWrongAttempt();
+    setTimeout(()=>el.classList.remove('picked-bad'), 500);
+  }
+}
+
+function updateRedProgress(){
+  let n=0;
+  ['card-battery','card-motor','card-inverter','card-capstone'].forEach(id=>{
+    if(document.getElementById(id).classList.contains('done')) n++;
+  });
+  document.getElementById('red-fill').style.width = (n/4*100)+'%';
+  document.getElementById('red-label').textContent = n+' / 4';
+}
+
+/* ================= EVENT WIRING (no inline handlers) ================= */
+document.querySelectorAll('.lang-btn').forEach(b=>{
+  b.addEventListener('click', ()=> setLang(b.dataset.lang));
+});
+document.querySelectorAll('.tab-btn').forEach(b=>{
+  b.addEventListener('click', ()=> switchModule(b.dataset.mod));
+});
+document.querySelectorAll('.loto-step').forEach(el=>{
+  el.addEventListener('click', ()=> pickLOTO(el, +el.dataset.order));
+});
+document.getElementById('intro-skip-btn').addEventListener('click', ()=>{
+  playClick();
+  finishIntro();
+});
+document.getElementById('cb-close-btn').addEventListener('click', ()=>{
+  document.getElementById('completion-banner').style.display='none';
+  playClick();
+});
+document.getElementById('g-bar').addEventListener('click', toggleAziz);
+document.getElementById('sound-btn').addEventListener('click', (ev)=> toggleSound(ev));
+
+['b1','b2','b3','b4','b5','b6','b7','l5','l6','l8'].forEach(id=>{
+  investInit(id);
+  document.querySelectorAll('#'+id+'-actions .choice-btn').forEach(el=>{
+    el.addEventListener('click', ()=> pickInvestAction(id, el));
+  });
+  document.querySelectorAll('#'+id+'-final .choice-btn').forEach(el=>{
+    el.addEventListener('click', ()=> pickInvestFinal(id, el));
+  });
+});
+
+['battery','motor','inverter'].forEach(id=> investInit(id));
+document.querySelectorAll('#cell-grid .cell').forEach(el=>{
+  el.addEventListener('click', ()=> pickCell(el));
+});
+document.querySelectorAll('#batt-final .choice-btn').forEach(el=>{
+  el.addEventListener('click', ()=> pickBattFinal(el));
+});
+document.getElementById('listen-a').addEventListener('click', function(){ playListen(this); pickMotor(this); });
+document.getElementById('listen-b').addEventListener('click', function(){ playListen(this); pickMotor(this); });
+document.querySelectorAll('#motor-final .choice-btn').forEach(el=>{
+  el.addEventListener('click', ()=> pickMotorFinal(el));
+});
+document.querySelectorAll('.hot-zone').forEach(el=>{
+  el.addEventListener('click', ()=> pickHotZone(el));
+});
+document.querySelectorAll('#inv-final .choice-btn').forEach(el=>{
+  el.addEventListener('click', ()=> pickInvFinal(el));
+});
+document.querySelectorAll('#cap-actions .choice-btn').forEach(el=>{
+  el.addEventListener('click', ()=> pickCapAction(el));
+});
+document.getElementById('cap-blind-btn').addEventListener('click', capGoBlind);
+document.querySelectorAll('#cap-choices .choice-btn').forEach(el=>{
+  el.addEventListener('click', ()=> pickCapstone(el));
+});
+
+/* Unlock Web Audio on the very first tap anywhere (mobile autoplay policy) */
+function unlockAudioOnce(){
+  ensureAudio();
+  document.removeEventListener('pointerdown', unlockAudioOnce);
+  document.removeEventListener('touchstart', unlockAudioOnce);
+}
+document.addEventListener('pointerdown', unlockAudioOnce, { once:true });
+document.addEventListener('touchstart', unlockAudioOnce, { once:true });
+
+applyStaticText();
+say(t('gilbertDefault'));
+shuffleLOTO();
+initViz();
+updateIntroUI();
+
+/* ================= DIAGNOSTIC BAY DEEP LINK ================= */
+(function(){
+  function resolveModule(cardKey){
+    if(cardKey==='loto' || cardKey.indexOf('l')===0) return 'orange';
+    if(['battery','motor','inverter','capstone'].includes(cardKey)) return 'red';
+    return 'blue';
+  }
+  const params = new URLSearchParams(window.location.search);
+  const card = params.get('card');
+  if(card){
+    const targetId = card==='loto' ? 'card-l7' : 'card-'+card;
+    const mod = resolveModule(card);
+    setTimeout(()=>{
+      switchModule(mod);
+      setTimeout(()=>{
+        const el = document.getElementById(targetId);
+        if(el){
+          el.scrollIntoView({behavior:'smooth', block:'center'});
+          el.classList.add('deep-link-highlight');
+          setTimeout(()=> el.classList.remove('deep-link-highlight'), 2400);
+        }
+      }, 260);
+    }, 60);
+  }
+  if(window.self !== window.top){
+    document.body.classList.add('embedded-mode');
+    const bar = document.createElement('div');
+    bar.id = 'embed-back-bar';
+    bar.innerHTML = '<button id="embed-back-btn">← Back to Diagnostic Bay</button>';
+    document.body.prepend(bar);
+    document.getElementById('embed-back-btn').addEventListener('click', ()=>{
+      window.parent.postMessage({type:'closeBridgeModal'}, '*');
+    });
+  }
+})();
+</script>
+</body>
+</html>
