@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>5D Digital Twin — 3D Trainer Line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1b1f26; --sub:#5b6570; --paper:#f4f6f8; --card:#ffffff; --rail:#c7d0d9; --line:#dfe4e9;
+    --mod1:#2b6cb0; --mod1-tint:#eaf1f9; --mod2:#a15c00; --mod2-tint:#fbf0e1; --gate:#6b5b8a; --sim2d:#2f7a6e; --capstone:#b23a48; --capstone-tint:#fbe9ea;
+    --focus:#0f6a70;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#eef1f4; --sub:#a7b0ba; --paper:#14181d; --card:#1c2128; --rail:#3a4350; --line:#2a313a;
+      --mod1:#7fb0e8; --mod1-tint:#1c2b3d; --mod2:#e0a565; --mod2-tint:#3a2c18; --gate:#b6a4dd; --sim2d:#6fcabd; --focus:#5fc3c9; --capstone:#e8919c; --capstone-tint:#3a1f22;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#eef1f4; --sub:#a7b0ba; --paper:#14181d; --card:#1c2128; --rail:#3a4350; --line:#2a313a;
+    --mod1:#7fb0e8; --mod1-tint:#1c2b3d; --mod2:#e0a565; --mod2-tint:#3a2c18; --gate:#b6a4dd; --sim2d:#6fcabd; --focus:#5fc3c9; --capstone:#e8919c; --capstone-tint:#3a1f22;
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 34px 34px;
+  }
+  .disp{font-family:'Space Grotesk', 'IBM Plex Sans', sans-serif}
+  .mono{font-family:'IBM Plex Mono', 'IBM Plex Sans', monospace}
+  .wrap{max-width:1180px; margin:0 auto; padding:28px 22px 60px}
+
+  header{display:flex; justify-content:space-between; align-items:flex-start; gap:18px; margin-bottom:8px; flex-wrap:wrap}
+  .brand{display:flex; align-items:center; gap:12px}
+  .brand-mark{
+    width:40px; height:40px; border-radius:8px; background:var(--ink); color:var(--paper);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex:none;
+  }
+  .brand-name{font-size:12.5px; color:var(--sub); line-height:1.35}
+  .brand-name b{color:var(--ink); font-weight:600}
+  h1{font-size:clamp(28px,4vw,40px); line-height:1.08; margin:14px 0 6px; font-weight:600; letter-spacing:-0.01em}
+  .lede{color:var(--sub); font-size:15.5px; max-width:56ch; line-height:1.55; margin:0}
+
+  .langtoggle{display:flex; border:1px solid var(--rail); border-radius:7px; overflow:hidden; flex:none}
+  .langtoggle button{border:0; background:var(--card); color:var(--sub); font:600 12.5px/1 'IBM Plex Sans', sans-serif; padding:8px 13px; cursor:pointer}
+  .langtoggle button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
+
+  .legend{display:flex; gap:22px; flex-wrap:wrap; margin:26px 0 6px; font-size:12.5px; color:var(--sub)}
+  .legend span{display:inline-flex; align-items:center; gap:7px}
+  .swatch{width:11px; height:11px; border-radius:3px; display:inline-block}
+
+  /* ---- rail (desktop) ---- */
+  .rail-outer{position:relative; margin-top:56px; height:660px}
+  .rail{
+    position:absolute; left:112px; right:112px; top:50%; height:3px; background:var(--rail); transform:translateY(-1.5px);
+    border-radius:2px;
+  }
+  .stations{position:absolute; inset:0 112px}
+  .station{position:absolute; top:50%}
+  .stub{
+    position:absolute; left:50%; width:2px; background:var(--rail); transform:translateX(-1px);
+  }
+  .station.above .stub{bottom:50%; height:56px}
+  .station.below .stub{top:50%; height:56px}
+  .node{
+    position:absolute; left:50%; top:50%; width:13px; height:13px; margin:-6.5px 0 0 -6.5px;
+    border-radius:50%; background:var(--card); border:3px solid var(--mod1); z-index:2;
+  }
+  .station[data-mod="2"] .node{border-color:var(--mod2)}
+  .station[data-mod="capstone"] .node{border-color:var(--capstone)}
+  .weeklabel{
+    position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); margin-top:26px;
+    font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:500; color:var(--sub);
+    background:var(--paper); padding:1px 5px; white-space:nowrap; z-index:3;
+  }
+  .station.above .weeklabel{margin-top:26px}
+  .station.below .weeklabel{margin-top:-32px}
+
+  .card{
+    position:absolute; left:50%; transform:translateX(-50%); width:210px;
+    background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 15px 15px;
+    box-shadow:0 1px 0 var(--line);
+  }
+  .station.above .card{bottom:calc(50% + 56px)}
+  .station.below .card{top:calc(50% + 56px)}
+
+  .gate .node{border-color:var(--gate); background:var(--paper)}
+  .gate .gatepill{
+    position:absolute; left:50%; bottom:calc(50% + 13px); transform:translateX(-50%);
+    font-size:10.5px; font-weight:600; color:var(--gate); white-space:nowrap;
+    background:var(--paper); border:1px dashed var(--gate); border-radius:20px; padding:3px 9px 3px 7px;
+    display:flex; align-items:center; gap:5px;
+  }
+  .note .node{border-color:var(--rail); background:var(--paper)}
+  .note .gatepill{
+    position:absolute; left:50%; bottom:calc(50% + 13px); transform:translateX(-50%);
+    font-size:10.5px; font-weight:600; color:var(--sub); white-space:nowrap;
+    background:var(--paper); border:1px solid var(--rail); border-radius:20px; padding:3px 9px 3px 7px;
+    display:flex; align-items:center; gap:5px; text-decoration:none;
+  }
+  .note.tool .node{border-color:var(--sim2d)}
+  .note.tool .gatepill{color:var(--sim2d); border-color:var(--sim2d)}
+  .note.tool a.gatepill:hover{background:var(--sim2d); color:var(--paper)}
+
+  .k{display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:500; color:var(--mod1); margin-bottom:7px}
+  .station[data-mod="2"] .k{color:var(--mod2)}
+  .station[data-mod="capstone"] .k{color:var(--capstone)}
+  .card h3{margin:0 0 6px; font-size:15px; font-weight:600; line-height:1.28}
+  .card p{margin:0 0 10px; font-size:12.5px; color:var(--sub); line-height:1.48}
+  .task{font-size:11.5px; color:var(--ink); background:var(--mod1-tint); border-radius:6px; padding:6px 8px; margin:0 0 12px; line-height:1.4}
+  .station[data-mod="2"] .task{background:var(--mod2-tint)}
+  .station[data-mod="capstone"] .task{background:var(--capstone-tint)}
+  .open{
+    display:inline-flex; align-items:center; gap:6px; font:600 12.5px/1 'IBM Plex Sans', sans-serif;
+    color:var(--ink); text-decoration:none; border:1px solid var(--ink); border-radius:7px; padding:7px 11px;
+    transition:background .15s, color .15s;
+  }
+  .open:hover{background:var(--ink); color:var(--paper)}
+  .open svg{width:12px; height:12px}
+
+  /* ---- mobile: vertical rail ---- */
+  @media (max-width: 860px){
+    .rail-outer{height:auto; margin-top:34px}
+    .rail{left:16px; top:0; bottom:0; right:auto; width:3px; height:auto; transform:none}
+    .stations{position:relative; inset:auto; display:flex; flex-direction:column; gap:34px}
+    .station{position:relative; top:auto; width:auto; padding-left:44px}
+    .stub{display:none}
+    .node{position:absolute; left:16px; top:22px; margin:-6.5px 0 0 -6.5px}
+    .weeklabel{position:static; transform:none; margin:0 0 6px !important; padding:0; background:none; display:block}
+    .card{position:static; transform:none; width:100%; max-width:420px}
+    .gate{padding-left:44px}
+    .gate .gatepill, .note .gatepill{position:static; transform:none; display:inline-flex; margin-top:20px}
+  }
+
+  .foot{margin-top:70px; padding-top:18px; border-top:1px solid var(--line); font-size:12px; color:var(--sub); line-height:1.6; max-width:70ch}
+  .foot b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="brand-mark disp">IEG</div>
+      <div class="brand-name">5D Digital Twin<br><b data-t="program">Smart-Factory Training Program</b></div>
+    </div>
+    <div class="langtoggle" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="ko" aria-pressed="false">KO</button>
+    </div>
+  </header>
+
+  <h1 class="disp" data-t="title">Six trainers. One line.</h1>
+  <p class="lede" data-t="lede">Each scenario week has its own hands-on 3D fault trainer. This page is a single launch point for reviewing all six — laid out on the same week rail the ten-week course runs on.</p>
+
+  <div class="legend">
+    <span><span class="swatch" style="background:var(--mod1)"></span><span data-t="leg1">Module 1 · PLC &amp; Cell-Based Robotics</span></span>
+    <span><span class="swatch" style="background:var(--mod2)"></span><span data-t="leg2">Module 2 · E-GMP 800V Battery Pack</span></span>
+    <span><span class="swatch" style="background:var(--sim2d)"></span><span data-t="leg4">2D simulator (demo / whole-module run)</span></span>
+    <span><span class="swatch" style="background:var(--gate); border-radius:50%"></span><span data-t="leg3">Safety gate (no trainer)</span></span>
+    <span><span class="swatch" style="background:var(--rail); border-radius:50%"></span><span data-t="leg5">No digital tool (instructor-led)</span></span>
+    <span><span class="swatch" style="background:var(--capstone)"></span><span data-t="leg6">Capstone (draws on both modules)</span></span>
+  </div>
+
+  <div class="rail-outer">
+    <div class="rail"></div>
+    <div class="stations" id="stations"></div>
+  </div>
+
+  <div class="foot">
+    <p data-t="foot1"><b data-t="foot1b">Illustrative training program.</b> All 3D scenes are simplified, code-generated illustrations, not OEM CAD, and every numeric threshold is an illustrative training value. Grounded in publicly disclosed Hyundai Motor Group E-GMP and HMGICS-style automation, not real OEM specifications.</p>
+    <p data-t="foot2">Each link opens its trainer as a separate artifact in a new tab. These are private artifacts — only you can open them unless you choose to share.</p>
+  </div>
+</div>
+
+<script>
+var STATIONS = [
+  { note:true, tool:true, week:1, key:'sim2d',
+    en:{label:'Week 1 · Orientation (2D demo)'}, ko:{label:'1주차 · 오리엔테이션 (2D 시연)'},
+    url:'https://claude.ai/artifact/A613L5ZHo5VZZxC7ViXvUn' },
+  { week:2, mod:1, side:'above', key:'plc-3d',
+    en:{title:'AMR / LiDAR Fault', desc:'A logistics robot keeps stalling near one work cell.', task:'Inspect floor markers, clean the dirty reflector, run a verification pass.'},
+    ko:{title:'AMR / LiDAR 결함', desc:'물류 로봇이 특정 셀 근처에서 계속 멈춥니다.', task:'바닥 마커를 점검하고 오염된 반사판을 닦은 뒤 검증 주행으로 확인합니다.'},
+    url:'https://claude.ai/artifact/UMDREV92erYHccqT5YrQZk' },
+  { week:3, mod:1, side:'below', key:'plc-3d-interlock',
+    en:{title:'Safety Interlock Fault', desc:'A robot cell stays disabled after an E-stop reset.', task:'Realign the door, cycle it three times, resume — a bypass button is the trap.'},
+    ko:{title:'안전 인터록 결함', desc:'비상정지 리셋 후에도 로봇셀이 재기동되지 않습니다.', task:'도어를 재정렬하고 3회 순환 후 재개하세요 — 우회 버튼은 함정입니다.'},
+    url:'https://claude.ai/artifact/An7aMSdBcDW6QyZZ3qGLCB' },
+  { week:4, mod:1, side:'above', key:'plc-3d-twin',
+    en:{title:'Digital-Twin Sync Fault', desc:'The virtual twin quietly falls behind the real robot — no alarm fires.', task:'Prioritize twin-sync traffic, offload the switch, then re-measure latency.'},
+    ko:{title:'디지털트윈 동기화 결함', desc:'경보 없이 가상 트윈이 실제 로봇보다 조금씩 뒤처집니다.', task:'트윈 동기화 트래픽에 우선순위를 주고 트래픽을 분산한 뒤 지연을 재측정하세요.'},
+    url:'https://claude.ai/artifact/A4wNPj5SpePRGSg6DxfwAc' },
+  { gate:true, week:5 },
+  { week:6, mod:2, side:'below', key:'battery-3d-weld',
+    en:{title:'Busbar Weld QC Fault', desc:'Vision inspection rejects two welds on the same module.', task:'Correct the weld current and time, run test welds, then release the line.'},
+    ko:{title:'버스바 용접 QC 결함', desc:'비전 검사에서 같은 모듈의 용접 2곳이 불합격했습니다.', task:'용접 전류·시간을 교정하고 테스트 용접 후 라인을 출하하세요.'},
+    url:'https://claude.ai/artifact/FjpyBGAFYvFn4MyJzFBz9G' },
+  { week:7, mod:2, side:'above', key:'battery-3d',
+    en:{title:'Torque Fastening Fault', desc:'One module-to-pack-tray bolt reads under spec.', task:'Audit all 8 bolts, then re-torque the low one into the 24–26 N·m window.'},
+    ko:{title:'토크 체결 결함', desc:'모듈-팩 트레이 볼트 하나가 기준 미달입니다.', task:'8개 볼트를 모두 점검하고 미달 볼트를 24–26 N·m로 재체결하세요.'},
+    url:'https://claude.ai/artifact/BpvGV5gkaaPQTrbTHMn2HM' },
+  { week:8, mod:2, side:'below', key:'battery-3d-pra',
+    en:{title:'PRA Insulation Fault', desc:'An insulation-resistance test fails during a humid shift.', task:'Re-seat the connector boot, dry it, then re-test insulation resistance.'},
+    ko:{title:'PRA 절연 결함', desc:'습한 근무조 동안 절연저항 테스트가 실패합니다.', task:'커넥터 부트를 재장착하고 건조 후 절연저항을 재시험하세요.'},
+    url:'https://claude.ai/artifact/RwZFH1sQvAySdRqsEPt9vd' },
+  { week:9, mod:'capstone', side:'above', key:'plc-3d-capstone',
+    en:{title:'Capstone: Chronic Micro-Stoppage', desc:'An AMR keeps stopping for a few seconds at a time, all shift — no single alarm ever fires.', task:'Read the 8-hour shift log, install a shade baffle, then verify across several more hours.'},
+    ko:{title:'캡스톤: 만성 미세정지', desc:'AMR이 교대 내내 몇 초씩 계속 멈추는데, 경보는 한 번도 울리지 않습니다.', task:'8시간 교대 로그를 읽고 차광 배플을 설치한 뒤 여러 시간대에 걸쳐 검증하세요.'},
+    url:'https://claude.ai/artifact/XG2jnvemrC8Zy7S75byL4w' },
+  { note:true, tool:true, week:10, key:'sim2d',
+    en:{label:'Week 10 · Final Assessment (2D)'}, ko:{label:'10주차 · 최종 평가 (2D)'},
+    url:'https://claude.ai/artifact/A613L5ZHo5VZZxC7ViXvUn' }
+];
+var STR = {
+  en:{ program:'Smart-Factory Training Program', title:'Six trainers. One line.',
+    lede:'Each scenario week has its own hands-on 3D fault trainer, and the Week 9 capstone has one of its own too. This page is a single launch point for reviewing all seven — laid out on the same week rail the ten-week course runs on.',
+    leg1:'Module 1 · PLC & Cell-Based Robotics', leg2:'Module 2 · E-GMP 800V Battery Pack', leg3:'Safety gate (no trainer)',
+    leg4:'2D simulator (demo / whole-module run)', leg5:'No digital tool (instructor-led)', leg6:'Capstone (draws on both modules)',
+    foot1b:'Illustrative training program. ', foot1:'All 3D scenes are simplified, code-generated illustrations, not OEM CAD, and every numeric threshold is an illustrative training value. Grounded in publicly disclosed Hyundai Motor Group E-GMP and HMGICS-style automation, not real OEM specifications.',
+    foot2:'Each link opens its trainer as a separate artifact in a new tab. These are private artifacts — only you can open them unless you choose to share.',
+    week:'WEEK', open:'Open trainer', gatelabel:'Week 5 · Safety Gate' },
+  ko:{ program:'스마트팩토리 트레이닝 프로그램', title:'여섯 개의 트레이너, 하나의 라인.',
+    lede:'시나리오가 있는 매주마다 전용 3D 실습 트레이너가 있고, 9주차 캡스톤에도 별도 트레이너가 있습니다. 이 페이지는 10주 커리큘럼과 같은 주차 레일 위에서 일곱 개를 한 번에 열어볼 수 있는 시작점입니다.',
+    leg1:'Module 1 · PLC & 셀 기반 로보틱스', leg2:'Module 2 · E-GMP 800V 배터리 팩', leg3:'안전 게이트 (트레이너 없음)',
+    leg4:'2D 시뮬레이터 (시연 / 모듈 전체 실행)', leg5:'디지털 도구 없음 (강사 진행)', leg6:'캡스톤 (두 모듈을 종합)',
+    foot1b:'예시용 훈련 프로그램입니다. ', foot1:'모든 3D 장면은 단순화된 코드 생성 일러스트이며 OEM CAD가 아니고, 모든 수치 기준은 훈련용 예시값입니다. 공개된 현대자동차그룹 E-GMP 및 HMGICS형 자동화 정보를 바탕으로 했으며 실제 OEM 사양이 아닙니다.',
+    foot2:'각 링크는 새 탭에서 별도 아티팩트로 트레이너를 엽니다. 모두 비공개 아티팩트이므로, 직접 공유하지 않는 한 본인만 열 수 있습니다.',
+    week:'WEEK', open:'트레이너 열기', gatelabel:'5주차 · 안전 게이트' }
+};
+var lang = 'en';
+
+function iconFor(key){
+  var d = {
+    'plc-3d':'M4 17l4-9 4 9M6 13h4M15 8h5v9h-5zM17 8V5', // amr/lidar-ish
+    'plc-3d-interlock':'M6 10V7a4 4 0 018 0v3M5 10h10v9H5z',
+    'plc-3d-twin':'M3 7h6v6H3zM15 7h6v6h-6zM9 10h6M6 13v4M18 13v4',
+    'battery-3d-weld':'M4 12h4l2-4 3 8 2-4h5',
+    'battery-3d':'M12 3v4M8 5.5l2 3M16 5.5l-2 3M6 12a6 6 0 1112 0 6 6 0 01-12 0z',
+    'battery-3d-pra':'M7 4h10v7a5 5 0 01-10 0z M9 4v3h6V4'
+  }[key];
+  return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + '<path d="'+d+'"/></svg>';
+}
+
+function render(){
+  var host = document.getElementById('stations');
+  var min = 1, max = 10;
+  host.innerHTML = STATIONS.map(function(s){
+    var pct = ((s.week - min) / (max - min) * 100).toFixed(2);
+    if (s.gate){
+      return '<div class="station gate" style="left:'+pct+'%" data-mobile-order>' +
+        '<div class="node"></div>' +
+        '<div class="gatepill">' +
+          '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 10V7a4 4 0 018 0v3M5 10h10v9H5z"/></svg>' +
+          STR[lang].gatelabel +
+        '</div></div>';
+    }
+    if (s.note){
+      var label = s[lang].label;
+      var icon = s.tool
+        ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 17v3"/></svg>'
+        : '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5h14v11H9l-4 4z"/></svg>';
+      var inner = icon + label;
+      var pill = s.tool
+        ? '<a class="gatepill" href="'+s.url+'" target="_blank" rel="noopener">'+inner+'</a>'
+        : '<div class="gatepill">'+inner+'</div>';
+      return '<div class="station note'+(s.tool ? ' tool' : '')+'" style="left:'+pct+'%" data-mobile-order>' +
+        '<div class="node"></div>' + pill + '</div>';
+    }
+    var d = s[lang];
+    return '<div class="station '+s.side+'" data-mod="'+s.mod+'" style="left:'+pct+'%">' +
+      '<div class="stub"></div>' +
+      '<div class="node"></div>' +
+      '<div class="weeklabel">W'+s.week+'</div>' +
+      '<div class="card">' +
+        '<span class="k mono">'+STR[lang].week+' '+s.week+'</span>' +
+        '<div style="color:var(--sub); margin-bottom:8px">'+iconFor(s.key)+'</div>' +
+        '<h3>'+d.title+'</h3>' +
+        '<p>'+d.desc+'</p>' +
+        '<div class="task">'+d.task+'</div>' +
+        '<a class="open" href="'+s.url+'" target="_blank" rel="noopener">' +
+          STR[lang].open +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M9 7h8v8"/></svg>' +
+        '</a>' +
+      '</div></div>';
+  }).join('');
+
+  document.querySelectorAll('[data-t]').forEach(function(el){
+    var k = el.getAttribute('data-t');
+    if (STR[lang][k] != null) el.textContent = STR[lang][k];
+  });
+  document.title = lang === 'ko' ? '5D 디지털트윈 — 3D 트레이너 라인' : '5D Digital Twin — 3D Trainer Line';
+  document.documentElement.lang = lang;
+}
+
+document.querySelectorAll('.langtoggle button').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    lang = btn.getAttribute('data-lang');
+    document.querySelectorAll('.langtoggle button').forEach(function(b){ b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
+    render();
+  });
+});
+render();
+</script>
+</body>
+</html>
